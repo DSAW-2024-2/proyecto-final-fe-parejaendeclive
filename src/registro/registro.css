@@ -1,0 +1,120 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f0f0f0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.formulario {
+  background-color: white;
+  border-radius: 0px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  width: 100%;
+  max-width: 400px;
+  position: relative; /* Asegura que los elementos dentro del formulario se posicionen relativamente */
+}
+
+.header_registro {
+  background-color: #d0a2f2;
+  height: 150px; /* Ajusta la altura para dar espacio a la imagen */
+  width: 100%;
+  position: relative; /* Permite posicionar elementos dentro del header */
+  border-radius: 0;
+  z-index: 0;
+}
+
+.imagen-perfil-container {
+  position: absolute;
+  top: 150px; /* Coloca la imagen al final del header */
+  left: 50%;
+  transform: translate(-50%, -50%); /* Centra la imagen y la mueve a la mitad de su altura */
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: #f0f0f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  border: 4px solid white;
+  z-index: 1; /* Asegura que la imagen esté encima del header */
+}
+
+.imagen-perfil {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.imagen-perfil-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 40px;
+  color: #999;
+}
+
+.hidden-input {
+  display: none;
+}
+
+h2 {
+  text-align: center;
+  color: #401163;
+  margin-top: 80px; /* Ajuste para que el título quede correctamente alineado */
+  margin-bottom: 20px;
+}
+
+form {
+  padding: 0 20px 20px;
+}
+
+input {
+  width: 100%;
+  padding: 15px;
+  margin-bottom: 15px;
+  border: none;
+  border-radius: 20px;
+  background-color: #f0d8ff;
+  color: #401163;
+  font-size: 14px;
+}
+
+input::placeholder {
+  color: #8e6baf;
+}
+
+button {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 20px;
+  background-color: #684483;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #563974;
+}
+
+.input-error {
+  border: 2px solid red;
+}
+
+.error {
+  color: red;
+  font-size: 12px;
+  margin-top: -10px;
+  margin-bottom: 10px;
+}
