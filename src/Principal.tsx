@@ -6,7 +6,7 @@ const Principal: React.FC = () => {
     <div className="container">
       <div className="header">
         <div className="logo"></div>
-        <div className="title">Campus Rush</div>
+        <h1 className="title">Campus Rush</h1>
       </div>
       <div className="button-container">
         <a href="#" className="button">Iniciar sesión</a>
