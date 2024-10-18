@@ -41,7 +41,7 @@
     height: 40vw;
     max-width: 200px;
     max-height: 200px;
-    background: url('./assets/v8_3.png') no-repeat center center;
+    background: url('./assets/logo.png') no-repeat center center;
     background-size: contain;
     margin-bottom: 20px;
   }
@@ -124,7 +124,6 @@
   
     .title {
       font-size: 4vw;
-      max-font-size: 64px;
     }
   
     .button {
