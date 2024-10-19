@@ -6,20 +6,20 @@ import perfilPredefinido from '../assets/perfil_predefinido.png';
 const Registro: React.FC = () => {
   const [imagenPerfil, setImagenPerfil] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    nombre: '',
-    apellido: '',
-    idUniversidad: '',
-    correo: '',
-    numeroContacto: '',
-    contraseña: ''
+    name: '',           // Nombre del estudiante
+    lastName: '',       // Apellido del estudiante
+    id: '',             // ID de la universidad
+    email: '',          // Correo del usuario
+    number: '',         // Número de contacto
+    password: ''        // Contraseña
   });
   const [errores, setErrores] = useState({
-    nombre: '',
-    apellido: '',
-    idUniversidad: '',
-    correo: '',
-    numeroContacto: '',
-    contraseña: ''
+    name: '',           // Nombre del estudiante
+    lastName: '',       // Apellido del estudiante
+    id: '',             // ID de la universidad
+    email: '',          // Correo del usuario
+    number: '',         // Número de contacto
+    password: ''        // Contraseña
   });
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -47,50 +47,50 @@ const Registro: React.FC = () => {
     let erroresTemp = { ...errores };
 
     // Validación de Nombre y Apellido (no deben contener números)
-    if (!formData.nombre || /\d/.test(formData.nombre)) {
-      erroresTemp.nombre = 'El nombre no debe contener números';
+    if (!formData.name || /\d/.test(formData.name)) {
+      erroresTemp.name = 'El nombre no debe contener números';
       esValido = false;
     } else {
-      erroresTemp.nombre = '';
+      erroresTemp.name = '';
     }
 
-    if (!formData.apellido || /\d/.test(formData.apellido)) {
-      erroresTemp.apellido = 'El apellido no debe contener números';
+    if (!formData.lastName || /\d/.test(formData.lastName)) {
+      erroresTemp.lastName = 'El apellido no debe contener números';
       esValido = false;
     } else {
-      erroresTemp.apellido = '';
+      erroresTemp.lastName = '';
     }
 
     // Validación de ID Universidad (debe tener 10 dígitos y empezar con 4 ceros)
-    if (!/^[0]{4}\d{6}$/.test(formData.idUniversidad)) {
-      erroresTemp.idUniversidad = 'El ID debe contener 10 números y comenzar con 4 ceros';
+    if (!/^[0]{4}\d{6}$/.test(formData.id)) {
+      erroresTemp.id = 'El ID debe contener 10 números y comenzar con 4 ceros';
       esValido = false;
     } else {
-      erroresTemp.idUniversidad = '';
+      erroresTemp.id = '';
     }
 
     // Validación de correo (debe ser un correo válido)
-    if (!/\S+@\S+\.\S+/.test(formData.correo)) {
-      erroresTemp.correo = 'Debe ser un correo electrónico válido';
+    if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      erroresTemp.email = 'Debe ser un correo electrónico válido';
       esValido = false;
     } else {
-      erroresTemp.correo = '';
+      erroresTemp.email = '';
     }
 
     // Validación de Número de Contacto (solo números y debe tener 10 dígitos)
-    if (!/^\d{10}$/.test(formData.numeroContacto)) {
-      erroresTemp.numeroContacto = 'El número de contacto debe tener 10 dígitos';
+    if (!/^\d{10}$/.test(formData.number)) {
+      erroresTemp.number = 'El número de contacto debe tener 10 dígitos';
       esValido = false;
     } else {
-      erroresTemp.numeroContacto = '';
+      erroresTemp.number = '';
     }
 
     // Validación de contraseña (no vacía)
-    if (!formData.contraseña) {
-      erroresTemp.contraseña = 'La contraseña no puede estar vacía';
+    if (!formData.password) {
+      erroresTemp.password = 'La contraseña no puede estar vacía';
       esValido = false;
     } else {
-      erroresTemp.contraseña = '';
+      erroresTemp.password = '';
     }
 
     setErrores(erroresTemp);
@@ -101,7 +101,6 @@ const Registro: React.FC = () => {
     event.preventDefault();
     if (validarFormulario()) {
       console.log('Formulario enviado:', formData);
-
       navigate('/Principal');
     }
   };
@@ -136,62 +135,62 @@ const Registro: React.FC = () => {
         <input
           type="text"
           placeholder="Nombre"
-          name="nombre"
-          value={formData.nombre}
+          name="name"
+          value={formData.name}
           onChange={handleChange}
-          className={errores.nombre ? 'input-error' : ''}
+          className={errores.name ? 'input-error' : ''}
         />
-        {errores.nombre && <p className="error">{errores.nombre}</p>}
+        {errores.name && <p className="error">{errores.name}</p>}
 
         <input
           type="text"
           placeholder="Apellido"
-          name="apellido"
-          value={formData.apellido}
+          name="lastName"
+          value={formData.lastName}
           onChange={handleChange}
-          className={errores.apellido ? 'input-error' : ''}
+          className={errores.lastName ? 'input-error' : ''}
         />
-        {errores.apellido && <p className="error">{errores.apellido}</p>}
+        {errores.lastName && <p className="error">{errores.lastName}</p>}
 
         <input
           type="text"
           placeholder="ID universidad"
-          name="idUniversidad"
-          value={formData.idUniversidad}
+          name="id"
+          value={formData.id}
           onChange={handleChange}
-          className={errores.idUniversidad ? 'input-error' : ''}
+          className={errores.id ? 'input-error' : ''}
         />
-        {errores.idUniversidad && <p className="error">{errores.idUniversidad}</p>}
+        {errores.id && <p className="error">{errores.id}</p>}
 
         <input
           type="email"
           placeholder="Correo institucional"
-          name="correo"
-          value={formData.correo}
+          name="email"
+          value={formData.email}
           onChange={handleChange}
-          className={errores.correo ? 'input-error' : ''}
+          className={errores.email ? 'input-error' : ''}
         />
-        {errores.correo && <p className="error">{errores.correo}</p>}
+        {errores.email && <p className="error">{errores.email}</p>}
 
         <input
           type="tel"
           placeholder="Número de contacto"
-          name="numeroContacto"
-          value={formData.numeroContacto}
+          name="number"
+          value={formData.number}
           onChange={handleChange}
-          className={errores.numeroContacto ? 'input-error' : ''}
+          className={errores.number ? 'input-error' : ''}
         />
-        {errores.numeroContacto && <p className="error">{errores.numeroContacto}</p>}
+        {errores.number && <p className="error">{errores.number}</p>}
 
         <input
           type="password"
           placeholder="Contraseña"
-          name="contraseña"
-          value={formData.contraseña}
+          name="password"
+          value={formData.password}
           onChange={handleChange}
-          className={errores.contraseña ? 'input-error' : ''}
+          className={errores.password ? 'input-error' : ''}
         />
-        {errores.contraseña && <p className="error">{errores.contraseña}</p>}
+        {errores.password && <p className="error">{errores.password}</p>}
 
         <button type="submit">Registrar</button>
       </form>

@@ -1,5 +1,5 @@
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Instrument Sans', sans-serif;
   background-color: #f0f0f0;
   margin: 0;
   padding: 0;
@@ -83,7 +83,7 @@ input {
   margin-bottom: 15px;
   border: none;
   border-radius: 20px;
-  background-color: #f0d8ff;
+  background-color: #d0a2f2;
   color: #401163;
   font-size: 14px;
 }

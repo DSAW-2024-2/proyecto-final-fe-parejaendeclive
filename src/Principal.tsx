@@ -1,7 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import './principal.css';
-import Registro from './registro/registro'; // Manteniendo tu estructura original
+import Registro from './registro/registro'; 
+import Login from './inicio_sesion/inicio_sesion';
 
 const Principal: React.FC = () => {
   return (
@@ -24,7 +25,7 @@ const App: React.FC = () => {
       <Routes>
         <Route path="/" element={<Principal />} />
 
-        <Route path="/login" element={<Registro />} />
+        <Route path="/login" element={<Login />} />
 
         <Route path="/registro" element={<Registro />} />
 
