@@ -115,6 +115,10 @@ const Registro: React.FC = () => {
 
   return (
     <div className="formulario">
+      {/* Botón de regreso */}
+      <button className="back-button" onClick={() => navigate('/Principal')}>
+        ←
+      </button>
       <div className="header_registro"></div>
       <div className="imagen-perfil-container" onClick={handleImageClick}>
         {imagenPerfil ? (

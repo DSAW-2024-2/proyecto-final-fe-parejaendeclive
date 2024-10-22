@@ -1,6 +1,5 @@
 body {
   font-family: 'Instrument Sans', sans-serif;
-  background-color: #f0f0f0;
   margin: 0;
   padding: 0;
   display: flex;
@@ -16,23 +15,23 @@ body {
   overflow: hidden;
   width: 100%;
   max-width: 400px;
-  position: relative; /* Asegura que los elementos dentro del formulario se posicionen relativamente */
+  position: relative;
 }
 
 .header_registro {
   background-color: #d0a2f2;
-  height: 150px; /* Ajusta la altura para dar espacio a la imagen */
+  height: 100px;
   width: 100%;
-  position: relative; /* Permite posicionar elementos dentro del header */
+  position: relative;
   border-radius: 0;
   z-index: 0;
 }
 
 .imagen-perfil-container {
   position: absolute;
-  top: 150px; /* Coloca la imagen al final del header */
+  top: 100px;
   left: 50%;
-  transform: translate(-50%, -50%); /* Centra la imagen y la mueve a la mitad de su altura */
+  transform: translate(-50%, -50%);
   width: 120px;
   height: 120px;
   border-radius: 50%;
@@ -43,23 +42,13 @@ body {
   align-items: center;
   cursor: pointer;
   border: 4px solid white;
-  z-index: 1; /* Asegura que la imagen esté encima del header */
+  z-index: 1;
 }
 
 .imagen-perfil {
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-.imagen-perfil-placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 40px;
-  color: #999;
 }
 
 .hidden-input {
@@ -69,7 +58,7 @@ body {
 h2 {
   text-align: center;
   color: #401163;
-  margin-top: 80px; /* Ajuste para que el título quede correctamente alineado */
+  margin-top: 80px;
   margin-bottom: 20px;
 }
 
@@ -117,4 +106,28 @@ button:hover {
   font-size: 12px;
   margin-top: -10px;
   margin-bottom: 10px;
+}
+
+/* Flecha de retroceso circular */
+.back-arrow {
+  position: absolute;
+  top: 15px;   /* Ajusta el valor según la necesidad */
+  left: 15px;  /* Ajusta el valor según la necesidad */
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #684483;
+  border: none;
+  border-radius: 50%;
+  font-size: 18px;
+  color: white;
+  cursor: pointer;
+  z-index: 2;
+  transition: background-color 0.3s;
+}
+
+.back-arrow:hover {
+  background-color: #563974;
 }
