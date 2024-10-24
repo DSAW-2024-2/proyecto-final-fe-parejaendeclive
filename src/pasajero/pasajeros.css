@@ -1,0 +1,203 @@
+* {
+    box-sizing: border-box;
+}
+body {
+    font-size: 14px;
+    font-family: 'Instrument Sans', sans-serif;
+    margin: 0;
+    padding: 0;
+    height: 100%; /* Asegurarse de que el body ocupe el 100% del viewport */
+}
+
+.pasajeros-container {
+    display: flex;
+    flex-direction: column;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(245, 245, 245, 1); /* Fondo gris claro */
+    padding: 20px;
+    overflow-y: auto;
+}
+
+/* Estilos para el encabezado */
+.header_pasajeros {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: rgba(255, 255, 255, 1);
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 16px;
+    margin-bottom: 20px;
+    flex-shrink: 0; /* Evita que el encabezado se reduzca */
+}
+
+/* Botón de persona y ajustes de alineación */
+.persona-button_pasajeros {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%; /* Hace que el botón sea completamente circular */
+    background-color: #D0A2F2;
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Centra la imagen en el círculo */
+    margin-left: 10px; /* Espacio entre la imagen de persona y el título */
+}
+
+.persona-button_pasajeros img {
+    width: 24px;
+    height: 24px; /* Tamaño de la imagen dentro del círculo */
+}
+
+/* Botón de menú */
+.menu-button_pasajeros {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%; /* Hace que el botón sea circular */
+    background-color: #D0A2F2;
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Centra la imagen en el botón */
+}
+
+.menu-button_pasajeros img {
+    width: 20px;
+    height: 20px; /* Tamaño de la imagen dentro del botón */
+}
+
+/* Ajuste del título */
+.title_pasajeros {
+    font-size: 24px;
+    font-weight: bold;
+    color: rgba(0, 0, 0, 1);
+    margin-right: 10px; /* Ajusta el espacio entre el título y el botón de persona */
+}
+
+/* Vista por defecto para móviles (una sola columna) */
+.main-content_pasajeros {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex-grow: 1; /* Permite que el contenido crezca y ocupe el espacio disponible */
+}
+
+/* Ajuste específico para el mapa */
+.map-section_pasajeros {
+    flex-grow: 1; /* El mapa ocupará todo el espacio disponible */
+    background-color: rgba(255, 255, 255, 1);
+    border-radius: 16px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden; /* Asegura que el contenido del iframe no se salga de los bordes */
+}
+
+.map-section_pasajeros iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.filters-section_pasajeros {
+    background-color: rgba(255, 255, 255, 1);
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    margin-bottom: 20px;
+    flex-shrink: 0; /* Evita que la sección de filtros se reduzca */
+}
+
+.filters-section_pasajeros h3 {
+    margin-bottom: 10px;
+}
+
+.form-group_pasajeros {
+    margin-bottom: 15px;
+}
+
+.form-group_pasajeros label {
+    display: block;
+    color: rgba(104, 68, 131, 1);
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.input-field_pasajeros {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid rgba(64, 17, 99, 1);
+    border-radius: 16px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    color: rgba(64, 17, 99, 1);
+    background-color: #D0A2F2;
+}
+
+.input-highlight_pasajeros {
+    background-color: rgba(208, 162, 242, 0.5);
+}
+
+.button-primary_pasajeros, .button-secondary_pasajeros {
+    width: 132px;
+    height: 40px;
+    background: rgba(104, 68, 131, 1);
+    color: rgba(255, 255, 255, 1);
+    font-family: 'Instrument Sans', sans-serif;
+    font-weight: semi-bold;
+    font-size: 15px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.button-secondary_pasajeros {
+    background: rgba(255, 0, 0, 1);
+}
+
+.button-container_pasajeros {
+    display: flex;
+    justify-content: space-between;
+}
+
+.viajes-list_pasajeros {
+    list-style-type: none;
+    padding: 0;
+}
+
+.viaje-item_pasajeros {
+    background-color: rgba(245, 245, 245, 1);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.viaje-item_pasajeros p {
+    margin: 5px 0;
+    color: #D0A2F2;
+}
+
+.form-row_pasajeros {
+    display: flex;
+    justify-content: space-between;
+}
+
+.form-row_pasajeros .form-group_pasajeros {
+    width: 48%;
+}
+
+/* Estilos para pantallas más grandes (tablets y desktop) */
+@media (min-width: 768px) {
+    .main-content_pasajeros {
+        flex-direction: row;
+    }
+
+    .filters-section_pasajeros,
+    .map-section_pasajeros {
+        width: 48%;
+        margin-bottom: 0;
+    }
+}
