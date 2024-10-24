@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import './principal.css';
 import Registro from './registro/registro'; 
 import Login from './inicio_sesion/inicio_sesion';
+import Pasajero from './pasajeros/pasajeros';
 
 const Principal: React.FC = () => {
   return (
@@ -28,6 +29,8 @@ const App: React.FC = () => {
         <Route path="/login" element={<Login />} />
 
         <Route path="/registro" element={<Registro />} />
+
+        <Route path="/pasajeros" element={<Pasajero />} />
 
         <Route path="/Principal" element={<Principal />} />
       </Routes>

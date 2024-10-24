@@ -108,26 +108,27 @@ button:hover {
   margin-bottom: 10px;
 }
 
-/* Flecha de retroceso circular */
+/* Flecha de retroceso actualizada */
 .back-arrow {
   position: absolute;
-  top: 15px;   /* Ajusta el valor según la necesidad */
-  left: 15px;  /* Ajusta el valor según la necesidad */
+  top: 0; /* Esquina superior izquierda */
+  left: 0;
   width: 40px;
   height: 40px;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #684483;
+  background-color: transparent; /* Sin fondo inicialmente */
   border: none;
   border-radius: 50%;
   font-size: 18px;
-  color: white;
+  color: #684483; /* Color de los botones */
   cursor: pointer;
   z-index: 2;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s, color 0.3s;
 }
 
 .back-arrow:hover {
-  background-color: #563974;
+  background-color: #684483; /* Fondo del color de los botones al hacer hover */
+  color: white; /* Flecha blanca al hacer hover */
 }

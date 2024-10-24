@@ -1,0 +1,361 @@
+/* Variables CSS para colores y tamaños */
+:root {
+    --color-fondo: #ffffff;
+    --color-primario: #401163;
+    --color-secundario: #D0A2F2;
+    --color-contraste: #684483;
+    --color-error: #ff0000;
+    --sombra: rgba(0, 0, 0, 0.1);
+    --fuente-principal: 'Instrument Sans', sans-serif;
+    --fuente-secundaria: 'Roboto', sans-serif;
+    --tam-fuente-base: 0.875rem; /* 14px */
+    --tam-fuente-titulo: 1.75rem; /* 28px */
+    --altura-header: 5rem; /* 80px */
+    --ancho-mapa: 40vw; /* Ancho del mapa */
+    --ancho-izquierda: 60vw; /* Ancho de la columna izquierda */
+    --border-thin: 0.0625rem; /* 1px */
+    --border-radius-small: 0.3125rem; /* 5px */
+}
+
+/* Reset y box-sizing */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 100%; /* 16px */
+}
+
+body {
+    font-size: var(--tam-fuente-base);
+    font-family: var(--fuente-principal);
+    height: 100vh;
+    overflow: hidden;
+    background-color: var(--color-fondo);
+    color: var(--color-primario);
+}
+
+/* Contenedor principal */
+.pasajeros-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+}
+
+/* Encabezado */
+.header_pasajeros {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1.25rem; /* 20px */
+    background-color: var(--color-fondo);
+    box-shadow: 0 0.25rem 0.75rem var(--sombra); /* 4px 12px */
+    border: var(--border-thin) solid var(--color-primario); /* 1px */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: var(--altura-header);
+    z-index: 10;
+}
+
+/* Botones del encabezado */
+.menu-button_pasajeros,
+.persona-button_pasajeros {
+    width: 3.5625rem; /* 57px */
+    height: 3.5625rem; /* 57px */
+    border-radius: 50%;
+    background-color: var(--color-secundario);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.menu-button_pasajeros:hover,
+.persona-button_pasajeros:hover {
+    background-color: #b58eea; /* Color más oscuro manualmente */
+}
+
+.menu-button_pasajeros img,
+.persona-button_pasajeros img {
+    width: 1.5rem; /* 24px */
+    height: 1.5rem; /* 24px */
+}
+
+/* Título del encabezado */
+.title_pasajeros {
+    font-size: var(--tam-fuente-titulo);
+    font-weight: bold;
+    color: var(--color-primario);
+    margin-right: auto;
+    margin-left: 1rem;
+}
+
+/* Contenedor Principal */
+.main-content_pasajeros {
+    display: flex;
+    flex-direction: row;
+    margin-top: var(--altura-header);
+    height: calc(100vh - var(--altura-header));
+    width: 100%;
+    overflow: hidden;
+}
+
+/* Columna Izquierda */
+.left-section_pasajeros {
+    width: var(--ancho-izquierda);
+    background-color: var(--color-fondo);
+    border-right: var(--border-thin) solid var(--color-primario); /* 1px */
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto; /* Scroll solo en la columna izquierda */
+    padding: 1rem;
+    gap: 1rem;
+}
+
+/* Columna Derecha (Mapa) */
+.right-section_pasajeros {
+    width: var(--ancho-mapa);
+    flex-shrink: 0;
+    background-color: var(--color-fondo);
+    position: relative;
+}
+
+.right-section_pasajeros iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* Secciones dentro de la Columna Izquierda */
+.filters-section_pasajeros,
+.viajes-section_pasajeros,
+.seleccion-section_pasajeros {
+    background-color: var(--color-fondo);
+    padding: 1rem;
+    border-radius: var(--border-radius-small); /* 5px */
+    box-shadow: 0 0.25rem 0.75rem var(--sombra);
+}
+
+.filters-section_pasajeros h3,
+.viajes-section_pasajeros h3,
+.seleccion-section_pasajeros h3 {
+    margin-bottom: 0.625rem; /* 10px */
+    color: var(--color-primario);
+}
+
+.form-group_pasajeros {
+    margin-bottom: 0.938rem; /* 15px */
+}
+
+.form-group_pasajeros label {
+    display: block;
+    color: var(--color-contraste);
+    font-weight: bold;
+    font-size: 1rem; /* 16px */
+    margin-bottom: 0.313rem; /* 5px */
+}
+
+.input-field_pasajeros {
+    width: 100%;
+    padding: 0.625rem; /* 10px */
+    border: var(--border-thin) solid var(--color-primario); /* 1px */
+    border-radius: 1rem; /* 16px */
+    font-family: var(--fuente-secundaria);
+    font-size: 0.875rem; /* 14px */
+    color: var(--color-primario);
+    background-color: var(--color-secundario);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.input-field_pasajeros:focus {
+    background-color: rgba(208, 162, 242, 0.75);
+    border-color: #2e0e7c; /* Color más oscuro manualmente */
+    outline: none;
+}
+
+.button-primary_pasajeros,
+.button-secondary_pasajeros {
+    padding: 0.625rem 1rem; /* 10px 16px */
+    background-color: var(--color-contraste);
+    color: var(--color-fondo);
+    font-family: var(--fuente-principal);
+    font-weight: 600;
+    font-size: 0.938rem; /* 15px */
+    border: none;
+    border-radius: 0.75rem; /* 12px */
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.button-primary_pasajeros:hover {
+    background-color: #563b6c; /* Color más oscuro manualmente */
+}
+
+.button-secondary_pasajeros {
+    background-color: var(--color-error);
+}
+
+.button-secondary_pasajeros:hover {
+    background-color: #cc0000; /* Color más oscuro manualmente */
+}
+
+.button-container_pasajeros {
+    display: flex;
+    gap: 0.625rem; /* 10px */
+    margin-top: 1rem;
+}
+
+/* Lista de Viajes */
+.viajes-list_pasajeros {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.viaje-item_pasajeros {
+    background-color: var(--color-fondo);
+    padding: 1rem;
+    border: var(--border-thin) solid var(--color-primario); /* 1px */
+    border-radius: var(--border-radius-small); /* 5px */
+    box-shadow: 0 0.25rem 0.75rem var(--sombra);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.viaje-item_pasajeros:hover {
+    transform: translateY(-0.3125rem); /* 5px */
+    box-shadow: 0 0.5rem 1rem var(--sombra);
+}
+
+.viaje-item_pasajeros p {
+    margin: 0.313rem 0; /* 5px */
+    color: var(--color-contraste);
+}
+
+/* Selección */
+.seleccion-section_pasajeros {
+    /* Puedes añadir estilos específicos si es necesario */
+}
+
+/* Detalles del viaje seleccionado */
+.input-highlight_pasajeros {
+    width: 100%;
+    padding: 0.625rem; /* 10px */
+    border: var(--border-thin) solid var(--color-primario); /* 1px */
+    border-radius: 1rem; /* 16px */
+    font-family: var(--fuente-secundaria);
+    font-size: 0.875rem; /* 14px */
+    color: var(--color-primario);
+    background-color: rgba(208, 162, 242, 0.5);
+}
+
+/* Alinear campos del viaje seleccionado */
+.seleccion-section_pasajeros .form-row_pasajeros {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+}
+
+.seleccion-section_pasajeros .form-group_pasajeros {
+    flex: 1;
+}
+
+/* Alinear Cupos y Hora en los filtros */
+.form-row_pasajeros {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem; /* Espacio entre los elementos */
+}
+
+.form-row_pasajeros .form-group_pasajeros {
+    flex: 1; /* Para que ambos ocupen el mismo espacio */
+}
+
+/* Overlay para el modal */
+.modal-overlay_pasajeros {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5); /* Fondo semitransparente */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 20;
+}
+
+/* Contenido del modal */
+.modal-content_pasajeros {
+    background-color: var(--color-fondo);
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 0.25rem 0.75rem var(--sombra);
+    width: 80%;
+    max-width: 600px;
+}
+
+.modal-content_pasajeros h3 {
+    margin-bottom: 1rem;
+    color: var(--color-primario);
+}
+
+/* Estilos de los botones en el modal */
+.button-container_pasajeros {
+    display: flex;
+    gap: 0.625rem;
+    justify-content: center;
+}
+
+/* Responsividad */
+@media (max-width: 1024px) {
+    :root {
+        --ancho-mapa: 50vw;
+        --ancho-izquierda: 50vw;
+    }
+}
+
+@media (max-width: 768px) {
+    :root {
+        --ancho-mapa: 100%;
+        --ancho-izquierda: 100%;
+    }
+
+    .main-content_pasajeros {
+        flex-direction: column;
+    }
+
+    .left-section_pasajeros,
+    .right-section_pasajeros {
+        width: 100%;
+        height: 50vh;
+    }
+
+    .right-section_pasajeros {
+        height: 50vh;
+        border-top: var(--border-thin) solid var(--color-primario); /* 1px */
+    }
+
+    /* Alinear Cupos y Hora en los filtros */
+    .form-row_pasajeros {
+        display: flex;
+        flex-direction: row;
+        gap: 1rem;
+    }
+
+    .form-row_pasajeros .form-group_pasajeros {
+        flex: 1;
+    }
+}

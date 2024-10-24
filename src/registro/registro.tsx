@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom'; // Importar useNavigate
+import { useNavigate } from 'react-router-dom';
 import './registro.css';
 import perfilPredefinido from '../assets/perfil_predefinido.png';
 import axios from 'axios';
@@ -16,18 +16,18 @@ const Registro: React.FC = () => {
     password: ''        // Contraseña
   });
   const [errores, setErrores] = useState({
-    name: '',           // Nombre del estudiante
-    lastName: '',       // Apellido del estudiante
-    id: '',             // ID de la universidad
-    email: '',          // Correo del usuario
-    number: '',         // Número de contacto
-    password: ''        // Contraseña
+    name: '',
+    lastName: '',
+    id: '',
+    email: '',
+    number: '',
+    password: ''
   });
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const navigate = useNavigate(); // Inicializar useNavigate
+  const navigate = useNavigate();
 
-  const handleImageUpload =  (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -103,7 +103,7 @@ const Registro: React.FC = () => {
     event.preventDefault();
     if (validarFormulario()) {
       try {
-        // Prepare the form data
+        // Preparar los datos del formulario
         const formDataToSend = new FormData();
         formDataToSend.append('name', formData.name);
         formDataToSend.append('LastName', formData.lastName);
@@ -120,18 +120,15 @@ const Registro: React.FC = () => {
           },
         });
         navigate('/login');
-    }
-    catch(error){
-      if (axios.isAxiosError(error) && error.response) {
-        console.error('Error en el registro:', error.response.data.message);
-      } else {
-        console.error('Error al conectar con el servidor');
-
+      } catch (error) {
+        if (axios.isAxiosError(error) && error.response) {
+          console.error('Error en el registro:', error.response.data.message);
+        } else {
+          console.error('Error al conectar con el servidor');
+        }
       }
     }
-  }
-};
-  
+  };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -144,7 +141,7 @@ const Registro: React.FC = () => {
   return (
     <div className="formulario">
       {/* Botón de regreso */}
-      <button className="back-button" onClick={() => navigate('/Principal')}>
+      <button className="back-arrow" onClick={() => navigate('/Principal')}>
         ←
       </button>
       <div className="header_registro"></div>

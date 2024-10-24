@@ -42,8 +42,11 @@ const InicioSesion = () => {
       // Store the token in local storage
       localStorage.setItem('token', accessToken);
   
-      // Redirect to the main page
-      navigate('/Principal');
+      // Clear the error message on successful login
+      setErrorMessage('');
+
+      // Redirect to the "Pasajeros" page after successful login
+      navigate('/pasajeros');
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         // Handle known errors (e.g., invalid credentials)
@@ -53,10 +56,6 @@ const InicioSesion = () => {
         setErrorMessage('Error al conectar con el servidor');
       }
     }
-
-    // Si todo es válido, redirigir a la página principal
-    setErrorMessage('');
-    navigate('/Principal');
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
