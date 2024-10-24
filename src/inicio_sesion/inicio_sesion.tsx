@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import {api_URL} from '../apiConfig';
+import { api_URL } from '../apiConfig';
 
 import './inicio_sesion.css';
 import perfilPredefinido from '../assets/persona.png'; // Icono de usuario
@@ -36,27 +36,30 @@ const InicioSesion = () => {
     try {
       const response = await axios.post(`${api_URL}/login`, { email, password });
   
-      // Assuming the backend returns { message: string, accessToken: string }
+      // Asumiendo que el backend devuelve { accessToken: string }
       const { accessToken } = response.data;
   
-      // Store the token in local storage
+      // Almacenar el token en el local storage
       localStorage.setItem('token', accessToken);
   
       // Clear the error message on successful login
       setErrorMessage('');
 
-      // Redirect to the "Pasajeros" page after successful login
+      // Redirigir a la página de pasajeros
       navigate('/pasajeros');
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        // Handle known errors (e.g., invalid credentials)
+        // Manejar errores conocidos (por ejemplo, credenciales incorrectas)
         setErrorMessage(error.response.data.error || 'Error en el inicio de sesión');
       } else {
-        // Handle unexpected errors
+        // Manejar errores inesperados
         setErrorMessage('Error al conectar con el servidor');
       }
     }
-  };
+
+    // Si todo es válido, limpiar el mensaje de error
+    setErrorMessage('');
+};
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -67,8 +70,8 @@ const InicioSesion = () => {
   };
 
   return (
-    <div className="full-screen"> {/* Este div abarca toda la pantalla */}
-      <div className="login-wrapper"> {/* Este div aplica el fondo violeta */}
+    <div className="full-screen"> {/* Este div abarca toda la pantalla */ }
+      <div className="login-wrapper"> {/* Este div aplica el fondo violeta */ }
         <div className="login-container">
           <h2 className="login-title">Iniciar sesión</h2>
           <div className="input-group">

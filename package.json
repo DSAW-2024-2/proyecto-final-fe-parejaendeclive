@@ -11,15 +11,21 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@react-google-maps/api": "^2.20.3",
     "axios": "^1.7.7",
     "debug": "^4.3.1",
+    "leaflet": "^1.9.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-helmet": "^6.1.0",
+    "react-helmet-async": "^2.0.5",
+    "react-leaflet": "^4.2.1",
     "react-router-dom": "^6.27.0",
     "vercel": "^37.12.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
+    "@types/leaflet": "^1.9.14",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",

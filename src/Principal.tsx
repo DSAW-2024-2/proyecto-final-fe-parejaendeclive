@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import './principal.css';
 import Registro from './registro/registro'; 
 import Login from './inicio_sesion/inicio_sesion';
-import Pasajero from './pasajeros/pasajeros';
 
 const Principal: React.FC = () => {
   return (
@@ -13,7 +12,7 @@ const Principal: React.FC = () => {
         <h1 className="title_principal">Campus Rush</h1>
       </div>
       <div className="button-container_principal">
-        <Link to="/login" className="button">Iniciar sesión</Link>
+        <Link to="/pasajeros" className="button">Iniciar sesión</Link>
         <Link to="/registro" className="button">Registrarme</Link>
       </div>
     </div>
