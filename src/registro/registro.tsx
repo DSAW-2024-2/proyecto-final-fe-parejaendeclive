@@ -2,6 +2,8 @@ import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom'; // Importar useNavigate
 import './registro.css';
 import perfilPredefinido from '../assets/perfil_predefinido.png';
+import axios from 'axios';
+import { api_URL } from '../apiConfig';
 
 const Registro: React.FC = () => {
   const [imagenPerfil, setImagenPerfil] = useState<string | null>(null);
@@ -25,7 +27,7 @@ const Registro: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate(); // Inicializar useNavigate
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload =  (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -97,13 +99,39 @@ const Registro: React.FC = () => {
     return esValido;
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (validarFormulario()) {
-      console.log('Formulario enviado:', formData);
-      navigate('/Principal');
+      try {
+        // Prepare the form data
+        const formDataToSend = new FormData();
+        formDataToSend.append('name', formData.name);
+        formDataToSend.append('LastName', formData.lastName);
+        formDataToSend.append('id', formData.id);
+        formDataToSend.append('email', formData.email);
+        formDataToSend.append('number', formData.number);
+        formDataToSend.append('password', formData.password);
+        if (fileInputRef.current && fileInputRef.current.files && fileInputRef.current.files[0]) {
+          formDataToSend.append('photoUser', fileInputRef.current.files[0]);
+        }
+        await axios.post(`${api_URL}/register`, formDataToSend, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        navigate('/login');
     }
-  };
+    catch(error){
+      if (axios.isAxiosError(error) && error.response) {
+        console.error('Error en el registro:', error.response.data.message);
+      } else {
+        console.error('Error al conectar con el servidor');
+
+      }
+    }
+  }
+};
+  
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;

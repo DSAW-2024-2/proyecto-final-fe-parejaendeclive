@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import {api_URL} from '../apiConfig';
+
 import './inicio_sesion.css';
 import perfilPredefinido from '../assets/persona.png'; // Icono de usuario
 import candadoIcon from '../assets/candado.png'; // Icono de candado
@@ -17,7 +20,7 @@ const InicioSesion = () => {
     return emailRegex.test(email);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const { email, password } = formData;
 
     if (!email || !password) {
@@ -28,6 +31,27 @@ const InicioSesion = () => {
     if (!validateEmail(email)) {
       setErrorMessage('Por favor, ingresa un correo válido');
       return;
+    }
+
+    try {
+      const response = await axios.post(`${api_URL}/login`, { email, password });
+  
+      // Assuming the backend returns { message: string, accessToken: string }
+      const { accessToken } = response.data;
+  
+      // Store the token in local storage
+      localStorage.setItem('token', accessToken);
+  
+      // Redirect to the main page
+      navigate('/Principal');
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        // Handle known errors (e.g., invalid credentials)
+        setErrorMessage(error.response.data.error || 'Error en el inicio de sesión');
+      } else {
+        // Handle unexpected errors
+        setErrorMessage('Error al conectar con el servidor');
+      }
     }
 
     // Si todo es válido, redirigir a la página principal
