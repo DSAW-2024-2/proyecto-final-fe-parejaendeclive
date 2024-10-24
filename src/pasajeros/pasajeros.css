@@ -1,6 +1,6 @@
 /* Variables CSS para colores y tamaños */
 :root {
-    --color-fondo: #ffffff;
+    --color-fondo: #ffffff; /* Mantén este valor si es necesario para otros componentes */
     --color-primario: #401163;
     --color-secundario: #D0A2F2;
     --color-contraste: #684483;
@@ -30,21 +30,13 @@ html {
     font-size: 100%; /* 16px */
 }
 
-body {
-    font-size: var(--tam-fuente-base);
-    font-family: var(--fuente-principal);
-    height: 100vh;
-    overflow: hidden;
-    background-color: var(--color-fondo);
-    color: var(--color-primario);
-}
-
 /* Contenedor principal */
 .pasajeros-container {
     display: flex;
     flex-direction: column;
     width: 100%;
     height: 100%;
+    background-color: #f3bdff; /* Fondo local aplicado aquí */
 }
 
 /* Encabezado */
@@ -94,8 +86,13 @@ body {
     font-size: var(--tam-fuente-titulo);
     font-weight: bold;
     color: var(--color-primario);
-    margin-right: auto;
-    margin-left: 1rem;
+    /* Centramos el título usando flexbox sin posición absoluta */
+    position: absolute; /* Posicionamiento absoluto para centrar */
+    left: 50%; /* Posición horizontal al 50% del contenedor */
+    transform: translateX(-50%); /* Ajuste para centrar exactamente */
+    text-align: center;
+    /* Opcional: Añadir z-index si es necesario */
+    z-index: 5;
 }
 
 /* Contenedor Principal */
@@ -242,11 +239,6 @@ body {
 .viaje-item_pasajeros p {
     margin: 0.313rem 0; /* 5px */
     color: var(--color-contraste);
-}
-
-/* Selección */
-.seleccion-section_pasajeros {
-    /* Puedes añadir estilos específicos si es necesario */
 }
 
 /* Detalles del viaje seleccionado */
