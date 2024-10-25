@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './Pasajeros.css';
+import './pasajeros.css';
 import menuIcon from '../assets/menu.png';  // Icono de menú
 import personaIcon from '../assets/persona.png';  // Icono de persona
 
