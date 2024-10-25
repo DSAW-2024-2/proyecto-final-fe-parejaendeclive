@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react'; // Añadido useContext para usar el contexto de autenticación
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { api_URL } from '../apiConfig';
+import { AuthContext } from '../Authentication'; // Añadido para importar AuthContext
 
 import './inicio_sesion.css';
 import perfilPredefinido from '../assets/persona.png'; // Icono de usuario
@@ -9,6 +10,7 @@ import candadoIcon from '../assets/candado.png'; // Icono de candado
 
 const InicioSesion = () => {
   const navigate = useNavigate();
+  const { setIsAuthenticated } = useContext(AuthContext); // Añadido para acceder a setIsAuthenticated del contexto
   const [formData, setFormData] = useState({
     email: '', // "correo del usuario"
     password: '' // "contraseña"
@@ -41,7 +43,9 @@ const InicioSesion = () => {
   
       // Almacenar el token en el local storage
       localStorage.setItem('token', accessToken);
-  
+
+      setIsAuthenticated(true); // Añadido para actualizar el estado de autenticación a true
+
       // Clear the error message on successful login
       setErrorMessage('');
 
@@ -59,7 +63,7 @@ const InicioSesion = () => {
 
     // Si todo es válido, limpiar el mensaje de error
     setErrorMessage('');
-};
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
