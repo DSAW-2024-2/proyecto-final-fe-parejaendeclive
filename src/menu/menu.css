@@ -1,0 +1,224 @@
+:root {
+    --color-primario: #401163;
+    --color-secundario: #D0A2F2;
+    --color-contraste: #684483;
+    --color-fondo: #ffffff;
+    --border-radius-small: 0.3125rem;
+    --sombra: rgba(0, 0, 0, 0.1);
+    --tam-fuente-base: 1rem; /* Tamaño de letra aumentado */
+    --tam-fuente-titulo: 1.75rem;
+}
+
+/* Fondo de la página */
+.page-background {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--color-secundario);
+}
+
+/* Contenedor principal del menú */
+.menu-container {
+    width: 90%;
+    max-width: 360px; /* Ancho reducido */
+    background-color: var(--color-fondo);
+    border-radius: var(--border-radius-small);
+    box-shadow: 0 0.25rem 0.75rem var(--sombra);
+}
+
+/* A partir de 1024px, el contenedor ocupa toda la pantalla */
+@media (min-width: 1024px) {
+    .menu-container {
+        width: 100vw;
+        height: 100vh;
+        max-width: none;
+        border-radius: 0; /* Sin bordes redondeados */
+        box-shadow: none; /* Sin sombra */
+    }
+
+    .page-background {
+        background-color: var(--color-fondo);
+        justify-content: center;
+    }
+}
+
+/* Encabezado */
+.menu-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1rem;
+    background-color: var(--color-fondo);
+    border-bottom: 1px solid var(--color-secundario);
+    height: 5rem;
+    position: relative;
+}
+
+.menu-button,
+.persona-button {
+    width: 3.5625rem;
+    height: 3.5625rem;
+    border-radius: 50%;
+    background-color: var(--color-secundario);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.menu-button img,
+.persona-button img {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.menu-title {
+    font-size: var(--tam-fuente-titulo);
+    font-weight: bold;
+    color: var(--color-primario);
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+}
+
+/* Contenido del menú */
+.menu-content {
+    padding: 1rem;
+    border: 1px solid var(--color-primario);
+    border-radius: var(--border-radius-small);
+    margin: 1rem auto;
+    text-align: center;
+}
+
+.user-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.user-avatar {
+    width: 4rem;
+    height: 4rem;
+    background-color: var(--color-secundario);
+    border-radius: 50%;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-avatar img {
+    width: 100%;
+    height: auto;
+    border-radius: 50%;
+}
+
+.user-greeting {
+    font-size: 1.25rem; /* Tamaño de letra aumentado */
+    color: var(--color-primario);
+    font-weight: bold;
+}
+
+/* Opciones del menú con iconos y switches */
+.options-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem; /* Más espacio entre opciones */
+}
+
+.option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem;
+    font-size: var(--tam-fuente-base); /* Tamaño de letra aumentado */
+    color: var(--color-contraste);
+    border-radius: var(--border-radius-small);
+}
+
+.option:hover {
+    background-color: rgba(208, 162, 242, 0.3);
+}
+
+.option.disabled {
+    color: rgba(64, 17, 99, 0.3);
+    cursor: not-allowed;
+}
+
+.option.disabled img {
+    opacity: 0.3;
+}
+
+/* Alineación de imagen y texto en la opción */
+.option-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.icon {
+    width: 2.5rem; /* Tamaño aumentado */
+    height: 2.5rem;
+    border-radius: 50%;
+    background-color: var(--color-secundario); /* Fondo circular */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.5rem; /* Espaciado interno para centrar icono */
+}
+
+.icon img {
+    width: 1.2rem;
+    height: 1.2rem;
+}
+
+/* Estilos del switch */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--color-contraste);
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: var(--color-secundario);
+}
+
+input:checked + .slider:before {
+    transform: translateX(20px);
+}

@@ -4,6 +4,7 @@ import './principal.css';
 import Registro from './registro/registro'; 
 import Login from './inicio_sesion/inicio_sesion';
 import Pasajero from './pasajeros/pasajeros';
+import Menu from './menu/menu';
 import { AuthProvider } from './Authentication'; // Importar AuthProvider
 import ProtectedRoute from './routeProtected';
 import LoginRedirect from './login-redirect';
@@ -46,6 +47,15 @@ const App: React.FC = () => {
             element={
               <ProtectedRoute>
                 <Pasajero />
+              </ProtectedRoute>
+            } 
+          />
+          <Route path="/menu" element={<Menu />} />
+          <Route 
+            path="/menu" 
+            element={
+              <ProtectedRoute>
+                <Menu/>
               </ProtectedRoute>
             } 
           />

@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './pasajeros.css';
 import menuIcon from '../assets/menu.png';  // Icono de menú
 import personaIcon from '../assets/persona.png';  // Icono de persona
 
 const Pasajeros = () => {
+  const navigate = useNavigate();
+  
   const [puntoInicio_pasajeros, setPuntoInicio_pasajeros] = useState('');  // Se buscará en la API
   const [puntoFinal_pasajeros, setPuntoFinal_pasajeros] = useState('');    // Se buscará en la API
   const [cuposDisponibles_pasajeros, setCuposDisponibles_pasajeros] = useState(2); // Inicialmente en 2
@@ -48,11 +51,15 @@ const Pasajeros = () => {
     setViajeSeleccionado_pasajeros(null); // Cerrar el modal
   };
 
+  const navigateToMenu = () => {
+    navigate('/menu');  // Navega a la pestaña de menú
+  };
+
   return (
     <div className="pasajeros-container">
       {/* Encabezado con menú e icono de persona */}
       <header className="header_pasajeros">
-        <button className="menu-button_pasajeros">
+        <button className="menu-button_pasajeros" onClick={navigateToMenu}>
           <img src={menuIcon} alt="Menú" />
         </button>
         <span className="title_pasajeros">Pasajero</span>
@@ -147,8 +154,8 @@ const Pasajeros = () => {
         {/* Columna Derecha con el mapa */}
         <div className="right-section_pasajeros">
           <iframe
-            title="Google Maps"
-            src={`https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q=Estación+Alcalá`}
+            title="Mapa"
+            src={``}
             allowFullScreen
           />
         </div>
@@ -221,4 +228,4 @@ const Pasajeros = () => {
   );
 };
 
-export default Pasajeros;
+export default Pasajeros
