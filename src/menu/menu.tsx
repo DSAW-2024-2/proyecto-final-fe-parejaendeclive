@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Importa useNavigate
 import './menu.css';
 import menuIcon from '../assets/menu.png';
 import personaIcon from '../assets/persona.png';
@@ -11,6 +12,8 @@ import vehiculoIcon from '../assets/carro.png';
 const Menu = () => {
   const [isPassenger, setIsPassenger] = useState(false);
   const [isDriver, setIsDriver] = useState(false);
+
+  const navigate = useNavigate(); // Crea la función de navegación
 
   const handlePassengerSwitch = () => {
     setIsPassenger(!isPassenger);
@@ -27,11 +30,11 @@ const Menu = () => {
       <div className="menu-container">
         {/* Encabezado con menú e icono de persona */}
         <header className="menu-header">
-          <button className="menu-button">
+          <button className="menu-button" onClick={() => navigate('/pasajeros')}>
             <img src={menuIcon} alt="Menú" />
           </button>
           <span className="menu-title">Pasajero</span>
-          <div className="persona-button">
+          <div className="persona-button" onClick={() => navigate('/perfil')}>
             <img src={personaIcon} alt="Perfil" />
           </div>
         </header>
@@ -42,7 +45,7 @@ const Menu = () => {
             <div className="user-avatar">
               <img src={perfilIcon} alt="Foto de perfil" />
             </div>
-            <span className="user-greeting">Hola! Andrea</span>
+            <span className="user-greeting">¡Hola, Andrea!</span>
           </div>
           <div className="options-section">
             {/* Switch para Pasajero */}

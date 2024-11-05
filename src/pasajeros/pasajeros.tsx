@@ -7,6 +7,7 @@ import personaIcon from '../assets/persona.png';  // Icono de persona
 const Pasajeros = () => {
   const navigate = useNavigate();
   
+  // Estados para los filtros y datos
   const [puntoInicio_pasajeros, setPuntoInicio_pasajeros] = useState('');  // Se buscará en la API
   const [puntoFinal_pasajeros, setPuntoFinal_pasajeros] = useState('');    // Se buscará en la API
   const [cuposDisponibles_pasajeros, setCuposDisponibles_pasajeros] = useState(2); // Inicialmente en 2
@@ -16,6 +17,7 @@ const Pasajeros = () => {
 
   const opcionesCupos_pasajeros = Array.from({ length: 11 }, (_, index) => index);
 
+  // Manejo de cambios en los filtros
   const handleCuposChange_pasajeros = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setCuposDisponibles_pasajeros(parseInt(e.target.value));
   };
@@ -34,6 +36,7 @@ const Pasajeros = () => {
     // Aquí puedes implementar la lógica para buscar en la API
   };
 
+  // Filtrar viajes disponibles (simulación)
   const handleFiltrarViajes_pasajeros = () => {
     const viajesDisponibles = [
       { id: 1, inicio: 'Estación Alcala', final: 'Universidad de La Sabana', cupos: 2, hora: '9:00 am', tarifa: 6000 },
@@ -43,16 +46,23 @@ const Pasajeros = () => {
     setViajes_pasajeros(viajesDisponibles);
   };
 
+  // Seleccionar un viaje de la lista
   const handleSeleccionarViaje_pasajeros = (viaje: any) => {
     setViajeSeleccionado_pasajeros(viaje);
   };
 
+  // Cerrar el modal de detalles del viaje
   const handleCloseModal = () => {
     setViajeSeleccionado_pasajeros(null); // Cerrar el modal
   };
 
+  // Funciones de navegación
   const navigateToMenu = () => {
     navigate('/menu');  // Navega a la pestaña de menú
+  };
+
+  const navigateToPerfil = () => {
+    navigate('/perfil'); // Navega a la pestaña de perfil
   };
 
   return (
@@ -63,8 +73,8 @@ const Pasajeros = () => {
           <img src={menuIcon} alt="Menú" />
         </button>
         <span className="title_pasajeros">Pasajero</span>
-        <div className="persona-button_pasajeros">
-          <img src={personaIcon} alt="Persona" />
+        <div className="persona-button_pasajeros" onClick={navigateToPerfil}>
+          <img src={personaIcon} alt="Perfil" />
         </div>
       </header>
 
@@ -128,7 +138,6 @@ const Pasajeros = () => {
           {/* Sección de Viajes Disponibles */}
           {viajes_pasajeros.length > 0 && (
             <div className="viajes-section_pasajeros">
-              {/* <h3>Viajes disponibles</h3> */} {/* Título eliminado */}
               <ul className="viajes-list_pasajeros">
                 {viajes_pasajeros.map((viaje) => (
                   <li key={viaje.id} className="viaje-item_pasajeros">
@@ -155,7 +164,7 @@ const Pasajeros = () => {
         <div className="right-section_pasajeros">
           <iframe
             title="Mapa"
-            src={``}
+            src=""
             allowFullScreen
           />
         </div>
@@ -228,4 +237,4 @@ const Pasajeros = () => {
   );
 };
 
-export default Pasajeros
+export default Pasajeros;

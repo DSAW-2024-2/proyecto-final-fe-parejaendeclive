@@ -5,7 +5,8 @@ import Registro from './registro/registro';
 import Login from './inicio_sesion/inicio_sesion';
 import Pasajero from './pasajeros/pasajeros';
 import Menu from './menu/menu';
-import { AuthProvider } from './Authentication'; // Importar AuthProvider
+import Perfil from './perfil/perfil';
+import { AuthProvider } from './Authentication';
 import ProtectedRoute from './routeProtected';
 import LoginRedirect from './login-redirect';
 
@@ -20,7 +21,7 @@ const Principal: React.FC = () => {
       </div>
       
       <div className="button-container_principal">
-        <Link to="/login" className="button">Iniciar sesión</Link>
+        <Link to="/pasajeros" className="button">Iniciar sesión</Link>
         <Link to="/registro" className="button">Registrarme</Link>
       </div>
     </div>
@@ -33,33 +34,58 @@ const App: React.FC = () => {
       <Router>
         <Routes>
           <Route path="/" element={<Principal />} />
+          <Route path="/principal" element={<Principal />} />
+          <Route path="/registro" element={<Registro />} />
+          
           <Route 
             path="/login" 
             element={
+              /* 
               <LoginRedirect>
                 <Login />
-              </LoginRedirect>
+              </LoginRedirect> 
+              */
+              <Login />
             } 
           />
-          <Route path="/registro" element={<Registro />} />
+          
           <Route 
             path="/pasajeros" 
             element={
+              /* 
               <ProtectedRoute>
                 <Pasajero />
-              </ProtectedRoute>
+              </ProtectedRoute> 
+              */
+              <Pasajero />
             } 
           />
-          <Route path="/menu" element={<Menu />} />
+          
+          {/* Mantener solo una ruta para /menu */}
           <Route 
             path="/menu" 
             element={
+              /* 
               <ProtectedRoute>
-                <Menu/>
-              </ProtectedRoute>
+                <Menu />
+              </ProtectedRoute> 
+              */
+              <Menu />
             } 
           />
-          <Route path="/Principal" element={<Principal />} />
+          
+          {/* Añadir la ruta para /perfil */}
+          <Route 
+            path="/perfil" 
+            element={
+              /* 
+              <ProtectedRoute>
+                <Perfil />
+              </ProtectedRoute> 
+              */
+              <Perfil />
+            } 
+          />
         </Routes>
       </Router>
     </AuthProvider>

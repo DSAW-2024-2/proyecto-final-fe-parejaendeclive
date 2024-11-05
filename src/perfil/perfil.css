@@ -5,7 +5,7 @@
     --color-fondo: #ffffff;
     --border-radius-small: 0.3125rem;
     --sombra: rgba(0, 0, 0, 0.1);
-    --tam-fuente-base: 1rem; /* Tamaño de letra base */
+    --tam-fuente-base: 1rem;
     --tam-fuente-titulo: 1.75rem;
 }
 
@@ -17,8 +17,7 @@
     width: 100vw;
     height: 100vh;
     background-color: var(--color-secundario);
-    padding-top: 2rem; /* Espacio superior */
-    box-sizing: border-box;
+    padding-top: 2rem;
 }
 
 /* Contenedor principal del perfil */
@@ -31,7 +30,6 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    box-sizing: border-box;
 }
 
 /* Encabezado */
@@ -45,7 +43,6 @@
     height: 5rem;
     position: relative;
     margin-bottom: 1rem;
-    box-sizing: border-box;
 }
 
 .menu-button_perfil,
@@ -79,19 +76,17 @@
 /* Contenido del perfil */
 .menu-content_perfil {
     padding: 1rem;
-    padding-bottom: 2rem; /* Espacio inferior */
+    padding-bottom: 2rem;
     border: 1px solid var(--color-primario);
     border-radius: var(--border-radius-small);
     margin: 0 auto;
     text-align: center;
-    width: 90%; /* Ocupa el 90% del ancho en pantallas pequeñas */
+    width: 90%;
     max-width: none;
-    /* Flex properties removed to prevent stretching */
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
-    /* Justify-content adjusted */
-    justify-content: flex-start;
-    box-sizing: border-box;
+    justify-content: center;
 }
 
 /* Sección del usuario */
@@ -135,7 +130,6 @@
     gap: 1rem;
     width: 100%;
     padding: 0 1rem;
-    box-sizing: border-box;
 }
 
 .option_perfil {
@@ -147,7 +141,6 @@
     color: var(--color-contraste);
     border-radius: var(--border-radius-small);
     cursor: pointer;
-    box-sizing: border-box;
 }
 
 .option_perfil:hover {
@@ -205,8 +198,8 @@
 /* Estilos para pantallas medianas y grandes (laptops y desktops) */
 @media (min-width: 769px) {
     .menu-content_perfil {
-        width: 60%; /* Ocupa el 60% del ancho en pantallas más grandes */
-        max-width: 800px; /* Ancho máximo */
+        width: 60%;
+        max-width: 800px;
     }
 
     .user-avatar_perfil {
@@ -230,10 +223,5 @@
     .icon_perfil img {
         width: 1.5rem;
         height: 1.5rem;
-    }
-
-    /* Ajuste del padding inferior para mayor espacio */
-    .menu-content_perfil {
-        padding-bottom: 3rem; /* Aumenta el espacio inferior en pantallas grandes */
     }
 }

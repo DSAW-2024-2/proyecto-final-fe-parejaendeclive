@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react'; // Añadido useContext para usar el contexto de autenticación
+import { useState, useContext, useEffect } from 'react'; // Añadido useEffect para verificar el token
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { api_URL } from '../apiConfig';
@@ -21,6 +21,34 @@ const InicioSesion = () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
+
+  // Nueva función para verificar el token de localStorage
+  const verifyToken = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return; // Si no hay token, no se hace nada
+
+    try {
+      const response = await axios.get(`${api_URL}/verify-token`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      // Si el token es válido, se actualiza el estado de autenticación
+      if (response.status === 200) {
+        setIsAuthenticated(true);
+        navigate('/pasajeros');
+      }
+    } catch (error) {
+      // Si el token es inválido, se borra del localStorage y se muestra un error
+      localStorage.removeItem('token');
+      setErrorMessage('Sesión expirada, por favor inicia sesión nuevamente');
+      setIsAuthenticated(false);
+    }
+  };
+
+  // Verificar token al cargar el componente
+  useEffect(() => {
+    verifyToken();
+  }, []);
 
   const handleSubmit = async () => {
     const { email, password } = formData;

@@ -5,19 +5,31 @@ import perfilPredefinido from '../assets/perfil_predefinido.png';
 import axios from 'axios';
 import { api_URL } from '../apiConfig';
 
+interface FormDataType {
+  name: string;           // Nombre del estudiante
+  LastName: string;       // Apellido del estudiante (con L mayúscula)
+  id: string;             // ID de la universidad
+  email: string;          // Correo del usuario
+  number: string;         // Número de contacto
+  password: string;       // Contraseña
+  photoUser?: string;     // Imagen en formato Base64 (opcional)
+  role?: string;          // Rol (se asignará automáticamente como 'pasajero')
+}
+
 const Registro: React.FC = () => {
   const [imagenPerfil, setImagenPerfil] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
-    name: '',           // Nombre del estudiante
-    lastName: '',       // Apellido del estudiante
-    id: '',             // ID de la universidad
-    email: '',          // Correo del usuario
-    number: '',         // Número de contacto
-    password: ''        // Contraseña
+  const [formData, setFormData] = useState<FormDataType>({
+    name: '',           
+    LastName: '',       
+    id: '',             
+    email: '',          
+    number: '',         
+    password: '',
+    photoUser: ''
   });
   const [errores, setErrores] = useState({
     name: '',
-    lastName: '',
+    LastName: '',
     id: '',
     email: '',
     number: '',
@@ -32,7 +44,12 @@ const Registro: React.FC = () => {
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        setImagenPerfil(reader.result as string);
+        const result = reader.result as string;
+        setImagenPerfil(result);
+        setFormData(prevFormData => ({
+          ...prevFormData,
+          photoUser: result
+        }));
       };
       reader.readAsDataURL(file);
     }
@@ -56,11 +73,11 @@ const Registro: React.FC = () => {
       erroresTemp.name = '';
     }
 
-    if (!formData.lastName || /\d/.test(formData.lastName)) {
-      erroresTemp.lastName = 'El apellido no debe contener números';
+    if (!formData.LastName || /\d/.test(formData.LastName)) {
+      erroresTemp.LastName = 'El apellido no debe contener números';
       esValido = false;
     } else {
-      erroresTemp.lastName = '';
+      erroresTemp.LastName = '';
     }
 
     // Validación de ID Universidad (debe tener 10 dígitos y empezar con 4 ceros)
@@ -103,28 +120,44 @@ const Registro: React.FC = () => {
     event.preventDefault();
     if (validarFormulario()) {
       try {
-        // Preparar los datos del formulario
-        const formDataToSend = new FormData();
-        formDataToSend.append('name', formData.name);
-        formDataToSend.append('LastName', formData.lastName);
-        formDataToSend.append('id', formData.id);
-        formDataToSend.append('email', formData.email);
-        formDataToSend.append('number', formData.number);
-        formDataToSend.append('password', formData.password);
-        if (fileInputRef.current && fileInputRef.current.files && fileInputRef.current.files[0]) {
-          formDataToSend.append('photoUser', fileInputRef.current.files[0]);
-        }
-        await axios.post(`${api_URL}/register`, formDataToSend, {
+        // Construir el objeto de datos a enviar, incluyendo 'role' y mapeando los campos
+        const dataToSend = {
+          id: formData.id,
+          name: formData.name,
+          LastName: formData.LastName,
+          email: formData.email,
+          number: formData.number,
+          password: formData.password,
+          role: 'pasajero', // Añadir el rol automáticamente
+          // Incluir 'photoUser' solo si existe
+          ...(formData.photoUser && { photoUser: formData.photoUser })
+        };
+
+        await axios.post(`${api_URL}/register`, dataToSend, {
           headers: {
-            'Content-Type': 'multipart/form-data',
+            'Content-Type': 'application/json',
           },
         });
+        alert('Registro exitoso. Redirigiendo a la página de inicio de sesión.');
         navigate('/login');
       } catch (error) {
-        if (axios.isAxiosError(error) && error.response) {
-          console.error('Error en el registro:', error.response.data.message);
+        if (axios.isAxiosError(error)) {
+          if (error.response) {
+            // El servidor respondió con un estado fuera del rango de 2xx
+            console.error('Error en el registro:', error.response.data.message);
+            alert(`Error en el registro: ${error.response.data.message}`);
+          } else if (error.request) {
+            // La solicitud fue hecha pero no se recibió respuesta
+            console.error('No se recibió respuesta del servidor.');
+            alert('No se recibió respuesta del servidor. Por favor, intenta de nuevo más tarde.');
+          } else {
+            // Algo sucedió al configurar la solicitud que desencadenó un error
+            console.error('Error al configurar la solicitud:', error.message);
+            alert(`Error al configurar la solicitud: ${error.message}`);
+          }
         } else {
-          console.error('Error al conectar con el servidor');
+          console.error('Error desconocido:', error);
+          alert('Ocurrió un error desconocido. Por favor, intenta de nuevo.');
         }
       }
     }
@@ -141,7 +174,7 @@ const Registro: React.FC = () => {
   return (
     <div className="formulario">
       {/* Botón de regreso */}
-      <button className="back-arrow" onClick={() => navigate('/Principal')}>
+      <button className="back-arrow" onClick={() => navigate('/principal')}>
         ←
       </button>
       <div className="header_registro"></div>
@@ -174,12 +207,12 @@ const Registro: React.FC = () => {
         <input
           type="text"
           placeholder="Apellido"
-          name="lastName"
-          value={formData.lastName}
+          name="LastName" // Cambiado a 'LastName' con L mayúscula
+          value={formData.LastName}
           onChange={handleChange}
-          className={errores.lastName ? 'input-error' : ''}
+          className={errores.LastName ? 'input-error' : ''}
         />
-        {errores.lastName && <p className="error">{errores.lastName}</p>}
+        {errores.LastName && <p className="error">{errores.LastName}</p>}
 
         <input
           type="text"
