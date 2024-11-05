@@ -10,19 +10,34 @@ import conductorIcon from '../assets/carro.png';
 import vehiculoIcon from '../assets/carro.png';
 
 const Menu = () => {
-  const [isPassenger, setIsPassenger] = useState(false);
+  // Configura "Pasajero" como activo por defecto
+  const [isPassenger, setIsPassenger] = useState(true);
   const [isDriver, setIsDriver] = useState(false);
 
   const navigate = useNavigate(); // Crea la función de navegación
 
   const handlePassengerSwitch = () => {
-    setIsPassenger(!isPassenger);
-    if (!isPassenger) setIsDriver(false); // Apaga "Conductor" si "Pasajero" se enciende
+    if (!isPassenger) {
+      // Si se activa "Pasajero", desactiva "Conductor"
+      setIsPassenger(true);
+      setIsDriver(false);
+    } else {
+      // Si se intenta desactivar "Pasajero", activa "Conductor"
+      setIsPassenger(false);
+      setIsDriver(true);
+    }
   };
 
   const handleDriverSwitch = () => {
-    setIsDriver(!isDriver);
-    if (!isDriver) setIsPassenger(false); // Apaga "Pasajero" si "Conductor" se enciende
+    if (!isDriver) {
+      // Si se activa "Conductor", desactiva "Pasajero"
+      setIsDriver(true);
+      setIsPassenger(false);
+    } else {
+      // Si se intenta desactivar "Conductor", activa "Pasajero"
+      setIsDriver(false);
+      setIsPassenger(true);
+    }
   };
 
   return (
@@ -33,7 +48,7 @@ const Menu = () => {
           <button className="menu-button" onClick={() => navigate('/pasajeros')}>
             <img src={menuIcon} alt="Menú" />
           </button>
-          <span className="menu-title">Pasajero</span>
+          <span className="menu-title">Menu</span>
           <div className="persona-button" onClick={() => navigate('/perfil')}>
             <img src={personaIcon} alt="Perfil" />
           </div>
@@ -55,7 +70,11 @@ const Menu = () => {
                 <span>Pasajero</span>
               </div>
               <label className="switch">
-                <input type="checkbox" checked={isPassenger} onChange={handlePassengerSwitch} />
+                <input
+                  type="checkbox"
+                  checked={isPassenger}
+                  onChange={handlePassengerSwitch}
+                />
                 <span className="slider"></span>
               </label>
             </div>
@@ -67,12 +86,17 @@ const Menu = () => {
                 <span>Conductor</span>
               </div>
               <label className="switch">
-                <input type="checkbox" checked={isDriver} onChange={handleDriverSwitch} />
+                <input
+                  type="checkbox"
+                  checked={isDriver}
+                  onChange={handleDriverSwitch}
+                />
                 <span className="slider"></span>
               </label>
             </div>
 
-            <div className="option">
+            {/* Otras Opciones */}
+            <div className="option" onClick={() => navigate('/viajes-reservados')}>
               <div className="option-label">
                 <img src={viajesIcon} alt="Viajes reservados" className="icon" />
                 <span>Viajes reservados</span>
