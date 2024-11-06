@@ -3,22 +3,35 @@ import { useNavigate } from 'react-router-dom';
 import './registro.css';
 import perfilPredefinido from '../assets/perfil_predefinido.png';
 import axios from 'axios';
-import { api_URL } from '../apiConfig';
+
+const api_URL = import.meta.env.VITE_API_URL;
+
+
+interface MyUglyFormData {
+  name: string;           // Nombre del estudiante
+  LastName: string;       // Apellido del estudiante
+  idUser: string;             // ID de la universidad
+  email: string;          // Correo del usuario
+  number: string;         // Número de contacto
+  password: string;
+  photoUser?: string;
+}
 
 const Registro: React.FC = () => {
   const [imagenPerfil, setImagenPerfil] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
-    name: '',           // Nombre del estudiante
-    lastName: '',       // Apellido del estudiante
-    id: '',             // ID de la universidad
-    email: '',          // Correo del usuario
-    number: '',         // Número de contacto
-    password: ''        // Contraseña
+  const [formData, setFormData] = useState<MyUglyFormData>({
+    name: '',       // Inicializado como cadena vacía
+    LastName: '',   // Inicializado como cadena vacía
+    idUser: '',         // Inicializado como cadena vacía
+    email: '',      // Inicializado como cadena vacía
+    number: '',     // Inicializado como cadena vacía
+    password: '',   // Inicializado como cadena vacía
+    photoUser: ''   // Inicialización opcional
   });
   const [errores, setErrores] = useState({
     name: '',
-    lastName: '',
-    id: '',
+    LastName: '',
+    idUser: '',
     email: '',
     number: '',
     password: ''
@@ -48,7 +61,6 @@ const Registro: React.FC = () => {
     let esValido = true;
     let erroresTemp = { ...errores };
 
-    // Validación de Nombre y Apellido (no deben contener números)
     if (!formData.name || /\d/.test(formData.name)) {
       erroresTemp.name = 'El nombre no debe contener números';
       esValido = false;
@@ -56,22 +68,20 @@ const Registro: React.FC = () => {
       erroresTemp.name = '';
     }
 
-    if (!formData.lastName || /\d/.test(formData.lastName)) {
-      erroresTemp.lastName = 'El apellido no debe contener números';
+    if (!formData.LastName || /\d/.test(formData.LastName)) {
+      erroresTemp.LastName = 'El apellido no debe contener números';
       esValido = false;
     } else {
-      erroresTemp.lastName = '';
+      erroresTemp.LastName = '';
     }
 
-    // Validación de ID Universidad (debe tener 10 dígitos y empezar con 4 ceros)
-    if (!/^[0]{4}\d{6}$/.test(formData.id)) {
-      erroresTemp.id = 'El ID debe contener 10 números y comenzar con 4 ceros';
+    if (!/^[0]{4}\d{6}$/.test(formData.idUser)) {
+      erroresTemp.idUser = 'El ID debe contener 10 números y comenzar con 4 ceros';
       esValido = false;
     } else {
-      erroresTemp.id = '';
+      erroresTemp.idUser = '';
     }
 
-    // Validación de correo (debe ser un correo válido)
     if (!/\S+@\S+\.\S+/.test(formData.email)) {
       erroresTemp.email = 'Debe ser un correo electrónico válido';
       esValido = false;
@@ -79,7 +89,6 @@ const Registro: React.FC = () => {
       erroresTemp.email = '';
     }
 
-    // Validación de Número de Contacto (solo números y debe tener 10 dígitos)
     if (!/^\d{10}$/.test(formData.number)) {
       erroresTemp.number = 'El número de contacto debe tener 10 dígitos';
       esValido = false;
@@ -87,7 +96,6 @@ const Registro: React.FC = () => {
       erroresTemp.number = '';
     }
 
-    // Validación de contraseña (no vacía)
     if (!formData.password) {
       erroresTemp.password = 'La contraseña no puede estar vacía';
       esValido = false;
@@ -103,28 +111,35 @@ const Registro: React.FC = () => {
     event.preventDefault();
     if (validarFormulario()) {
       try {
-        // Preparar los datos del formulario
-        const formDataToSend = new FormData();
-        formDataToSend.append('name', formData.name);
-        formDataToSend.append('LastName', formData.lastName);
-        formDataToSend.append('id', formData.id);
-        formDataToSend.append('email', formData.email);
-        formDataToSend.append('number', formData.number);
-        formDataToSend.append('password', formData.password);
+        let newFormData = { ...formData };
+
         if (fileInputRef.current && fileInputRef.current.files && fileInputRef.current.files[0]) {
-          formDataToSend.append('photoUser', fileInputRef.current.files[0]);
+          newFormData = {
+            ...formData,
+            photoUser: fileInputRef.current.files[0].name || ''
+          }
         }
-        await axios.post(`${api_URL}/register`, formDataToSend, {
+        console.log("API URL:", api_URL);
+
+        await axios.post(`${api_URL}/register`, newFormData, {
           headers: {
-            'Content-Type': 'multipart/form-data',
+            'Content-Type': 'application/json',
           },
+          withCredentials: true
         });
         navigate('/login');
       } catch (error) {
-        if (axios.isAxiosError(error) && error.response) {
-          console.error('Error en el registro:', error.response.data.message);
+        if (axios.isAxiosError(error)) {
+          console.error('Error de Axios en el registro:', error.toJSON());
+          if (error.response) {
+            console.error('Respuesta del servidor:', error.response.data);
+          } else if (error.request) {
+            console.error('No se recibió respuesta del servidor:', error.request);
+          } else {
+            console.error('Error al configurar la solicitud:', error.message);
+          }
         } else {
-          console.error('Error al conectar con el servidor');
+          console.error('Error desconocido:', error);
         }
       }
     }
@@ -140,7 +155,6 @@ const Registro: React.FC = () => {
 
   return (
     <div className="formulario">
-      {/* Botón de regreso */}
       <button className="back-arrow" onClick={() => navigate('/Principal')}>
         ←
       </button>
@@ -174,22 +188,22 @@ const Registro: React.FC = () => {
         <input
           type="text"
           placeholder="Apellido"
-          name="lastName"
-          value={formData.lastName}
+          name="LastName"
+          value={formData.LastName}
           onChange={handleChange}
-          className={errores.lastName ? 'input-error' : ''}
+          className={errores.LastName ? 'input-error' : ''}
         />
-        {errores.lastName && <p className="error">{errores.lastName}</p>}
+        {errores.LastName && <p className="error">{errores.LastName}</p>}
 
         <input
           type="text"
           placeholder="ID universidad"
-          name="id"
-          value={formData.id}
+          name="idUser"
+          value={formData.idUser}
           onChange={handleChange}
-          className={errores.id ? 'input-error' : ''}
+          className={errores.idUser ? 'input-error' : ''}
         />
-        {errores.id && <p className="error">{errores.id}</p>}
+        {errores.idUser && <p className="error">{errores.idUser}</p>}
 
         <input
           type="email"

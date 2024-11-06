@@ -1,12 +1,11 @@
 import { useState, useContext } from 'react'; // Añadido useContext para usar el contexto de autenticación
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { api_URL } from '../apiConfig';
 import { AuthContext } from '../Authentication'; // Añadido para importar AuthContext
-
 import './inicio_sesion.css';
 import perfilPredefinido from '../assets/persona.png'; // Icono de usuario
 import candadoIcon from '../assets/candado.png'; // Icono de candado
+const api_URL = import.meta.env.API_CONNECTION;
 
 const InicioSesion = () => {
   const navigate = useNavigate();
