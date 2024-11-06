@@ -23,7 +23,7 @@ const Perfil: React.FC = () => {
   };
 
   const navigateToEditProfile = (): void => {
-    navigate('/editarPerfil'); // Navega a la edición de perfil (ajusta la ruta según tu aplicación)
+    navigate('/editar-perfil'); // Navega a la edición de perfil con la ruta correcta
   };
 
   // Nueva función para navegar a 'pasajeros'

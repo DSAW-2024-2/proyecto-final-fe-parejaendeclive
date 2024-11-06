@@ -6,6 +6,7 @@ import Login from './inicio_sesion/inicio_sesion';
 import Pasajero from './pasajeros/pasajeros';
 import Menu from './menu/menu';
 import Perfil from './perfil/perfil';
+import EditPerfil from './editar_perfil/editar_perfil';
 import { AuthProvider } from './Authentication';
 import ProtectedRoute from './routeProtected';
 import LoginRedirect from './login-redirect';
@@ -61,7 +62,6 @@ const App: React.FC = () => {
             } 
           />
           
-          {/* Mantener solo una ruta para /menu */}
           <Route 
             path="/menu" 
             element={
@@ -74,7 +74,6 @@ const App: React.FC = () => {
             } 
           />
           
-          {/* Añadir la ruta para /perfil */}
           <Route 
             path="/perfil" 
             element={
@@ -84,6 +83,19 @@ const App: React.FC = () => {
               </ProtectedRoute> 
               */
               <Perfil />
+            } 
+          />
+
+          {/* Añadir la ruta para /editar-perfil */}
+          <Route 
+            path="/editar-perfil" 
+            element={
+              /* 
+              <ProtectedRoute>
+                <EditPerfil />
+              </ProtectedRoute> 
+              */
+              <EditPerfil />
             } 
           />
         </Routes>
