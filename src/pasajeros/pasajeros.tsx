@@ -1,8 +1,25 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { MapContainer, TileLayer } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import './pasajeros.css';
 import menuIcon from '../assets/menu.png';
 import personaIcon from '../assets/persona.png';
+
+// Importar las imágenes de los iconos de Leaflet
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+// Solucionar posibles problemas con los iconos en producción
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
 
 const Pasajeros = () => {
   const navigate = useNavigate();
@@ -180,11 +197,12 @@ const Pasajeros = () => {
 
         {/* Columna Derecha (Mapa) */}
         <div className="right-section_pasajeros">
-          <iframe
-            title="Mapa"
-            src=""
-            allowFullScreen
-          />
+          <MapContainer center={[4.7110, -74.0721]} zoom={12} className="map_pasajeros">
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            />
+          </MapContainer>
         </div>
       </div>
 
@@ -255,7 +273,9 @@ const Pasajeros = () => {
             </div>
             <div className="button-container_pasajeros">
               <button className="button-primary_pasajeros">Reservar</button>
-              <button className="button-secondary_pasajeros" onClick={handleCloseModal}>Cancelar</button>
+              <button className="button-secondary_pasajeros" onClick={handleCloseModal}>
+                Cancelar
+              </button>
             </div>
           </div>
         </div>

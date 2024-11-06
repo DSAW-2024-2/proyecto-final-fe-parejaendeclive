@@ -118,12 +118,13 @@ html {
     flex-shrink: 0;
     background-color: var(--color-fondo);
     position: relative;
+    height: 100%;
 }
 
-.right-section_pasajeros iframe {
+/* Map Container */
+.map_pasajeros {
     width: 100%;
     height: 100%;
-    border: none;
 }
 
 /* Secciones dentro de la Columna Izquierda */
