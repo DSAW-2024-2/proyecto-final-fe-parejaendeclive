@@ -1,8 +1,11 @@
+/* perfil.css */
+
 /* Variables de colores y tamaños */
 :root {
     --color-primario: #401163;
     --color-secundario: #D0A2F2;
     --color-contraste: #684483;
+    --color-error: #ff0000;
     --color-fondo: #ffffff;
     --border-radius-small: 10px;
     --sombra: rgba(0, 0, 0, 0.1);
@@ -10,26 +13,29 @@
     --tam-fuente-titulo: 28px;
 }
 
-/* Fondo de la página */
-.page-background {
-    font-family: 'Instrument Sans', sans-serif;
+/* Reset y box-sizing */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    background-color: var(--color-secundario);
-    min-height: 100vh;
-    overflow-x: hidden; /* Evita el scroll horizontal */
+}
+
+html {
+    font-size: 100%;
 }
 
 /* Contenedor principal del menú */
 .menu-container {
-    width: 100vw;
-    height: 50vw; /* Altura ajustada */
+    width: 200vh;
+    min-height: 100vh;
     background-color: var(--color-fondo);
     display: flex;
     flex-direction: column;
     overflow: hidden;
     position: relative;
-    margin: 0 auto;
+    z-index: 1;
 }
 
 /* Encabezado */
@@ -41,6 +47,7 @@
     background-color: var(--color-fondo);
     border-bottom: 1px solid var(--color-secundario);
     position: relative;
+    z-index: 2;
 }
 
 .menu-button,
@@ -53,6 +60,12 @@
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.menu-button:hover,
+.persona-button:hover {
+    background-color: #b58eea;
 }
 
 .menu-button img,
@@ -69,14 +82,7 @@
     left: 50%;
     transform: translateX(-50%);
     text-align: center;
-}
-
-/* Div morado de fondo */
-.header-background {
-    background-color: var(--color-secundario);
-    width: 100%;
-    height: 120px;
-    position: relative;
+    z-index: 1;
 }
 
 /* Foto de perfil */
@@ -91,7 +97,7 @@
     top: 80px;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 2;
+    z-index: 3;
 }
 
 .user-avatar img {
@@ -100,9 +106,24 @@
     object-fit: cover;
 }
 
+/* Sección de usuario */
+.user-section {
+    margin-top: 120px; /* Espacio para la foto de perfil */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.user-greeting {
+    font-size: 1.25rem;
+    color: var(--color-primario);
+    font-family: var(--fuente-principal, 'Instrument Sans', sans-serif);
+    font-weight: 600;
+}
+
 /* Contenido del menú */
 .menu-content {
-    padding: 1rem;
+    padding: 2rem 1rem 1rem 1rem;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -111,10 +132,13 @@
     background-color: var(--color-fondo);
     border: 2px solid var(--color-primario);
     border-radius: var(--border-radius-small);
-    margin: 0 1rem;
-    margin-top: 100px; /* Ajustado para acomodar la foto */
+    margin: 0 auto;
+    margin-top: 50px; /* Ajustado para acomodar la foto */
     position: relative;
     z-index: 1;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 0.25rem 0.75rem var(--sombra);
 }
 
 /* Opciones del menú */
@@ -130,12 +154,14 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.75rem 1rem; /* Ajustado para mejor proporción */
+    padding: 0.75rem 1rem;
     font-size: 1rem;
     color: var(--color-contraste);
     border-radius: var(--border-radius-small);
     transition: background-color 0.3s;
     width: 100%;
+    background-color: #f9f9f9;
+    box-shadow: 0 0.125rem 0.25rem var(--sombra);
 }
 
 .option:hover .option-label.clickable {
@@ -152,6 +178,8 @@
 .option-label.clickable {
     cursor: pointer;
     flex: 1;
+    display: flex;
+    align-items: center;
 }
 
 .icon {
@@ -169,70 +197,29 @@
     height: 20px;
 }
 
+.logout-icon {
+    width: 20px;
+    height: 20px;
+    background-image: url('../assets/logout-icon.png'); /* Asegúrate de tener este icono o reemplázalo */
+    background-size: cover;
+}
+
 .option-label span {
     font-size: 1rem;
     color: var(--color-primario);
 }
 
-/* Estilos del switch */
-.switch-container {
-    /* Alineación correcta del switch */
-}
-
-.switch {
-    position: relative;
-    display: inline-block;
-    width: 50px;
-    height: 24px;
-}
-
-.switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.switch .slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: var(--color-contraste);
-    transition: 0.4s;
-    border-radius: 24px;
-}
-
-.switch .slider:before {
-    position: absolute;
-    content: "";
-    height: 20px;
-    width: 20px;
-    left: 2px;
-    bottom: 2px;
-    background-color: white;
-    transition: 0.4s;
-    border-radius: 50%;
-}
-
-.switch input:checked + .slider {
-    background-color: var(--color-secundario);
-}
-
-.switch input:checked + .slider:before {
-    transform: translateX(26px);
-}
-
 /* Responsividad */
+@media (max-width: 1024px) {
+    .menu-content {
+        max-width: 500px;
+    }
+}
+
 @media (max-width: 768px) {
     .menu-container {
-        width: 100vw;
-        height: auto; /* Permitir que la altura se ajuste automáticamente */
-    }
-
-    .header-background {
-        height: 100px;
+        width: 100%;
+        height: auto;
     }
 
     .user-avatar {
@@ -245,6 +232,7 @@
         margin-top: 80px;
         margin-left: 0.5rem;
         margin-right: 0.5rem;
+        max-width: 350px;
     }
 
     .menu-title {
@@ -273,18 +261,20 @@
     .option-label span {
         font-size: 0.9rem;
     }
+}
 
-    .switch {
-        width: 40px;
-        height: 20px;
+@media (max-width: 480px) {
+    .menu-content {
+        max-width: 300px;
     }
 
-    .switch .slider:before {
-        width: 16px;
-        height: 16px;
+    .option {
+        flex-direction: column;
+        align-items: flex-start;
     }
 
-    .switch input:checked + .slider:before {
-        transform: translateX(20px);
+    .switch-container {
+        margin-left: 0;
+        margin-top: 0.5rem;
     }
 }

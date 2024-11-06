@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapContainer, TileLayer } from 'react-leaflet';
+import axios from 'axios';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './pasajeros.css';
@@ -13,13 +14,24 @@ import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
 // Solucionar posibles problemas con los iconos en producción
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
   iconUrl: markerIcon,
   shadowUrl: markerShadow,
 });
+
+// Definir la interfaz Viaje
+interface Viaje {
+  id: number;
+  inicio: string;
+  final: string;
+  cupos: number;
+  hora: string;
+  tarifa: number;
+  placa: string;
+  inicioCoords?: [number, number] | null;
+  finalCoords?: [number, number] | null;
+}
 
 const Pasajeros = () => {
   const navigate = useNavigate();
@@ -29,17 +41,77 @@ const Pasajeros = () => {
   const [puntoFinal_pasajeros, setPuntoFinal_pasajeros] = useState('');
   const [cuposDisponibles_pasajeros, setCuposDisponibles_pasajeros] = useState(2);
   const [horaSalida_pasajeros, setHoraSalida_pasajeros] = useState('');
-  const [viajes_pasajeros, setViajes_pasajeros] = useState<any[]>([]);
-  const [viajeSeleccionado_pasajeros, setViajeSeleccionado_pasajeros] = useState<any | null>(null);
+  const [viajes_pasajeros, setViajes_pasajeros] = useState<Viaje[]>([]);
+  const [viajeSeleccionado_pasajeros, setViajeSeleccionado_pasajeros] = useState<Viaje | null>(null);
+
+  // Estados para las coordenadas
+  const [inicioCoords, setInicioCoords] = useState<[number, number] | null>(null);
+  const [finalCoords, setFinalCoords] = useState<[number, number] | null>(null);
 
   const opcionesCupos_pasajeros = Array.from({ length: 11 }, (_, index) => index);
 
-  // Viajes disponibles (simulación)
-  const todosViajes = [
-    { id: 1, inicio: 'Estación Alcala', final: 'Universidad de La Sabana', cupos: 2, hora: '09:00', tarifa: 6000, placa: 'ABC123' },
-    { id: 2, inicio: 'Estación Calle 100', final: 'Universidad de La Sabana', cupos: 3, hora: '10:00', tarifa: 5500, placa: 'XYZ789' },
-    { id: 3, inicio: 'Estación Calle 85', final: 'Universidad de Los Andes', cupos: 2, hora: '09:30', tarifa: 6500, placa: 'JKL456' },
+  // Viajes disponibles (simulación) sin coordenadas
+  const todosViajes: Viaje[] = [
+    {
+      id: 1,
+      inicio: 'titan plaza',
+      final: 'Universidad de La Sabana',
+      cupos: 2,
+      hora: '09:00',
+      tarifa: 6000,
+      placa: 'ABC123',
+    },
+    {
+      id: 2,
+      inicio: 'Estación Calle 100',
+      final: 'Universidad de La Sabana',
+      cupos: 3,
+      hora: '10:00',
+      tarifa: 5500,
+      placa: 'XYZ789',
+    },
+    {
+      id: 3,
+      inicio: 'Estación Calle 85',
+      final: 'Universidad de Los Andes',
+      cupos: 2,
+      hora: '09:30',
+      tarifa: 6500,
+      placa: 'JKL456',
+    },
   ];
+
+  // Caché para geocodificación
+  const geocodeCache = new Map<string, [number, number]>();
+
+  // Función para geocodificar una dirección con caché
+  const geocodeAddress = async (address: string): Promise<[number, number] | null> => {
+    if (geocodeCache.has(address)) {
+      return geocodeCache.get(address)!;
+    }
+    try {
+      const response = await axios.get('https://nominatim.openstreetmap.org/search', {
+        params: {
+          q: address,
+          format: 'json',
+          addressdetails: 1,
+          limit: 1,
+        },
+      });
+
+      if (response.data && response.data.length > 0) {
+        const { lat, lon } = response.data[0];
+        const coords: [number, number] = [parseFloat(lat), parseFloat(lon)];
+        geocodeCache.set(address, coords);
+        return coords;
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.error('Error geocoding address:', error);
+      return null;
+    }
+  };
 
   // Manejo de cambios en los filtros
   const handleCuposChange_pasajeros = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -50,36 +122,109 @@ const Pasajeros = () => {
     setHoraSalida_pasajeros(e.target.value);
   };
 
-  const handlePuntoInicioChange_pasajeros = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPuntoInicio_pasajeros(e.target.value);
+  const handlePuntoInicioChange_pasajeros = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const address = e.target.value;
+    setPuntoInicio_pasajeros(address);
+
+    if (address) {
+      const coords = await geocodeAddress(address);
+      setInicioCoords(coords);
+    } else {
+      setInicioCoords(null);
+    }
   };
 
-  const handlePuntoFinalChange_pasajeros = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPuntoFinal_pasajeros(e.target.value);
+  const handlePuntoFinalChange_pasajeros = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const address = e.target.value;
+    setPuntoFinal_pasajeros(address);
+
+    if (address) {
+      const coords = await geocodeAddress(address);
+      setFinalCoords(coords);
+    } else {
+      setFinalCoords(null);
+    }
+  };
+
+  // Función para calcular la distancia en metros entre dos coordenadas
+  const getDistance = (coords1: [number, number], coords2: [number, number]) => {
+    const [lat1, lon1] = coords1;
+    const [lat2, lon2] = coords2;
+
+    const R = 6371e3; // Radio de la Tierra en metros
+    const φ1 = (lat1 * Math.PI) / 180;
+    const φ2 = (lat2 * Math.PI) / 180;
+    const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+    const Δλ = ((lon2 - lon1) * Math.PI) / 180;
+
+    const a =
+      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+      Math.cos(φ1) * Math.cos(φ2) *
+      Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    const distance = R * c;
+
+    return distance; // En metros
   };
 
   // Función para filtrar viajes según los filtros seleccionados
-  const handleFiltrarViajes_pasajeros = () => {
+  const handleFiltrarViajes_pasajeros = async () => {
+    // Geocodificar direcciones de viajes si no están geocodificadas
+    await Promise.all(
+      todosViajes.map(async (viaje) => {
+        if (!viaje.inicioCoords) {
+          viaje.inicioCoords = await geocodeAddress(viaje.inicio);
+        }
+        if (!viaje.finalCoords) {
+          viaje.finalCoords = await geocodeAddress(viaje.final);
+        }
+      })
+    );
+
     const viajesFiltrados = todosViajes.filter((viaje) => {
-      const coincideInicio = puntoInicio_pasajeros
-        ? viaje.inicio.toLowerCase().includes(puntoInicio_pasajeros.toLowerCase())
-        : true;
-      const coincideFinal = puntoFinal_pasajeros
-        ? viaje.final.toLowerCase().includes(puntoFinal_pasajeros.toLowerCase())
-        : true;
+      let coincideInicio = true;
+      let coincideFinal = true;
+
+      if (inicioCoords) {
+        if (viaje.inicioCoords) {
+          // Calcular distancia entre puntos de inicio
+          const distanciaInicio = getDistance(inicioCoords, viaje.inicioCoords);
+          coincideInicio = distanciaInicio < 2000; // 2 km de tolerancia
+        } else {
+          coincideInicio = false;
+        }
+      }
+
+      if (finalCoords) {
+        if (viaje.finalCoords) {
+          // Calcular distancia entre puntos finales
+          const distanciaFinal = getDistance(finalCoords, viaje.finalCoords);
+          coincideFinal = distanciaFinal < 2000; // 2 km de tolerancia
+        } else {
+          coincideFinal = false;
+        }
+      }
+
       const coincideCupos = cuposDisponibles_pasajeros ? viaje.cupos >= cuposDisponibles_pasajeros : true;
-      const coincideHora = horaSalida_pasajeros
-        ? viaje.hora === horaSalida_pasajeros
-        : true;
+      const coincideHora = horaSalida_pasajeros ? viaje.hora === horaSalida_pasajeros : true;
 
       return coincideInicio && coincideFinal && coincideCupos && coincideHora;
     });
 
     setViajes_pasajeros(viajesFiltrados);
+    setViajeSeleccionado_pasajeros(null); // Resetear selección al filtrar
   };
 
   // Seleccionar un viaje de la lista
-  const handleSeleccionarViaje_pasajeros = (viaje: any) => {
+  const handleSeleccionarViaje_pasajeros = async (viaje: Viaje) => {
+    // Geocodificar direcciones del viaje seleccionado si no están geocodificadas
+    if (!viaje.inicioCoords) {
+      viaje.inicioCoords = await geocodeAddress(viaje.inicio);
+    }
+    if (!viaje.finalCoords) {
+      viaje.finalCoords = await geocodeAddress(viaje.final);
+    }
     setViajeSeleccionado_pasajeros(viaje);
   };
 
@@ -110,176 +255,215 @@ const Pasajeros = () => {
         </div>
       </header>
 
-      {/* Contenedor de dos columnas para filtros y mapa */}
+      {/* Contenedor principal */}
       <div className="main-content_pasajeros">
-        {/* Columna Izquierda */}
+        {/* Sección Izquierda */}
         <div className="left-section_pasajeros">
           {/* Filtros */}
-          <div className="filters-section_pasajeros">
-            <h3>Filtrar viajes disponibles</h3>
-            <div className="form-group_pasajeros">
-              <label>Punto de inicio</label>
-              <input
-                type="text"
-                value={puntoInicio_pasajeros}
-                onChange={handlePuntoInicioChange_pasajeros}
-                placeholder="Punto salida"
-                className="input-field_pasajeros"
-              />
-            </div>
-            <div className="form-group_pasajeros">
-              <label>Punto final</label>
-              <input
-                type="text"
-                value={puntoFinal_pasajeros}
-                onChange={handlePuntoFinalChange_pasajeros}
-                placeholder="Punto llegada"
-                className="input-field_pasajeros"
-              />
-            </div>
-            <div className="form-row_pasajeros">
+          {!viajeSeleccionado_pasajeros && (
+            <div className="filters-section_pasajeros">
+              <h3>Filtrar viajes disponibles</h3>
               <div className="form-group_pasajeros">
-                <label>Cupos disponibles</label>
-                <select
-                  value={cuposDisponibles_pasajeros}
-                  onChange={handleCuposChange_pasajeros}
-                  className="input-field_pasajeros"
-                >
-                  {opcionesCupos_pasajeros.map((opcion) => (
-                    <option key={opcion} value={opcion}>
-                      {opcion}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="form-group_pasajeros">
-                <label>Hora salida</label>
+                <label>Punto de inicio</label>
                 <input
-                  type="time"
-                  value={horaSalida_pasajeros}
-                  onChange={handleHoraChange_pasajeros}
+                  type="text"
+                  value={puntoInicio_pasajeros}
+                  onChange={handlePuntoInicioChange_pasajeros}
+                  placeholder="Punto salida"
                   className="input-field_pasajeros"
                 />
               </div>
+              <div className="form-group_pasajeros">
+                <label>Punto final</label>
+                <input
+                  type="text"
+                  value={puntoFinal_pasajeros}
+                  onChange={handlePuntoFinalChange_pasajeros}
+                  placeholder="Punto llegada"
+                  className="input-field_pasajeros"
+                />
+              </div>
+              <div className="form-row_pasajeros">
+                <div className="form-group_pasajeros">
+                  <label>Cupos disponibles</label>
+                  <select
+                    value={cuposDisponibles_pasajeros}
+                    onChange={handleCuposChange_pasajeros}
+                    className="input-field_pasajeros"
+                  >
+                    {opcionesCupos_pasajeros.map((opcion) => (
+                      <option key={opcion} value={opcion}>
+                        {opcion}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="form-group_pasajeros">
+                  <label>Hora salida</label>
+                  <input
+                    type="time"
+                    value={horaSalida_pasajeros}
+                    onChange={handleHoraChange_pasajeros}
+                    className="input-field_pasajeros"
+                  />
+                </div>
+              </div>
+              <button className="button-primary_pasajeros" onClick={handleFiltrarViajes_pasajeros}>
+                Filtrar
+              </button>
             </div>
-            <button className="button-primary_pasajeros" onClick={handleFiltrarViajes_pasajeros}>
-              Filtrar
-            </button>
-          </div>
+          )}
 
           {/* Viajes Disponibles */}
-          {viajes_pasajeros.length > 0 ? (
-            <div className="viajes-section_pasajeros">
-              <ul className="viajes-list_pasajeros">
-                {viajes_pasajeros.map((viaje) => (
-                  <li key={viaje.id} className="viaje-item_pasajeros">
-                    <div>
-                      <p>Inicio: {viaje.inicio}</p>
-                      <p>Final: {viaje.final}</p>
-                      <p>Hora: {viaje.hora}</p>
-                      <p>Tarifa: ${viaje.tarifa}</p>
-                      <p>Cupos disponibles: {viaje.cupos}</p>
-                      <button
-                        className="button-primary_pasajeros"
-                        onClick={() => handleSeleccionarViaje_pasajeros(viaje)}
-                      >
-                        Seleccionar
-                      </button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+          {!viajeSeleccionado_pasajeros && (
+            <>
+              {viajes_pasajeros.length > 0 ? (
+                <div className="viajes-section_pasajeros">
+                  <ul className="viajes-list_pasajeros">
+                    {viajes_pasajeros.map((viaje) => (
+                      <li key={viaje.id} className="viaje-item_pasajeros">
+                        <div>
+                          <p><strong>Inicio:</strong> {viaje.inicio}</p>
+                          <p><strong>Final:</strong> {viaje.final}</p>
+                          <p><strong>Hora:</strong> {viaje.hora}</p>
+                          <p><strong>Tarifa:</strong> ${viaje.tarifa}</p>
+                          <p><strong>Cupos disponibles:</strong> {viaje.cupos}</p>
+                          <button
+                            className="button-primary_pasajeros"
+                            onClick={() => handleSeleccionarViaje_pasajeros(viaje)}
+                          >
+                            Seleccionar
+                          </button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <p>No hay viajes disponibles con los filtros seleccionados.</p>
+              )}
+            </>
+          )}
+
+          {/* Modal de detalles dentro de la sección izquierda */}
+          {viajeSeleccionado_pasajeros && (
+            <div className="modal-overlay_pasajeros" onClick={handleCloseModal}>
+              <div className="modal-content_pasajeros" onClick={(e) => e.stopPropagation()}>
+                <h3>Detalles del viaje seleccionado</h3>
+                <div className="form-row_pasajeros">
+                  <div className="form-group_pasajeros">
+                    <label>Inicio viaje:</label>
+                    <input
+                      type="text"
+                      value={viajeSeleccionado_pasajeros.inicio}
+                      readOnly
+                      className="input-highlight_pasajeros"
+                    />
+                  </div>
+                  <div className="form-group_pasajeros">
+                    <label>Final viaje:</label>
+                    <input
+                      type="text"
+                      value={viajeSeleccionado_pasajeros.final}
+                      readOnly
+                      className="input-highlight_pasajeros"
+                    />
+                  </div>
+                </div>
+                <div className="form-row_pasajeros">
+                  <div className="form-group_pasajeros">
+                    <label>Hora inicio:</label>
+                    <input
+                      type="text"
+                      value={viajeSeleccionado_pasajeros.hora}
+                      readOnly
+                      className="input-highlight_pasajeros"
+                    />
+                  </div>
+                  <div className="form-group_pasajeros">
+                    <label>Tarifa:</label>
+                    <input
+                      type="text"
+                      value={`$${viajeSeleccionado_pasajeros.tarifa}`}
+                      readOnly
+                      className="input-highlight_pasajeros"
+                    />
+                  </div>
+                </div>
+                <div className="form-row_pasajeros">
+                  <div className="form-group_pasajeros">
+                    <label>Cupos disponibles:</label>
+                    <input
+                      type="text"
+                      value={`${viajeSeleccionado_pasajeros.cupos} cupos`}
+                      readOnly
+                      className="input-highlight_pasajeros"
+                    />
+                  </div>
+                  <div className="form-group_pasajeros">
+                    <label>Placa:</label>
+                    <input
+                      type="text"
+                      value={viajeSeleccionado_pasajeros.placa}
+                      readOnly
+                      className="input-highlight_pasajeros"
+                    />
+                  </div>
+                </div>
+                <div className="button-container_pasajeros">
+                  <button className="button-primary_pasajeros">Reservar</button>
+                  <button className="button-secondary_pasajeros" onClick={handleCloseModal}>
+                    Cerrar
+                  </button>
+                </div>
+              </div>
             </div>
-          ) : (
-            <p>No hay viajes disponibles con los filtros seleccionados.</p>
           )}
         </div>
 
-        {/* Columna Derecha (Mapa) */}
+        {/* Sección Derecha (Mapa) */}
         <div className="right-section_pasajeros">
           <MapContainer center={[4.7110, -74.0721]} zoom={12} className="map_pasajeros">
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              attribution='&copy; OpenStreetMap contributors'
             />
+
+            {/* Marcadores según el estado */}
+            {viajeSeleccionado_pasajeros ? (
+              <>
+                {viajeSeleccionado_pasajeros.inicioCoords && (
+                  <Marker position={viajeSeleccionado_pasajeros.inicioCoords}>
+                    <Popup>
+                      <strong>Inicio:</strong> {viajeSeleccionado_pasajeros.inicio}
+                    </Popup>
+                  </Marker>
+                )}
+                {viajeSeleccionado_pasajeros.finalCoords && (
+                  <Marker position={viajeSeleccionado_pasajeros.finalCoords}>
+                    <Popup>
+                      <strong>Final:</strong> {viajeSeleccionado_pasajeros.final}
+                    </Popup>
+                  </Marker>
+                )}
+              </>
+            ) : (
+              <>
+                {inicioCoords && (
+                  <Marker position={inicioCoords}>
+                    <Popup>Punto de inicio ingresado</Popup>
+                  </Marker>
+                )}
+                {finalCoords && (
+                  <Marker position={finalCoords}>
+                    <Popup>Punto final ingresado</Popup>
+                  </Marker>
+                )}
+              </>
+            )}
           </MapContainer>
         </div>
       </div>
-
-      {/* Modal de detalles */}
-      {viajeSeleccionado_pasajeros && (
-        <div className="modal-overlay_pasajeros" onClick={handleCloseModal}>
-          <div className="modal-content_pasajeros" onClick={(e) => e.stopPropagation()}>
-            <h3>Detalles del viaje seleccionado</h3>
-            <div className="form-row_pasajeros">
-              <div className="form-group_pasajeros">
-                <label>Inicio viaje:</label>
-                <input
-                  type="text"
-                  value={viajeSeleccionado_pasajeros.inicio}
-                  readOnly
-                  className="input-highlight_pasajeros"
-                />
-              </div>
-              <div className="form-group_pasajeros">
-                <label>Final viaje:</label>
-                <input
-                  type="text"
-                  value={viajeSeleccionado_pasajeros.final}
-                  readOnly
-                  className="input-highlight_pasajeros"
-                />
-              </div>
-            </div>
-            <div className="form-row_pasajeros">
-              <div className="form-group_pasajeros">
-                <label>Hora inicio:</label>
-                <input
-                  type="text"
-                  value={viajeSeleccionado_pasajeros.hora}
-                  readOnly
-                  className="input-highlight_pasajeros"
-                />
-              </div>
-              <div className="form-group_pasajeros">
-                <label>Tarifa:</label>
-                <input
-                  type="text"
-                  value={`$${viajeSeleccionado_pasajeros.tarifa}`}
-                  readOnly
-                  className="input-highlight_pasajeros"
-                />
-              </div>
-            </div>
-            <div className="form-row_pasajeros">
-              <div className="form-group_pasajeros">
-                <label>Cupos disponibles:</label>
-                <input
-                  type="text"
-                  value={`${viajeSeleccionado_pasajeros.cupos} cupos`}
-                  readOnly
-                  className="input-highlight_pasajeros"
-                />
-              </div>
-              <div className="form-group_pasajeros">
-                <label>Placa:</label>
-                <input
-                  type="text"
-                  value={viajeSeleccionado_pasajeros.placa}
-                  readOnly
-                  className="input-highlight_pasajeros"
-                />
-              </div>
-            </div>
-            <div className="button-container_pasajeros">
-              <button className="button-primary_pasajeros">Reservar</button>
-              <button className="button-secondary_pasajeros" onClick={handleCloseModal}>
-                Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
