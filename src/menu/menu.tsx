@@ -1,9 +1,10 @@
+// Menu.tsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './menu.css';
 import menuIcon from '../assets/menu.png';
 import personaIcon from '../assets/persona.png';
-import perfilIcon from '../assets/perfil.png';
+import perfilAvatarIcon from '../assets/perfil.png';
 import pasajeroIcon from '../assets/persona.png';
 import viajesIcon from '../assets/ubicacion.png';
 import carroIcon from '../assets/carro.png'; // Único icono para Conductor, Vehículo y Carro
@@ -32,29 +33,29 @@ const Menu = () => {
   };
 
   return (
-    <div className="menu-container">
-      {/* Encabezado con menú e icono de persona */}
-      <header className="menu-header">
-        <button className="menu-button" onClick={() => navigate('/pasajeros')} aria-label="Menú">
-          <img src={menuIcon} alt="Menú" />
+    <div className="perfil-container">
+      {/* Encabezado con perfil e icono de persona */}
+      <header className="perfil-header">
+        <button className="perfil-button" onClick={() => navigate('/pasajeros')} aria-label="Perfil">
+          <img src={menuIcon} alt="Perfil" />
         </button>
-        <span className="menu-title">Menú</span>
+        <span className="perfil-title">Menu</span>
         <div className="persona-button" onClick={() => navigate('/perfil')} role="button">
           <img src={personaIcon} alt="Perfil" />
         </div>
       </header>
 
-      {/* Contenido del menú */}
-      <div className="menu-content">
+      {/* Contenido del perfil */}
+      <div className="perfil-content">
         {/* Div morado de fondo */}
         <div className="header-background"></div>
 
         {/* Foto de perfil */}
         <div className="user-avatar">
-          <img src={perfilIcon} alt="Foto de perfil" />
+          <img src={perfilAvatarIcon} alt="Foto de perfil" />
         </div>
 
-        {/* Opciones del menú */}
+        {/* Opciones del perfil */}
         <div className="options-section">
           {/* Opción Pasajero con botón y Switch */}
           <div className="option">
@@ -113,7 +114,7 @@ const Menu = () => {
           <div className="option">
             <div
               className="option-label clickable"
-              onClick={() => navigate('/añadir-vehiculo')}
+              onClick={() => navigate('/registro-carro')}
             >
               <img src={carroIcon} alt="Añadir vehículo" className="icon" />
               <span>Añadir vehículo</span>

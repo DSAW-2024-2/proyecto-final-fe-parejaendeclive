@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
@@ -12,13 +12,6 @@ import personaIcon from '../assets/persona.png';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-
-// Solucionar posibles problemas con los iconos en producción
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: markerIcon2x,
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
-});
 
 // Definir la interfaz Viaje
 interface Viaje {
@@ -48,13 +41,17 @@ const Pasajeros = () => {
   const [inicioCoords, setInicioCoords] = useState<[number, number] | null>(null);
   const [finalCoords, setFinalCoords] = useState<[number, number] | null>(null);
 
+  // Nuevos estados para el punto de recogida
+  const [puntoRecogida, setPuntoRecogida] = useState('');
+  const [puntoRecogidaCoords, setPuntoRecogidaCoords] = useState<[number, number] | null>(null);
+
   const opcionesCupos_pasajeros = Array.from({ length: 11 }, (_, index) => index);
 
   // Viajes disponibles (simulación) sin coordenadas
   const todosViajes: Viaje[] = [
     {
       id: 1,
-      inicio: 'titan plaza',
+      inicio: 'Titan Plaza',
       final: 'Universidad de La Sabana',
       cupos: 2,
       hora: '09:00',
@@ -113,6 +110,21 @@ const Pasajeros = () => {
     }
   };
 
+  // Definir un icono personalizado usando useMemo para optimizar el rendimiento
+  const defaultIcon = useMemo(
+    () =>
+      L.icon({
+        iconRetinaUrl: markerIcon2x,
+        iconUrl: markerIcon,
+        shadowUrl: markerShadow,
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41],
+      }),
+    []
+  );
+
   // Manejo de cambios en los filtros
   const handleCuposChange_pasajeros = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setCuposDisponibles_pasajeros(parseInt(e.target.value));
@@ -143,6 +155,27 @@ const Pasajeros = () => {
       setFinalCoords(coords);
     } else {
       setFinalCoords(null);
+    }
+  };
+
+  // Manejo del punto de recogida (solo actualiza el input)
+  const handlePuntoRecogidaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const address = e.target.value;
+    setPuntoRecogida(address);
+    // No geocodificamos aquí para evitar geocodificaciones innecesarias mientras el usuario escribe
+  };
+
+  // Función para agregar el punto de recogida al mapa
+  const handleAgregarPuntoRecogida = async () => {
+    if (puntoRecogida.trim() !== '') {
+      const coords = await geocodeAddress(puntoRecogida);
+      if (coords) {
+        setPuntoRecogidaCoords(coords);
+      } else {
+        alert('No se pudo geocodificar la dirección de recogida.');
+      }
+    } else {
+      alert('Por favor, ingresa una dirección válida para el punto de recogida.');
     }
   };
 
@@ -214,6 +247,9 @@ const Pasajeros = () => {
 
     setViajes_pasajeros(viajesFiltrados);
     setViajeSeleccionado_pasajeros(null); // Resetear selección al filtrar
+    // Resetear el punto de recogida
+    setPuntoRecogida('');
+    setPuntoRecogidaCoords(null);
   };
 
   // Seleccionar un viaje de la lista
@@ -226,11 +262,17 @@ const Pasajeros = () => {
       viaje.finalCoords = await geocodeAddress(viaje.final);
     }
     setViajeSeleccionado_pasajeros(viaje);
+    // Resetear el punto de recogida al seleccionar un viaje
+    setPuntoRecogida('');
+    setPuntoRecogidaCoords(null);
   };
 
   // Cerrar el modal de detalles del viaje
   const handleCloseModal = () => {
     setViajeSeleccionado_pasajeros(null);
+    // Resetear el punto de recogida al cerrar el modal
+    setPuntoRecogida('');
+    setPuntoRecogidaCoords(null);
   };
 
   // Funciones de navegación
@@ -410,6 +452,34 @@ const Pasajeros = () => {
                     />
                   </div>
                 </div>
+
+                {/* Nuevo input para el Punto de Recogida con botón "Añadir para" */}
+                <div className="form-group_pasajeros">
+                  <label>Punto de recogida:</label>
+                  <div className="input-add-button">
+                    <input
+                      type="text"
+                      value={puntoRecogida}
+                      onChange={handlePuntoRecogidaChange}
+                      placeholder="Ingresa el punto de recogida"
+                      className="input-field_pasajeros"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAgregarPuntoRecogida();
+                        }
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAgregarPuntoRecogida}
+                      className="button-add_pasajeros"
+                    >
+                      Añadir para
+                    </button>
+                  </div>
+                </div>
+
                 <div className="button-container_pasajeros">
                   <button className="button-primary_pasajeros">Reservar</button>
                   <button className="button-secondary_pasajeros" onClick={handleCloseModal}>
@@ -423,7 +493,12 @@ const Pasajeros = () => {
 
         {/* Sección Derecha (Mapa) */}
         <div className="right-section_pasajeros">
-          <MapContainer center={[4.7110, -74.0721]} zoom={12} className="map_pasajeros">
+          <MapContainer
+            center={[4.7110, -74.0721]}
+            zoom={12}
+            className="map_pasajeros"
+            style={{ height: '100%', width: '100%' }}
+          >
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution='&copy; OpenStreetMap contributors'
@@ -433,16 +508,24 @@ const Pasajeros = () => {
             {viajeSeleccionado_pasajeros ? (
               <>
                 {viajeSeleccionado_pasajeros.inicioCoords && (
-                  <Marker position={viajeSeleccionado_pasajeros.inicioCoords}>
+                  <Marker position={viajeSeleccionado_pasajeros.inicioCoords} icon={defaultIcon}>
                     <Popup>
                       <strong>Inicio:</strong> {viajeSeleccionado_pasajeros.inicio}
                     </Popup>
                   </Marker>
                 )}
                 {viajeSeleccionado_pasajeros.finalCoords && (
-                  <Marker position={viajeSeleccionado_pasajeros.finalCoords}>
+                  <Marker position={viajeSeleccionado_pasajeros.finalCoords} icon={defaultIcon}>
                     <Popup>
                       <strong>Final:</strong> {viajeSeleccionado_pasajeros.final}
+                    </Popup>
+                  </Marker>
+                )}
+                {/* Marcador para el Punto de Recogida */}
+                {puntoRecogidaCoords && (
+                  <Marker position={puntoRecogidaCoords} icon={defaultIcon}>
+                    <Popup>
+                      <strong>Punto de Recogida:</strong> {puntoRecogida}
                     </Popup>
                   </Marker>
                 )}
@@ -450,13 +533,21 @@ const Pasajeros = () => {
             ) : (
               <>
                 {inicioCoords && (
-                  <Marker position={inicioCoords}>
+                  <Marker position={inicioCoords} icon={defaultIcon}>
                     <Popup>Punto de inicio ingresado</Popup>
                   </Marker>
                 )}
                 {finalCoords && (
-                  <Marker position={finalCoords}>
+                  <Marker position={finalCoords} icon={defaultIcon}>
                     <Popup>Punto final ingresado</Popup>
+                  </Marker>
+                )}
+                {/* Marcador para el Punto de Recogida fuera de selección de viaje */}
+                {puntoRecogidaCoords && (
+                  <Marker position={puntoRecogidaCoords} icon={defaultIcon}>
+                    <Popup>
+                      <strong>Punto de Recogida:</strong> {puntoRecogida}
+                    </Popup>
                   </Marker>
                 )}
               </>

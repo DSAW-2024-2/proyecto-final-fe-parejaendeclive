@@ -25,45 +25,31 @@ html {
 }
 
 /* Contenedor principal del perfil */
-.menu-container_perfil {
-    width: 100vw; /* Ancho completo de la ventana */
+.perfil-container {
+    width: 100vw;
     min-height: 100vh;
     background-color: var(--color-fondo);
     display: flex;
     flex-direction: column;
     overflow: hidden;
     position: relative;
-    margin: 0 auto;
-    z-index: 1; /* Asegura que esté por encima del fondo si se utiliza */
+    z-index: 1;
 }
 
 /* Encabezado */
-.menu-header_perfil {
-    position: relative; /* Necesario para posicionamiento absoluto de background */
+.perfil-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 1rem;
     background-color: var(--color-fondo);
     border-bottom: 1px solid var(--color-secundario);
-    height: 130px; /* Establece una altura fija para el encabezado */
-    z-index: 2; /* Encabezado por encima del contenido */
+    position: relative;
+    z-index: 2;
 }
 
-/* Div morado de fondo dentro del encabezado */
-.header-background_perfil {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: var(--color-secundario);
-    z-index: -1; /* Asegura que esté detrás de otros elementos del encabezado */
-}
-
-/* Botones en el encabezado */
-.menu-button_perfil,
-.persona-button_perfil {
+.perfil-button,
+.persona-button {
     width: 48px;
     height: 48px;
     border-radius: 50%;
@@ -75,49 +61,30 @@ html {
     transition: background-color 0.3s;
 }
 
-.menu-button_perfil:hover,
-.persona-button_perfil:hover {
+.perfil-button:hover,
+.persona-button:hover {
     background-color: #b58eea;
 }
 
-.menu-button_perfil img,
-.persona-button_perfil img {
+.perfil-button img,
+.persona-button img {
     width: 24px;
     height: 24px;
 }
 
-/* Título en el encabezado */
-.menu-title_perfil {
+.perfil-title {
     font-size: var(--tam-fuente-titulo);
     font-weight: bold;
     color: var(--color-primario);
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
     text-align: center;
-}
-
-/* Contenido del perfil */
-.menu-content_perfil {
-    padding: 2rem 1rem; /* Incrementado el padding para separar del encabezado */
-    border: 2px solid var(--color-primario);
-    border-radius: var(--border-radius-small);
-    margin: 2rem auto; /* Añadido margen para separar del encabezado */
-    text-align: center;
-    width: 90%; /* Ancho responsivo */
-    max-width: 400px; /* Reducido el ancho máximo para ajustar contenido */
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start; /* Cambiado de center a flex-start */
-    align-items: center; /* Centra horizontalmente el contenido */
-    gap: 1rem; /* Reducido el espacio entre secciones */
-    overflow-y: auto; /* Añade scroll si es necesario */
-    box-sizing: border-box;
-    box-shadow: 0 0.25rem 0.75rem var(--sombra);
-    background-color: var(--color-fondo);
-    position: relative;
-    z-index: 1; /* Asegura que el contenido esté por encima del fondo */
+    z-index: 1;
 }
 
 /* Foto de perfil */
-.user-avatar_perfil {
+.user-avatar {
     width: 100px;
     height: 100px;
     border-radius: 50%;
@@ -125,57 +92,95 @@ html {
     background-color: var(--color-fondo);
     border: 4px solid var(--color-secundario);
     position: absolute;
-    top: -50px; /* Superpone la foto al contenido */
+    top: 80px;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 2; /* Asegura que la foto de perfil esté por encima de otros elementos */
+    z-index: 3;
 }
 
-.user-avatar_perfil img {
+.user-avatar img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-/* Opciones del perfil */
-.options-section_perfil {
+/* Sección de usuario */
+.user-section {
+    margin-top: 120px; /* Espacio para la foto de perfil */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.user-greeting {
+    font-size: 1.25rem;
+    color: var(--color-primario);
+    font-family: var(--fuente-principal, 'Instrument Sans', sans-serif);
+    font-weight: 600;
+}
+
+/* Contenido del perfil */
+.perfil-content {
+    padding: 2rem 1rem 1rem 1rem;
     display: flex;
     flex-direction: column;
-    gap: 0.75rem; /* Espacio entre opciones */
+    align-items: center;
+    gap: 1rem;
+    box-sizing: border-box;
+    background-color: var(--color-fondo);
+    border: 2px solid var(--color-primario);
+    border-radius: var(--border-radius-small);
+    margin: 0 auto;
+    margin-top: 50px; /* Ajustado para acomodar la foto */
+    position: relative;
+    z-index: 1;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 0.25rem 0.75rem var(--sombra);
+}
+
+/* Opciones del perfil */
+.options-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
     width: 100%;
-    padding: 0 0.5rem; /* Padding lateral */
-    align-items: center; /* Centra horizontalmente las opciones */
 }
 
 /* Ajuste de las opciones */
-.option_perfil {
+.option {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.75rem 1rem; /* Ajustado para mejor proporción */
-    font-size: var(--tam-fuente-base); /* Tamaño de letra */
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
     color: var(--color-contraste);
     border-radius: var(--border-radius-small);
-    cursor: pointer;
-    width: 100%; /* Ocupa todo el ancho disponible */
-    max-width: 350px; /* Reducido el ancho máximo para ajustar contenido */
     transition: background-color 0.3s;
-    background-color: #f9f9f9; /* Distinguido las opciones */
-    box-shadow: 0 0.125rem 0.25rem var(--sombra); /* Sombra suave */
+    width: 100%;
+    background-color: #f9f9f9;
+    box-shadow: 0 0.125rem 0.25rem var(--sombra);
 }
 
-.option_perfil:hover {
+.option:hover .option-label.clickable {
     background-color: rgba(208, 162, 242, 0.3);
 }
 
-/* Alineación de imagen y texto en la opción */
-.option-label_perfil {
+/* Alineación de imagen y texto */
+.option-label {
     display: flex;
     align-items: center;
     gap: 0.5rem;
 }
 
-.icon_perfil {
+.option-label.clickable {
+    cursor: pointer;
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+.icon {
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -185,125 +190,91 @@ html {
     align-items: center;
 }
 
-.icon_perfil img {
+.icon img,
+.icon svg {
     width: 20px;
     height: 20px;
 }
 
-/* Flecha CSS para Cerrar Sesión */
-.arrow-icon_perfil {
+.logout-icon {
     width: 20px;
     height: 20px;
-    position: relative;
+    background-image: url('../assets/logout-icon.png'); /* Asegúrate de tener este icono o reemplázalo */
+    background-size: cover;
 }
 
-.arrow-icon_perfil::before,
-.arrow-icon_perfil::after {
-    content: '';
-    position: absolute;
-    background-color: var(--color-primario);
-}
-
-.arrow-icon_perfil::before {
-    top: 50%;
-    left: 0;
-    width: 12px;
-    height: 2px;
-    transform: translateY(-50%) rotate(45deg);
-}
-
-.arrow-icon_perfil::after {
-    top: 50%;
-    left: 0;
-    width: 12px;
-    height: 2px;
-    transform: translateY(-50%) rotate(-45deg);
+.option-label span {
+    font-size: 1rem;
+    color: var(--color-primario);
 }
 
 /* Responsividad */
 @media (max-width: 1024px) {
-    .menu-content_perfil {
-        max-width: 500px; /* Aumentar ligeramente el ancho en pantallas más grandes */
+    .perfil-content {
+        max-width: 500px;
     }
 }
 
 @media (max-width: 768px) {
-    .menu-container_perfil {
+    .perfil-container {
         width: 100%;
-        height: auto; /* Permite que la altura se ajuste automáticamente */
+        height: auto;
     }
 
-    .header-background_perfil {
-        height: 100px;
-    }
-
-    .user-avatar_perfil {
+    .user-avatar {
         width: 80px;
         height: 80px;
-        top: -40px; /* Ajuste para superposición */
+        top: 70px;
     }
 
-    .menu-content_perfil {
+    .perfil-content {
         margin-top: 80px;
         margin-left: 0.5rem;
         margin-right: 0.5rem;
-        max-width: 350px; /* Reducir aún más el ancho en pantallas pequeñas */
+        max-width: 350px;
     }
 
-    .menu-title_perfil {
+    .perfil-title {
         font-size: 1.5rem;
     }
 
-    .option_perfil {
+    .option {
         padding: 0.5rem 0.75rem;
         font-size: 0.9rem;
     }
 
-    .option-label_perfil {
+    .option-label {
         gap: 0.5rem;
     }
 
-    .icon_perfil {
+    .icon {
         width: 32px;
         height: 32px;
     }
 
-    .icon_perfil img {
+    .icon img,
+    .icon svg {
         width: 16px;
         height: 16px;
     }
 
-    .option-label_perfil span {
+    .option-label span {
         font-size: 0.9rem;
-    }
-
-    .arrow-icon_perfil {
-        width: 16px;
-        height: 16px;
-    }
-
-    .arrow-icon_perfil::before,
-    .arrow-icon_perfil::after {
-        width: 10px;
-        height: 2px;
     }
 }
 
 @media (max-width: 480px) {
-    .menu-content_perfil {
-        max-width: 300px; /* Reducir aún más el ancho en dispositivos muy pequeños */
+    .perfil-content {
+        max-width: 300px;
     }
 
-    .option_perfil {
+    .option {
         flex-direction: column;
         align-items: flex-start;
     }
 
-    .option-label_perfil {
-        width: 100%;
-    }
-
-    .arrow-icon_perfil {
+    .switch-container {
+        margin-left: 0;
         margin-top: 0.5rem;
     }
 }

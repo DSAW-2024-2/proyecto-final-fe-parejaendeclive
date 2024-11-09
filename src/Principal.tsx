@@ -7,6 +7,7 @@ import Pasajero from './pasajeros/pasajeros';
 import Menu from './menu/menu';
 import Perfil from './perfil/perfil';
 import EditPerfil from './editar_perfil/editar_perfil';
+import RegistroCarro from './registro_carro/registro_carro'; // Importa el componente correctamente
 import { AuthProvider } from './Authentication';
 import ProtectedRoute from './routeProtected';
 import LoginRedirect from './login-redirect';
@@ -86,7 +87,6 @@ const App: React.FC = () => {
             } 
           />
 
-          {/* Añadir la ruta para /editar-perfil */}
           <Route 
             path="/editar-perfil" 
             element={
@@ -98,6 +98,20 @@ const App: React.FC = () => {
               <EditPerfil />
             } 
           />
+          
+          {/* Añadir la ruta para /registro-carro */}
+          <Route 
+            path="/registro-carro" 
+            element={
+              /*
+              <ProtectedRoute>
+                <RegistroCarro />
+              </ProtectedRoute>
+              */
+              <RegistroCarro />
+            } 
+          />
+          {/* Fin de la ruta para /registro-carro */}
         </Routes>
       </Router>
     </AuthProvider>

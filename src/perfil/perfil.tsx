@@ -1,101 +1,83 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './perfil.css';
 import menuIcon from '../assets/menu.png';
 import personaIcon from '../assets/persona.png';
 import perfilIcon from '../assets/perfil.png';
-import editarIcon from '../assets/editar.png'; // Icono de editar perfil
+import editIcon from '../assets/editar.png'; // Asegúrate de que este archivo exista en la ruta especificada
 
-const Perfil: React.FC = () => {
+const Perfil = () => {
   const navigate = useNavigate();
 
-  // Función para cerrar sesión
   const handleLogout = (): void => {
     localStorage.removeItem('token');
     navigate('/');
   };
 
-  // Funciones de navegación
-  const navigateToMenu = (): void => {
-    navigate('/menu');
-  };
-
-  const navigateToEditProfile = (): void => {
-    navigate('/editar-perfil');
-  };
-
-  const navigateToPasajeros = (): void => {
-    navigate('/pasajeros');
-  };
-
   return (
-    <div className="menu-container_perfil">
-      {/* Encabezado con menú y botón de perfil */}
-      <header className="menu-header_perfil">
-        {/* Div morado de fondo */}
-        <div className="header-background_perfil"></div>
-
-        <button className="menu-button_perfil" onClick={navigateToMenu} aria-label="Menú">
+    <div className="perfil-container">
+      {/* Encabezado con menú e icono de persona */}
+      <header className="perfil-header">
+        <button
+          className="perfil-button"
+          onClick={() => navigate('/menu')}
+          aria-label="Perfil"
+        >
           <img src={menuIcon} alt="Menú" />
         </button>
-        <span className="menu-title_perfil">Perfil</span>
+        <span className="perfil-title">Perfil</span>
         <div
-          className="persona-button_perfil"
-          onClick={navigateToPasajeros}
+          className="persona-button"
+          onClick={() => navigate('/perfil')}
           role="button"
-          tabIndex={0}
-          onKeyPress={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              navigateToPasajeros();
-            }
-          }}
-          aria-label="Ir a Pasajeros"
         >
-          <img src={personaIcon} alt="Pasajeros" />
+          <img src={personaIcon} alt="Perfil" />
         </div>
       </header>
 
       {/* Contenido del perfil */}
-      <div className="menu-content_perfil">
+      <div className="perfil-content">
+        {/* Div morado de fondo */}
+        <div className="header-background"></div>
+
         {/* Foto de perfil */}
-        <div className="user-avatar_perfil">
+        <div className="user-avatar">
           <img src={perfilIcon} alt="Foto de perfil" />
         </div>
 
         {/* Opciones del perfil */}
-        <div className="options-section_perfil">
-          {/* Botón para Editar Perfil */}
-          <div
-            className="option_perfil clickable"
-            onClick={navigateToEditProfile}
-            role="button"
-            tabIndex={0}
-            onKeyPress={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                navigateToEditProfile();
-              }
-            }}
-          >
-            <div className="option-label_perfil">
-              <img src={editarIcon} alt="Editar Perfil" className="icon_perfil" />
+        <div className="options-section">
+          {/* Opción Editar Perfil */}
+          <div className="option">
+            <div
+              className="option-label clickable"
+              onClick={() => navigate('/editar-perfil')}
+            >
+              <img src={editIcon} alt="Editar Perfil" className="icon" />
               <span>Editar Perfil</span>
             </div>
           </div>
 
-          {/* Botón para Cerrar Sesión con flecha CSS */}
-          <div
-            className="option_perfil clickable"
-            onClick={handleLogout}
-            role="button"
-            tabIndex={0}
-            onKeyPress={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                handleLogout();
-              }
-            }}
-          >
-            <div className="option-label_perfil">
-              <div className="arrow-icon_perfil"></div>
+          {/* Opción Cerrar Sesión */}
+          <div className="option">
+            <div
+              className="option-label clickable"
+              onClick={handleLogout}
+            >
+              {/* Reemplazo de la imagen con un icono de flecha SVG sencillo y negro */}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="black"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
+              </svg>
               <span>Cerrar Sesión</span>
             </div>
           </div>
