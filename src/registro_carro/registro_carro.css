@@ -20,11 +20,6 @@
   font-family: var(--font-family);
 }
 
-body {
-  background-color: var(--color-fondo);
-  color: var(--color-letra);
-}
-
 .registro_vehiculos {
   width: 100vw;
   height: 100vh;

@@ -1,8 +1,9 @@
+// Pasajeros.tsx
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import L from 'leaflet';
+import L, { Icon } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './pasajeros.css';
 import menuIcon from '../assets/menu.png';
@@ -41,9 +42,8 @@ const Pasajeros = () => {
   const [inicioCoords, setInicioCoords] = useState<[number, number] | null>(null);
   const [finalCoords, setFinalCoords] = useState<[number, number] | null>(null);
 
-  // Nuevos estados para el punto de recogida
+  // Nuevo estado para el punto de recogida
   const [puntoRecogida, setPuntoRecogida] = useState('');
-  const [puntoRecogidaCoords, setPuntoRecogidaCoords] = useState<[number, number] | null>(null);
 
   const opcionesCupos_pasajeros = Array.from({ length: 11 }, (_, index) => index);
 
@@ -111,9 +111,9 @@ const Pasajeros = () => {
   };
 
   // Definir un icono personalizado usando useMemo para optimizar el rendimiento
-  const defaultIcon = useMemo(
+  const defaultIcon: Icon = useMemo(
     () =>
-      L.icon({
+      new L.Icon({
         iconRetinaUrl: markerIcon2x,
         iconUrl: markerIcon,
         shadowUrl: markerShadow,
@@ -165,18 +165,14 @@ const Pasajeros = () => {
     // No geocodificamos aquí para evitar geocodificaciones innecesarias mientras el usuario escribe
   };
 
-  // Función para agregar el punto de recogida al mapa
-  const handleAgregarPuntoRecogida = async () => {
-    if (puntoRecogida.trim() !== '') {
-      const coords = await geocodeAddress(puntoRecogida);
-      if (coords) {
-        setPuntoRecogidaCoords(coords);
-      } else {
-        alert('No se pudo geocodificar la dirección de recogida.');
-      }
-    } else {
-      alert('Por favor, ingresa una dirección válida para el punto de recogida.');
+  // Función para agregar el punto de recogida
+  const handleAgregarPuntoRecogida = () => {
+    if (puntoRecogida.trim() === '') {
+      alert('Por favor, ingresa un Punto de Recogida.');
+      return;
     }
+    // Aquí podrías añadir lógica adicional si es necesario
+    alert('Punto de Recogida añadido.');
   };
 
   // Función para calcular la distancia en metros entre dos coordenadas
@@ -249,7 +245,21 @@ const Pasajeros = () => {
     setViajeSeleccionado_pasajeros(null); // Resetear selección al filtrar
     // Resetear el punto de recogida
     setPuntoRecogida('');
-    setPuntoRecogidaCoords(null);
+  };
+
+  // Función para manejar la reserva
+  const handleReservar = () => {
+    if (puntoRecogida.trim() === '') {
+      alert('Por favor, ingresa un Punto de Recogida para reservar.');
+      return;
+    }
+
+    // Aquí puedes añadir la lógica para reservar el viaje, por ejemplo, enviar datos al backend
+    // Por ahora, mostraremos un mensaje de éxito
+    alert('Reserva realizada exitosamente.');
+    // Resetear el punto de recogida después de la reserva
+    setPuntoRecogida('');
+    setViajeSeleccionado_pasajeros(null);
   };
 
   // Seleccionar un viaje de la lista
@@ -264,7 +274,6 @@ const Pasajeros = () => {
     setViajeSeleccionado_pasajeros(viaje);
     // Resetear el punto de recogida al seleccionar un viaje
     setPuntoRecogida('');
-    setPuntoRecogidaCoords(null);
   };
 
   // Cerrar el modal de detalles del viaje
@@ -272,7 +281,6 @@ const Pasajeros = () => {
     setViajeSeleccionado_pasajeros(null);
     // Resetear el punto de recogida al cerrar el modal
     setPuntoRecogida('');
-    setPuntoRecogidaCoords(null);
   };
 
   // Funciones de navegación
@@ -456,32 +464,32 @@ const Pasajeros = () => {
                 {/* Nuevo input para el Punto de Recogida con botón "Añadir para" */}
                 <div className="form-group_pasajeros">
                   <label>Punto de recogida:</label>
-                  <div className="input-add-button">
-                    <input
-                      type="text"
-                      value={puntoRecogida}
-                      onChange={handlePuntoRecogidaChange}
-                      placeholder="Ingresa el punto de recogida"
-                      className="input-field_pasajeros"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          handleAgregarPuntoRecogida();
-                        }
-                      }}
-                    />
-                    <button
-                      type="button"
-                      onClick={handleAgregarPuntoRecogida}
-                      className="button-add_pasajeros"
-                    >
-                      Añadir para
-                    </button>
-                  </div>
+                  <input
+                    type="text"
+                    value={puntoRecogida}
+                    onChange={handlePuntoRecogidaChange}
+                    placeholder="Ingresa el punto de recogida"
+                    className="input-field_pasajeros"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAgregarPuntoRecogida();
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAgregarPuntoRecogida}
+                    className="button-add_pasajeros"
+                  >
+                    Añadir parada
+                  </button>
                 </div>
 
                 <div className="button-container_pasajeros">
-                  <button className="button-primary_pasajeros">Reservar</button>
+                  <button className="button-primary_pasajeros" onClick={handleReservar}>
+                    Reservar
+                  </button>
                   <button className="button-secondary_pasajeros" onClick={handleCloseModal}>
                     Cerrar
                   </button>
@@ -521,14 +529,6 @@ const Pasajeros = () => {
                     </Popup>
                   </Marker>
                 )}
-                {/* Marcador para el Punto de Recogida */}
-                {puntoRecogidaCoords && (
-                  <Marker position={puntoRecogidaCoords} icon={defaultIcon}>
-                    <Popup>
-                      <strong>Punto de Recogida:</strong> {puntoRecogida}
-                    </Popup>
-                  </Marker>
-                )}
               </>
             ) : (
               <>
@@ -540,14 +540,6 @@ const Pasajeros = () => {
                 {finalCoords && (
                   <Marker position={finalCoords} icon={defaultIcon}>
                     <Popup>Punto final ingresado</Popup>
-                  </Marker>
-                )}
-                {/* Marcador para el Punto de Recogida fuera de selección de viaje */}
-                {puntoRecogidaCoords && (
-                  <Marker position={puntoRecogidaCoords} icon={defaultIcon}>
-                    <Popup>
-                      <strong>Punto de Recogida:</strong> {puntoRecogida}
-                    </Popup>
                   </Marker>
                 )}
               </>
