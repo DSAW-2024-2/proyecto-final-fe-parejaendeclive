@@ -5,7 +5,7 @@ import { AuthContext } from '../Authentication'; // Añadido para importar AuthC
 import './inicio_sesion.css';
 import perfilPredefinido from '../assets/persona.png'; // Icono de usuario
 import candadoIcon from '../assets/candado.png'; // Icono de candado
-const api_URL = import.meta.env.API_CONNECTION;
+const api_URL = import.meta.env.VITE_API_URL;
 
 const InicioSesion = () => {
   const navigate = useNavigate();
@@ -27,7 +27,7 @@ const InicioSesion = () => {
     if (!token) return; // Si no hay token, no se hace nada
 
     try {
-      const response = await axios.get(`${api_URL}/verify-token`, {
+      const response = await axios.get(`${api_URL}/login`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       

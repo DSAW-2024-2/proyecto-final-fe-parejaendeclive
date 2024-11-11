@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './editar_perfil.css';
 import perfilPredefinido from '../assets/perfil_predefinido.png';
@@ -12,7 +12,7 @@ interface MyUglyFormData {
   idUser: string;
   email: string;
   number: string;
-  password: string;
+  password?: string;
   photoUser?: string;
 }
 
@@ -38,6 +38,50 @@ const EditarPerfil: React.FC = () => {
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
+  const token = localStorage.getItem('token');
+  
+  useEffect(() => {
+    // Obtener la información del usuario al cargar la página
+    const fetchUserData = async () => {
+      
+      if (token) {
+        try {
+          // Decodificar el token manualmente para obtener el userId
+          const payloadBase64 = token.split('.')[1];
+          const decodedPayload = JSON.parse(atob(payloadBase64));
+          const userId = decodedPayload.userId;
+
+          // Realizar la solicitud GET al backend con el userId
+          const response = await axios.get(`${api_URL}/user/${userId}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            },
+            withCredentials: true
+          });
+
+          if (response.status === 200) {
+            const userData = response.data.data;
+            setFormData({
+              name: userData.name,
+              LastName: userData.LastName,
+              idUser: userData.idUser,
+              email: userData.email,
+              number: userData.number,
+              password: '', // Por razones de seguridad, no mostramos la contraseña original
+              photoUser: userData.photoUser || ''
+            });
+            setImagenPerfil(userData.photoUser || null);
+          }
+        } catch (error) {
+          console.error('Error al obtener la información del usuario:', error);
+        }
+      } else {
+        console.error('Token no encontrado');
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -100,12 +144,7 @@ const EditarPerfil: React.FC = () => {
       erroresTemp.number = '';
     }
 
-    if (!formData.password) {
-      erroresTemp.password = 'La contraseña no puede estar vacía';
-      esValido = false;
-    } else {
-      erroresTemp.password = '';
-    }
+    
 
     setErrores(erroresTemp);
     return esValido;
@@ -123,13 +162,20 @@ const EditarPerfil: React.FC = () => {
             photoUser: fileInputRef.current.files[0].name || ''
           };
         }
-
-        await axios.put(`${api_URL}/editProfile`, newFormData, {
+        if(token){
+          const payloadBase64 = token.split('.')[1];
+          const decodedPayload = JSON.parse(atob(payloadBase64));
+          const userId = decodedPayload.userId;
+        
+        await axios.put(`${api_URL}/user/${userId}`, newFormData, {
+          
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
           },
           withCredentials: true
         });
+      }
         alert('Perfil actualizado exitosamente.');
         navigate('/perfil');
       } catch (error) {
@@ -151,6 +197,7 @@ const EditarPerfil: React.FC = () => {
         }
       }
     }
+  
   };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -211,6 +258,7 @@ const EditarPerfil: React.FC = () => {
           value={formData.idUser}
           onChange={handleChange}
           className={errores.idUser ? 'input-error' : ''}
+          disabled // Desactivar para que el usuario no pueda cambiar su ID
         />
         {errores.idUser && <p className="error">{errores.idUser}</p>}
 
