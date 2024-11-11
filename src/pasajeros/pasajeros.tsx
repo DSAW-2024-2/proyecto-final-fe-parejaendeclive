@@ -269,8 +269,8 @@ const Pasajeros = () => {
   const handleFiltrarViajes_pasajeros = () => {
     // Filtrar los viajes según los puntos de inicio, final, cupos y hora
     const viajesFiltrados = todosViajes.filter((viaje) => {
-      const coincideInicio = puntoInicio_pasajeros ? viaje.inicio.includes(puntoInicio_pasajeros) : true;
-      const coincideFinal = puntoFinal_pasajeros ? viaje.final.includes(puntoFinal_pasajeros) : true;
+      const coincideInicio = puntoInicio_pasajeros ? viaje.inicio.toLowerCase().includes(puntoInicio_pasajeros.toLowerCase()) || puntoInicio_pasajeros.toLowerCase().includes(viaje.inicio.toLowerCase()) : true;
+      const coincideFinal = puntoFinal_pasajeros ? viaje.final.toLowerCase().includes(puntoFinal_pasajeros.toLowerCase()) || puntoFinal_pasajeros.toLowerCase().includes(viaje.final.toLowerCase()) : true;
       const coincideCupos = cuposDisponibles_pasajeros ? viaje.cupos >= cuposDisponibles_pasajeros : true;
       const coincideHora = horaSalida_pasajeros ? viaje.hora === horaSalida_pasajeros : true;
 

@@ -3,7 +3,6 @@ import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaf
 import L, { LatLng, Icon } from 'leaflet';
 import axios from 'axios';
 import './añadir_viaje.css';
-import ubicacionIcon from '../assets/ubicacion.png';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
