@@ -1,0 +1,201 @@
+:root {
+  --color-fondo: #ffffff;
+  --color-letra: #401163;
+  --color-input: rgba(208, 162, 242, 0.21);
+  --color-error: #ff0000;
+  --color-header: #D0A2F2;
+  --color-letra-header: #401163;
+  --color-letrainputstitulo: rgba(64, 17, 99, 0.51);
+  --border-radius-small: 20px;
+  --sombra: rgba(0, 0, 0, 0.1);
+  --tam-fuente-base: 18px;
+  --tam-fuente-titulo: 28px;
+  --font-family: "Instrument Sans", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family);
+}
+
+.registro_vehiculos {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header-añadir {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px 0;
+  background-color: var(--color-header);
+  color: var(--color-letra-header);
+  width: 100%;
+  position: relative;
+}
+
+.letra-header-añadir {
+  font-size: var(--tam-fuente-titulo);
+  color: var(--color-letra-header);
+  text-align: center;
+  margin: 0;
+}
+
+.registro_vehiculos_back-button {
+  position: absolute;
+  left: 20px;
+  background-color: var(--color-header);
+  border: none;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  color: var(--color-letra-header);
+  cursor: default; /* Cambiado de pointer a default */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  transition: none; /* Elimina cualquier transición */
+}
+
+/* Asegura que no haya cambios en hover */
+.registro_vehiculos_back-button:hover {
+  background-color: var(--color-header);
+  color: var(--color-letra-header);
+}
+
+.registro_vehiculos_content {
+  display: flex;
+  flex-grow: 1;
+  width: 100%;
+}
+
+.registro_vehiculos_left-section,
+.registro_vehiculos_right-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.registro_vehiculos_left-section {
+  background-color: var(--color-input);
+  text-align: center;
+}
+
+.registro_vehiculos_right-section {
+  background-color: var(--color-fondo);
+}
+
+.registro_vehiculos_car-photo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.registro_vehiculos_car-image {
+  width: 220px;
+  height: 220px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.registro_vehiculos_photo-text-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.registro_vehiculos_photo-text {
+  color: var(--color-letra);
+}
+
+.registro_vehiculos_add-photo-circular {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-letra-header);
+  cursor: pointer;
+}
+
+.registro_vehiculos_add-image-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.registro_vehiculos_add-photo-square {
+  width: 100%;
+  padding: 8px;
+  background-color: var(--color-input);
+  border: 1px solid var(--color-letra);
+  border-radius: var(--border-radius-small);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-top: 10px;
+  margin-bottom: 15px;
+  text-align: center;
+  color: var(--color-letra);
+}
+
+.inputs-añadir {
+  width: 90%; /* Ajuste del ancho de los inputs */
+  padding: 12px; /* Padding más grande */
+  font-size: var(--tam-fuente-base);
+  background-color: var(--color-input);
+  border: 1px solid var(--color-letra);
+  border-radius: var(--border-radius-small); /* Bordes más circulares */
+  color: var(--color-letra);
+  margin-bottom: 25px; /* Espaciado mayor entre inputs */
+}
+
+.input-error {
+  border-color: var(--color-error);
+  color: var(--color-error);
+}
+
+.letrainpitstitulo_añadir::placeholder {
+  color: var(--color-letrainputstitulo);
+  font-size: var(--tam-fuente-base);
+}
+
+.registro_vehiculos_error {
+  color: var(--color-error);
+  font-size: 14px;
+  margin-top: -5px;
+  margin-bottom: 10px;
+}
+
+.registro_vehiculos_soat-label,
+.registro_vehiculos_soat-expiry-label {
+  font-size: 16px;
+  color: var(--color-letra);
+  display: block; /* Para asegurar que estén en una línea separada */
+  margin-top: 20px; /* Espaciado superior adicional */
+  margin-bottom: 8px; /* Espaciado inferior */
+}
+
+.registro_vehiculos_submit-button {
+  padding: 12px;
+  width: 90%; /* Ancho consistente con los inputs */
+  background-color: var(--color-letra);
+  color: var(--color-fondo);
+  border: none;
+  border-radius: var(--border-radius-small);
+  cursor: pointer;
+  text-align: center;
+  font-weight: bold;
+  font-size: var(--tam-fuente-base);
+}

@@ -1,8 +1,3 @@
-/* principal.css */
-
-/* Importar fuente */
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap');
-
 /* Estilos existentes */
 
 * {
@@ -15,7 +10,7 @@ body, html {
     height: 100%;
     width: 100%;
     font-family: 'Instrument Sans', sans-serif; /* Cambiado a Instrument Sans */
-    background-color: #f3bdff;
+    background-color: #F0E8F6;
     overflow-x: hidden;
 }
 
@@ -31,7 +26,7 @@ body, html {
 .header_principal {
     width: 1500px;
     height: 1500px;
-    background-color: #f3bdff;
+    background-color: #F0E8F6;
     display: flex;
     flex-direction: column;
     justify-content: center;

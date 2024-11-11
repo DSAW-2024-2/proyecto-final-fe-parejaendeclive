@@ -4,7 +4,11 @@ import './principal.css';
 import Registro from './registro/registro'; 
 import Login from './inicio_sesion/inicio_sesion';
 import Pasajero from './pasajeros/pasajeros';
-import { AuthProvider } from './Authentication'; // Importar AuthProvider
+import Menu from './menu/menu';
+import Perfil from './perfil/perfil';
+import EditPerfil from './editar_perfil/editar_perfil';
+import RegistroCarro from './registro_carro/registro_carro'; // Importa el componente correctamente
+import { AuthProvider } from './Authentication';
 import ProtectedRoute from './routeProtected';
 import LoginRedirect from './login-redirect';
 
@@ -32,24 +36,82 @@ const App: React.FC = () => {
       <Router>
         <Routes>
           <Route path="/" element={<Principal />} />
+          <Route path="/principal" element={<Principal />} />
+          <Route path="/registro" element={<Registro />} />
+          
           <Route 
             path="/login" 
             element={
+              /* 
               <LoginRedirect>
                 <Login />
-              </LoginRedirect>
+              </LoginRedirect> 
+              */
+              <Login />
             } 
           />
-          <Route path="/registro" element={<Registro />} />
+          
           <Route 
             path="/pasajeros" 
             element={
+              /* 
               <ProtectedRoute>
                 <Pasajero />
-              </ProtectedRoute>
+              </ProtectedRoute> 
+              */
+              <Pasajero />
             } 
           />
-          <Route path="/Principal" element={<Principal />} />
+          
+          <Route 
+            path="/menu" 
+            element={
+              /* 
+              <ProtectedRoute>
+                <Menu />
+              </ProtectedRoute> 
+              */
+              <Menu />
+            } 
+          />
+          
+          <Route 
+            path="/perfil" 
+            element={
+              /* 
+              <ProtectedRoute>
+                <Perfil />
+              </ProtectedRoute> 
+              */
+              <Perfil />
+            } 
+          />
+
+          <Route 
+            path="/editar-perfil" 
+            element={
+              /* 
+              <ProtectedRoute>
+                <EditPerfil />
+              </ProtectedRoute> 
+              */
+              <EditPerfil />
+            } 
+          />
+          
+          {/* Añadir la ruta para /registro-carro */}
+          <Route 
+            path="/registro-carro" 
+            element={
+              /*
+              <ProtectedRoute>
+                <RegistroCarro />
+              </ProtectedRoute>
+              */
+              <RegistroCarro />
+            } 
+          />
+          {/* Fin de la ruta para /registro-carro */}
         </Routes>
       </Router>
     </AuthProvider>
