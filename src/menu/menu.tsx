@@ -123,7 +123,7 @@ const Menu = () => {
           <div className="option">
             <div
               className="option-label clickable"
-              onClick={() => navigate('/añadir-viaje')}
+              onClick={() => navigate('/añadir_viaje')}
             >
               <img src={viajesIcon} alt="Añadir viaje" className="icon" />
               <span>Añadir viaje</span>

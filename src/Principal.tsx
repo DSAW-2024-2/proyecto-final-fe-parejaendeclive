@@ -7,6 +7,7 @@ import Pasajero from './pasajeros/pasajeros';
 import Menu from './menu/menu';
 import Perfil from './perfil/perfil';
 import EditPerfil from './editar_perfil/editar_perfil';
+import Añadir_viaje from './añadir_viaje/añadir_viaje';
 import RegistroCarro from './registro_carro/registro_carro'; // Importa el componente correctamente
 import { AuthProvider } from './Authentication';
 import ProtectedRoute from './routeProtected';
@@ -23,7 +24,7 @@ const Principal: React.FC = () => {
       </div>
       
       <div className="button-container_principal">
-        <Link to="/login" className="button">Iniciar sesión</Link>
+        <Link to="/pasajeros" className="button">Iniciar sesión</Link>
         <Link to="/registro" className="button">Registrarme</Link>
       </div>
     </div>
@@ -109,6 +110,17 @@ const App: React.FC = () => {
               </ProtectedRoute>
               */
               <RegistroCarro />
+            } 
+          />
+          <Route 
+            path="/añadir_viaje" 
+            element={
+              /* 
+              <ProtectedRoute>
+                <EditPerfil />
+              </ProtectedRoute> 
+              */
+              <Añadir_viaje />
             } 
           />
           {/* Fin de la ruta para /registro-carro */}
