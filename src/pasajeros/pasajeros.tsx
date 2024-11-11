@@ -2,8 +2,8 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import L, { Icon } from 'leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import L, { Icon, LeafletMouseEvent } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './pasajeros.css';
 import menuIcon from '../assets/menu.png';
@@ -44,6 +44,10 @@ const Pasajeros = () => {
 
   // Nuevo estado para el punto de recogida
   const [puntoRecogida, setPuntoRecogida] = useState('');
+  const [puntoRecogidaCoords, setPuntoRecogidaCoords] = useState<[number, number] | null>(null);
+
+  // Estado para determinar qué input está activo
+  const [activeInput, setActiveInput] = useState<'inicio' | 'final' | 'recogida' | null>(null);
 
   const opcionesCupos_pasajeros = Array.from({ length: 11 }, (_, index) => index);
 
@@ -110,6 +114,23 @@ const Pasajeros = () => {
     }
   };
 
+  // Función para geocodificar coordenadas inversas
+  const reverseGeocodeCoords = async (coords: [number, number]): Promise<string | null> => {
+    try {
+      const response = await axios.get('https://nominatim.openstreetmap.org/reverse', {
+        params: {
+          lat: coords[0],
+          lon: coords[1],
+          format: 'json',
+        },
+      });
+      return response.data?.display_name || null;
+    } catch (error) {
+      console.error('Error reversing coordinates:', error);
+      return null;
+    }
+  };
+
   // Definir un icono personalizado usando useMemo para optimizar el rendimiento
   const defaultIcon: Icon = useMemo(
     () =>
@@ -125,16 +146,39 @@ const Pasajeros = () => {
     []
   );
 
-  // Manejo de cambios en los filtros
-  const handleCuposChange_pasajeros = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setCuposDisponibles_pasajeros(parseInt(e.target.value));
+  // Componente para manejar eventos en el mapa y seleccionar puntos de inicio, final o recogida
+  const LocationSelector = () => {
+    useMapEvents({
+      click: async (e: LeafletMouseEvent) => {
+        if (!activeInput) return;
+
+        const { lat, lng } = e.latlng;
+        const coords: [number, number] = [lat, lng];
+        try {
+          const address = await reverseGeocodeCoords(coords);
+          if (address) {
+            if (activeInput === 'inicio') {
+              setInicioCoords(coords);
+              setPuntoInicio_pasajeros(address);
+            } else if (activeInput === 'final') {
+              setFinalCoords(coords);
+              setPuntoFinal_pasajeros(address);
+            } else if (activeInput === 'recogida') {
+              setPuntoRecogidaCoords(coords);
+              setPuntoRecogida(address);
+            }
+          }
+        } catch (error) {
+          console.error('Error reversing coordinates:', error);
+        }
+      },
+    });
+    return null;
   };
 
-  const handleHoraChange_pasajeros = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setHoraSalida_pasajeros(e.target.value);
-  };
-
+  // Manejo de cambios en los filtros y activación del input
   const handlePuntoInicioChange_pasajeros = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setActiveInput('inicio');
     const address = e.target.value;
     setPuntoInicio_pasajeros(address);
 
@@ -147,6 +191,7 @@ const Pasajeros = () => {
   };
 
   const handlePuntoFinalChange_pasajeros = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setActiveInput('final');
     const address = e.target.value;
     setPuntoFinal_pasajeros(address);
 
@@ -158,11 +203,17 @@ const Pasajeros = () => {
     }
   };
 
-  // Manejo del punto de recogida (solo actualiza el input)
-  const handlePuntoRecogidaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePuntoRecogidaChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setActiveInput('recogida');
     const address = e.target.value;
     setPuntoRecogida(address);
-    // No geocodificamos aquí para evitar geocodificaciones innecesarias mientras el usuario escribe
+
+    if (address) {
+      const coords = await geocodeAddress(address);
+      setPuntoRecogidaCoords(coords);
+    } else {
+      setPuntoRecogidaCoords(null);
+    }
   };
 
   // Función para agregar el punto de recogida
@@ -171,116 +222,38 @@ const Pasajeros = () => {
       alert('Por favor, ingresa un Punto de Recogida.');
       return;
     }
-    // Aquí podrías añadir lógica adicional si es necesario
     alert('Punto de Recogida añadido.');
   };
 
-  // Función para calcular la distancia en metros entre dos coordenadas
-  const getDistance = (coords1: [number, number], coords2: [number, number]) => {
-    const [lat1, lon1] = coords1;
-    const [lat2, lon2] = coords2;
+  // Función para mover los marcadores
+  const DraggableMarker = ({ coords, setCoords, setAddress }: { coords: [number, number] | null, setCoords: React.Dispatch<React.SetStateAction<[number, number] | null>>, setAddress: React.Dispatch<React.SetStateAction<string>> }) => {
+    const markerRef = React.useRef<L.Marker>(null);
 
-    const R = 6371e3; // Radio de la Tierra en metros
-    const φ1 = (lat1 * Math.PI) / 180;
-    const φ2 = (lat2 * Math.PI) / 180;
-    const Δφ = ((lat2 - lat1) * Math.PI) / 180;
-    const Δλ = ((lon2 - lon1) * Math.PI) / 180;
-
-    const a =
-      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-      Math.cos(φ1) * Math.cos(φ2) *
-      Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-    const distance = R * c;
-
-    return distance; // En metros
-  };
-
-  // Función para filtrar viajes según los filtros seleccionados
-  const handleFiltrarViajes_pasajeros = async () => {
-    // Geocodificar direcciones de viajes si no están geocodificadas
-    await Promise.all(
-      todosViajes.map(async (viaje) => {
-        if (!viaje.inicioCoords) {
-          viaje.inicioCoords = await geocodeAddress(viaje.inicio);
+    const eventHandlers = {
+      dragend: async () => {
+        if (markerRef.current) {
+          const marker = markerRef.current;
+          const newCoords: [number, number] = [marker.getLatLng().lat, marker.getLatLng().lng];
+          setCoords(newCoords);
+          const newAddress = await reverseGeocodeCoords(newCoords);
+          if (newAddress) {
+            setAddress(newAddress);
+          }
         }
-        if (!viaje.finalCoords) {
-          viaje.finalCoords = await geocodeAddress(viaje.final);
-        }
-      })
-    );
+      },
+    };
 
-    const viajesFiltrados = todosViajes.filter((viaje) => {
-      let coincideInicio = true;
-      let coincideFinal = true;
-
-      if (inicioCoords) {
-        if (viaje.inicioCoords) {
-          // Calcular distancia entre puntos de inicio
-          const distanciaInicio = getDistance(inicioCoords, viaje.inicioCoords);
-          coincideInicio = distanciaInicio < 2000; // 2 km de tolerancia
-        } else {
-          coincideInicio = false;
-        }
-      }
-
-      if (finalCoords) {
-        if (viaje.finalCoords) {
-          // Calcular distancia entre puntos finales
-          const distanciaFinal = getDistance(finalCoords, viaje.finalCoords);
-          coincideFinal = distanciaFinal < 2000; // 2 km de tolerancia
-        } else {
-          coincideFinal = false;
-        }
-      }
-
-      const coincideCupos = cuposDisponibles_pasajeros ? viaje.cupos >= cuposDisponibles_pasajeros : true;
-      const coincideHora = horaSalida_pasajeros ? viaje.hora === horaSalida_pasajeros : true;
-
-      return coincideInicio && coincideFinal && coincideCupos && coincideHora;
-    });
-
-    setViajes_pasajeros(viajesFiltrados);
-    setViajeSeleccionado_pasajeros(null); // Resetear selección al filtrar
-    // Resetear el punto de recogida
-    setPuntoRecogida('');
-  };
-
-  // Función para manejar la reserva
-  const handleReservar = () => {
-    if (puntoRecogida.trim() === '') {
-      alert('Por favor, ingresa un Punto de Recogida para reservar.');
-      return;
-    }
-
-    // Aquí puedes añadir la lógica para reservar el viaje, por ejemplo, enviar datos al backend
-    // Por ahora, mostraremos un mensaje de éxito
-    alert('Reserva realizada exitosamente.');
-    // Resetear el punto de recogida después de la reserva
-    setPuntoRecogida('');
-    setViajeSeleccionado_pasajeros(null);
-  };
-
-  // Seleccionar un viaje de la lista
-  const handleSeleccionarViaje_pasajeros = async (viaje: Viaje) => {
-    // Geocodificar direcciones del viaje seleccionado si no están geocodificadas
-    if (!viaje.inicioCoords) {
-      viaje.inicioCoords = await geocodeAddress(viaje.inicio);
-    }
-    if (!viaje.finalCoords) {
-      viaje.finalCoords = await geocodeAddress(viaje.final);
-    }
-    setViajeSeleccionado_pasajeros(viaje);
-    // Resetear el punto de recogida al seleccionar un viaje
-    setPuntoRecogida('');
-  };
-
-  // Cerrar el modal de detalles del viaje
-  const handleCloseModal = () => {
-    setViajeSeleccionado_pasajeros(null);
-    // Resetear el punto de recogida al cerrar el modal
-    setPuntoRecogida('');
+    return coords ? (
+      <Marker
+        draggable
+        eventHandlers={eventHandlers}
+        position={coords}
+        icon={defaultIcon}
+        ref={markerRef}
+      >
+        <Popup>Mueve el marcador para ajustar la ubicación</Popup>
+      </Marker>
+    ) : null;
   };
 
   // Funciones de navegación
@@ -290,6 +263,43 @@ const Pasajeros = () => {
 
   const navigateToPerfil = () => {
     navigate('/perfil');
+  };
+
+  // Filtrar viajes
+  const handleFiltrarViajes_pasajeros = () => {
+    // Filtrar los viajes según los puntos de inicio, final, cupos y hora
+    const viajesFiltrados = todosViajes.filter((viaje) => {
+      const coincideInicio = puntoInicio_pasajeros ? viaje.inicio.includes(puntoInicio_pasajeros) : true;
+      const coincideFinal = puntoFinal_pasajeros ? viaje.final.includes(puntoFinal_pasajeros) : true;
+      const coincideCupos = cuposDisponibles_pasajeros ? viaje.cupos >= cuposDisponibles_pasajeros : true;
+      const coincideHora = horaSalida_pasajeros ? viaje.hora === horaSalida_pasajeros : true;
+
+      return coincideInicio && coincideFinal && coincideCupos && coincideHora;
+    });
+
+    setViajes_pasajeros(viajesFiltrados);
+  };
+
+  // Seleccionar un viaje de la lista
+  const handleSeleccionarViaje_pasajeros = (viaje: Viaje) => {
+    setViajeSeleccionado_pasajeros(viaje);
+  };
+
+  // Cerrar el modal de detalles del viaje
+  const handleCloseModal = () => {
+    setViajeSeleccionado_pasajeros(null);
+    setPuntoRecogida('');
+  };
+
+  // Función para manejar la reserva
+  const handleReservar = () => {
+    if (puntoRecogida.trim() === '') {
+      alert('Por favor, ingresa un Punto de Recogida para reservar.');
+      return;
+    }
+    alert('Reserva realizada exitosamente.');
+    setPuntoRecogida('');
+    setViajeSeleccionado_pasajeros(null);
   };
 
   return (
@@ -321,6 +331,7 @@ const Pasajeros = () => {
                   onChange={handlePuntoInicioChange_pasajeros}
                   placeholder="Punto salida"
                   className="input-field_pasajeros"
+                  onFocus={() => setActiveInput('inicio')}
                 />
               </div>
               <div className="form-group_pasajeros">
@@ -331,6 +342,7 @@ const Pasajeros = () => {
                   onChange={handlePuntoFinalChange_pasajeros}
                   placeholder="Punto llegada"
                   className="input-field_pasajeros"
+                  onFocus={() => setActiveInput('final')}
                 />
               </div>
               <div className="form-row_pasajeros">
@@ -338,7 +350,7 @@ const Pasajeros = () => {
                   <label>Cupos disponibles</label>
                   <select
                     value={cuposDisponibles_pasajeros}
-                    onChange={handleCuposChange_pasajeros}
+                    onChange={(e) => setCuposDisponibles_pasajeros(parseInt(e.target.value))}
                     className="input-field_pasajeros"
                   >
                     {opcionesCupos_pasajeros.map((opcion) => (
@@ -353,7 +365,7 @@ const Pasajeros = () => {
                   <input
                     type="time"
                     value={horaSalida_pasajeros}
-                    onChange={handleHoraChange_pasajeros}
+                    onChange={(e) => setHoraSalida_pasajeros(e.target.value)}
                     className="input-field_pasajeros"
                   />
                 </div>
@@ -470,6 +482,7 @@ const Pasajeros = () => {
                     onChange={handlePuntoRecogidaChange}
                     placeholder="Ingresa el punto de recogida"
                     className="input-field_pasajeros"
+                    onFocus={() => setActiveInput('recogida')}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         e.preventDefault();
@@ -502,7 +515,7 @@ const Pasajeros = () => {
         {/* Sección Derecha (Mapa) */}
         <div className="right-section_pasajeros">
           <MapContainer
-            center={[4.7110, -74.0721]}
+            center={[4.711, -74.0721]}
             zoom={12}
             className="map_pasajeros"
             style={{ height: '100%', width: '100%' }}
@@ -512,38 +525,13 @@ const Pasajeros = () => {
               attribution='&copy; OpenStreetMap contributors'
             />
 
+            {/* Component to handle selecting location on the map */}
+            <LocationSelector />
+
             {/* Marcadores según el estado */}
-            {viajeSeleccionado_pasajeros ? (
-              <>
-                {viajeSeleccionado_pasajeros.inicioCoords && (
-                  <Marker position={viajeSeleccionado_pasajeros.inicioCoords} icon={defaultIcon}>
-                    <Popup>
-                      <strong>Inicio:</strong> {viajeSeleccionado_pasajeros.inicio}
-                    </Popup>
-                  </Marker>
-                )}
-                {viajeSeleccionado_pasajeros.finalCoords && (
-                  <Marker position={viajeSeleccionado_pasajeros.finalCoords} icon={defaultIcon}>
-                    <Popup>
-                      <strong>Final:</strong> {viajeSeleccionado_pasajeros.final}
-                    </Popup>
-                  </Marker>
-                )}
-              </>
-            ) : (
-              <>
-                {inicioCoords && (
-                  <Marker position={inicioCoords} icon={defaultIcon}>
-                    <Popup>Punto de inicio ingresado</Popup>
-                  </Marker>
-                )}
-                {finalCoords && (
-                  <Marker position={finalCoords} icon={defaultIcon}>
-                    <Popup>Punto final ingresado</Popup>
-                  </Marker>
-                )}
-              </>
-            )}
+            <DraggableMarker coords={inicioCoords} setCoords={setInicioCoords} setAddress={setPuntoInicio_pasajeros} />
+            <DraggableMarker coords={finalCoords} setCoords={setFinalCoords} setAddress={setPuntoFinal_pasajeros} />
+            <DraggableMarker coords={puntoRecogidaCoords} setCoords={setPuntoRecogidaCoords} setAddress={setPuntoRecogida} />
           </MapContainer>
         </div>
       </div>

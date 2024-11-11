@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import L, { LatLngExpression, Icon } from 'leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import L, { LatLng, Icon } from 'leaflet';
 import axios from 'axios';
 import './añadir_viaje.css';
 import ubicacionIcon from '../assets/ubicacion.png';
@@ -21,8 +21,8 @@ const defaultIcon: Icon = new L.Icon({
 
 const AñadirViaje: React.FC = () => {
   const navigate = useNavigate();
-  const [startPoint, setStartPoint] = useState<LatLngExpression | null>(null);
-  const [endPoint, setEndPoint] = useState<LatLngExpression | null>(null);
+  const [startPoint, setStartPoint] = useState<LatLng | null>(null);
+  const [endPoint, setEndPoint] = useState<LatLng | null>(null);
   const [formData, setFormData] = useState({
     puntoInicio: '',
     puntoFinal: '',
@@ -34,8 +34,9 @@ const AñadirViaje: React.FC = () => {
   });
 
   const geocodeCache = new Map<string, [number, number]>();
+  const reverseGeocodeCache = new Map<string, string>();
 
-  // Función para geocodificar una dirección con caché
+  // Función para geocodificar una dirección (nombre de lugar a coordenadas)
   const geocodeAddress = async (address: string): Promise<[number, number] | null> => {
     if (geocodeCache.has(address)) {
       return geocodeCache.get(address)!;
@@ -63,14 +64,42 @@ const AñadirViaje: React.FC = () => {
     }
   };
 
+  // Función para obtener el nombre del lugar a partir de coordenadas
+  const reverseGeocode = async (coords: LatLng): Promise<string> => {
+    const cacheKey = `${coords.lat},${coords.lng}`;
+    if (reverseGeocodeCache.has(cacheKey)) {
+      return reverseGeocodeCache.get(cacheKey)!;
+    }
+    try {
+      const response = await axios.get('https://nominatim.openstreetmap.org/reverse', {
+        params: {
+          lat: coords.lat,
+          lon: coords.lng,
+          format: 'json',
+        },
+      });
+
+      if (response.data && response.data.display_name) {
+        const locationName = response.data.display_name;
+        reverseGeocodeCache.set(cacheKey, locationName);
+        return locationName;
+      } else {
+        return 'Ubicación desconocida';
+      }
+    } catch (error) {
+      console.error('Error en geocodificación inversa:', error);
+      return 'Ubicación desconocida';
+    }
+  };
+
   // Manejo de cambios en el campo de punto de inicio
   const handlePuntoInicioChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const address = e.target.value;
     setFormData({ ...formData, puntoInicio: address });
-
-    if (address) {
-      const coords = await geocodeAddress(address);
-      setStartPoint(coords);
+    const coords = await geocodeAddress(address);
+    if (coords) {
+      const [lat, lon] = coords;
+      setStartPoint(new L.LatLng(lat, lon));
     } else {
       setStartPoint(null);
     }
@@ -80,13 +109,57 @@ const AñadirViaje: React.FC = () => {
   const handlePuntoFinalChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const address = e.target.value;
     setFormData({ ...formData, puntoFinal: address });
-
-    if (address) {
-      const coords = await geocodeAddress(address);
-      setEndPoint(coords);
+    const coords = await geocodeAddress(address);
+    if (coords) {
+      const [lat, lon] = coords;
+      setEndPoint(new L.LatLng(lat, lon));
     } else {
       setEndPoint(null);
     }
+  };
+
+  // Componente de eventos del mapa
+  const MapEvents = () => {
+    useMapEvents({
+      click(e) {
+        if (!startPoint) {
+          setStartPoint(e.latlng);
+          updateStartLocation(e.latlng);
+        } else if (!endPoint) {
+          setEndPoint(e.latlng);
+          updateEndLocation(e.latlng);
+        }
+      },
+    });
+    return null;
+  };
+
+  // Actualiza el punto de inicio con el nombre del lugar
+  const updateStartLocation = async (coords: LatLng) => {
+    const locationName = await reverseGeocode(coords);
+    setFormData({ ...formData, puntoInicio: locationName });
+  };
+
+  // Actualiza el punto final con el nombre del lugar
+  const updateEndLocation = async (coords: LatLng) => {
+    const locationName = await reverseGeocode(coords);
+    setFormData({ ...formData, puntoFinal: locationName });
+  };
+
+  // Función para actualizar el punto de inicio al mover el marcador
+  const handleStartPointDrag = async (e: L.DragEndEvent) => {
+    const marker = e.target as L.Marker;
+    const position = marker.getLatLng();
+    setStartPoint(position);
+    updateStartLocation(position);
+  };
+
+  // Función para actualizar el punto final al mover el marcador
+  const handleEndPointDrag = async (e: L.DragEndEvent) => {
+    const marker = e.target as L.Marker;
+    const position = marker.getLatLng();
+    setEndPoint(position);
+    updateEndLocation(position);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -120,13 +193,28 @@ const AñadirViaje: React.FC = () => {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution='&copy; OpenStreetMap contributors'
             />
+            <MapEvents />
             {startPoint && (
-              <Marker position={startPoint} icon={defaultIcon}>
+              <Marker
+                position={startPoint}
+                icon={defaultIcon}
+                draggable={true}
+                eventHandlers={{
+                  dragend: handleStartPointDrag,
+                }}
+              >
                 <Popup>Punto de inicio</Popup>
               </Marker>
             )}
             {endPoint && (
-              <Marker position={endPoint} icon={defaultIcon}>
+              <Marker
+                position={endPoint}
+                icon={defaultIcon}
+                draggable={true}
+                eventHandlers={{
+                  dragend: handleEndPointDrag,
+                }}
+              >
                 <Popup>Punto final</Popup>
               </Marker>
             )}
