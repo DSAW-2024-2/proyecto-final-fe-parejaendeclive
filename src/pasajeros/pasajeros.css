@@ -158,15 +158,52 @@ html {
     margin-bottom: 0.313rem;
 }
 
+/* Contenedor de Input con Icono */
+.input-container_pasajeros {
+    position: relative;
+    display: flex;
+    align-items: center;
+    position: center;
+}
+
+.input-icon_pasajeros {
+    position: absolute;
+    left: 0.75rem;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background-color: #ccc; /* Color por defecto */
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.input-icon_pasajeros.inicio {
+    background-color: #2E8B57; /* Verde */
+}
+
+.input-icon_pasajeros.final {
+    background-color: #DC143C; /* Rojo */
+}
+
+.input-icon_pasajeros.recogida {
+    background-color: #1E90FF; /* Azul */
+}
+
+.input-icon_pasajeros.active {
+    background-color: #800080; /* Morado */
+}
+
 .input-field_pasajeros {
     width: 100%;
     padding: 0.625rem;
+    padding-left: 2.5rem; /* Espacio suficiente para el icono */
     border: var(--border-thin) solid var(--color-primario);
     border-radius: 1rem;
     font-family: var(--fuente-secundaria);
     font-size: 0.875rem;
     color: var(--color-primario);
     background-color: rgba(208, 162, 242, 0.5);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .input-field_pasajeros:focus {
@@ -175,6 +212,7 @@ html {
     outline: none;
 }
 
+/* Botones */
 .button-primary_pasajeros,
 .button-secondary_pasajeros {
     padding: 0.625rem 1rem;
@@ -209,6 +247,29 @@ html {
     gap: 0.625rem;
     margin-top: 1rem;
     justify-content: center; /* Alinear botones al centro */
+}
+
+/* Botón "Añadir parada" */
+.button-add_pasajeros {
+    width: 100%;
+    padding: 0.625rem 1rem;
+    background-color: var(--color-primario);
+    color: var(--color-fondo);
+    border: none;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-family: var(--fuente-principal);
+    font-weight: 600;
+    font-size: 0.938rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.5rem; /* Añadir margen superior para separación */
+}
+
+.button-add_pasajeros:hover {
+    background-color: #563b6c;
 }
 
 /* Lista de Viajes */
@@ -269,16 +330,23 @@ html {
     color: var(--color-primario);
 }
 
-/* Detalles del viaje seleccionado */
 .input-highlight_pasajeros {
     width: 100%;
     padding: 0.625rem;
+    padding-left: 2.5rem; /* Espacio suficiente para el icono */
     border: var(--border-thin) solid var(--color-primario);
     border-radius: 1rem;
     font-family: var(--fuente-secundaria);
     font-size: 0.875rem;
     color: var(--color-primario);
     background-color: rgba(208, 162, 242, 0.5);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.input-highlight_pasajeros:focus {
+    background-color: rgba(208, 162, 242, 0.75);
+    border-color: #2e0e7c;
+    outline: none;
 }
 
 /* Alinear campos del viaje seleccionado */
@@ -292,7 +360,7 @@ html {
     flex: 1;
 }
 
-/* Alinear Cupos y Hora en los filtros */
+/* Alinear Cupos, Hora y Fecha en los filtros */
 .form-row_pasajeros {
     display: flex;
     flex-direction: row;
@@ -371,7 +439,7 @@ html {
     }
 }
 
-/* Estilos para el Botón "Añadir para" */
+/* Estilos para el Botón "Añadir parada" */
 .button-add_pasajeros {
     width: 100%;
     padding: 0.625rem 1rem;
