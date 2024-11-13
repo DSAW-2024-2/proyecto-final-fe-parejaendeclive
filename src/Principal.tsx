@@ -8,7 +8,8 @@ import Menu from './menu/menu';
 import Perfil from './perfil/perfil';
 import EditPerfil from './editar_perfil/editar_perfil';
 import Añadir_viaje from './añadir_viaje/añadir_viaje';
-import RegistroCarro from './registro_carro/registro_carro'; // Importa el componente correctamente
+import RegistroCarro from './registro_carro/registro_carro';
+import Conductor from './conductores/conductores'
 import { AuthProvider } from './Authentication';
 import ProtectedRoute from './routeProtected';
 import LoginRedirect from './login-redirect';
@@ -121,6 +122,18 @@ const App: React.FC = () => {
               </ProtectedRoute> 
               */
               <Añadir_viaje />
+            } 
+          />
+          {/* Fin de la ruta para /registro-carro */}
+          <Route 
+            path="/conductores" 
+            element={
+              /* 
+              <ProtectedRoute>
+                <EditPerfil />
+              </ProtectedRoute> 
+              */
+              <Conductor />
             } 
           />
           {/* Fin de la ruta para /registro-carro */}

@@ -25,6 +25,7 @@ const AñadirViaje: React.FC = () => {
   const [formData, setFormData] = useState({
     puntoInicio: '',
     puntoFinal: '',
+    fechaSalida: '', // Nueva propiedad para la fecha de salida
     horaSalida: '',
     cuposDisponibles: '',
     tarifaPorPasajero: '',
@@ -117,6 +118,12 @@ const AñadirViaje: React.FC = () => {
     }
   };
 
+  // Manejo de cambios en el campo de fecha de salida
+  const handleFechaSalidaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const fecha = e.target.value;
+    setFormData({ ...formData, fechaSalida: fecha });
+  };
+
   // Componente de eventos del mapa
   const MapEvents = () => {
     useMapEvents({
@@ -164,9 +171,11 @@ const AñadirViaje: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Formulario enviado:', formData);
+    // Aquí puedes agregar la lógica para enviar los datos al backend
     setFormData({
       puntoInicio: '',
       puntoFinal: '',
+      fechaSalida: '', // Reiniciar la fecha de salida
       horaSalida: '',
       cuposDisponibles: '',
       tarifaPorPasajero: '',
@@ -180,7 +189,7 @@ const AñadirViaje: React.FC = () => {
   return (
     <div className="añadir_viaje">
       <header className="header-añadir">
-        <button className="añadir_viaje_back-button" onClick={() => navigate('/menu')}>
+        <button className="añadir_viaje_back-button" onClick={() => navigate('/menu')} aria-label="Volver">
           ←
         </button>
         <h1 className="letra-header-añadir">Añadir Viaje</h1>
@@ -236,6 +245,16 @@ const AñadirViaje: React.FC = () => {
               value={formData.puntoFinal}
               onChange={handlePuntoFinalChange}
               placeholder="Punto final"
+              className="inputs-añadir letrainpitstitulo_añadir"
+              required
+            />
+            {/* Nuevo Input para Fecha de Salida */}
+            <input
+              type="date"
+              name="fechaSalida"
+              value={formData.fechaSalida}
+              onChange={handleFechaSalidaChange}
+              placeholder="Fecha de salida"
               className="inputs-añadir letrainpitstitulo_añadir"
               required
             />
