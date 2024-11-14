@@ -7,7 +7,10 @@ import Pasajero from './pasajeros/pasajeros';
 import Menu from './menu/menu';
 import Perfil from './perfil/perfil';
 import EditPerfil from './editar_perfil/editar_perfil';
-import RegistroCarro from './registro_carro/registro_carro'; // Importa el componente correctamente
+import Añadir_viaje from './añadir_viaje/añadir_viaje';
+import RegistroCarro from './registro_carro/registro_carro';
+import Conductor from './conductores/conductores'
+import Viajes_Reservados from './viajes_reservados/viajes_reservados';
 import { AuthProvider } from './Authentication';
 import ProtectedRoute from './routeProtected';
 import LoginRedirect from './login-redirect';
@@ -109,6 +112,41 @@ const App: React.FC = () => {
               </ProtectedRoute>
               */
               <RegistroCarro />
+            } 
+          />
+          <Route 
+            path="/añadir_viaje" 
+            element={
+              /* 
+              <ProtectedRoute>
+                <EditPerfil />
+              </ProtectedRoute> 
+              */
+              <Añadir_viaje />
+            } 
+          />
+          {/* Fin de la ruta para /registro-carro */}
+          <Route 
+            path="/conductores" 
+            element={
+              /* 
+              <ProtectedRoute>
+                <EditPerfil />
+              </ProtectedRoute> 
+              */
+              <Conductor />
+            } 
+          />
+          {/* Fin de la ruta para /registro-carro */}
+          <Route 
+            path="/reservas" 
+            element={
+              /* 
+              <ProtectedRoute>
+                <EditPerfil />
+              </ProtectedRoute> 
+              */
+              <Viajes_Reservados />
             } 
           />
           {/* Fin de la ruta para /registro-carro */}

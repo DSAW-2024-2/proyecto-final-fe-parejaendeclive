@@ -83,7 +83,7 @@ const Menu = () => {
           <div className="option">
             <div
               className="option-label clickable"
-              onClick={() => navigate('/conductor')}
+              onClick={() => navigate('/conductores')}
             >
               <img src={carroIcon} alt="Conductor" className="icon" />
               <span>Conductor</span>
@@ -105,7 +105,7 @@ const Menu = () => {
           <div className="option">
             <div
               className="option-label clickable"
-              onClick={() => navigate('/viajes-reservados')}
+              onClick={() => navigate('/reservas')}
             >
               <img src={viajesIcon} alt="Viajes reservados" className="icon" />
               <span>Viajes reservados</span>
@@ -123,22 +123,13 @@ const Menu = () => {
           <div className="option">
             <div
               className="option-label clickable"
-              onClick={() => navigate('/añadir-viaje')}
+              onClick={() => navigate('/añadir_viaje')}
             >
               <img src={viajesIcon} alt="Añadir viaje" className="icon" />
               <span>Añadir viaje</span>
             </div>
           </div>
           {/* Nueva opción de Añadir carro */}
-          <div className="option">
-            <div
-              className="option-label clickable"
-              onClick={() => navigate('/añadir-carro')}
-            >
-              <img src={carroIcon} alt="Añadir carro" className="icon" />
-              <span>Añadir carro</span>
-            </div>
-          </div>
         </div>
       </div>
     </div>

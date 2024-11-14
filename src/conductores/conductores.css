@@ -4,6 +4,7 @@
     --color-secundario: #D0A2F2;
     --color-contraste: #684483;
     --color-error: #ff0000;
+    --color-cancelar-parada: #ff6347; /* Rojo tomate para cancelar paradas */
     --sombra: rgba(0, 0, 0, 0.1);
     --fuente-principal: 'Instrument Sans', sans-serif;
     --fuente-secundaria: 'Roboto', sans-serif;
@@ -14,9 +15,10 @@
     --ancho-mapa: 60vw;
     --border-thin: 0.0625rem;
     --border-radius-small: 0.3125rem;
+    --popup-width: 500px;
+    --popup-height: 650px;
 }
 
-/* Reset y box-sizing */
 *,
 *::before,
 *::after {
@@ -29,18 +31,17 @@ html {
     font-size: 100%;
 }
 
-/* Contenedor principal */
-.pasajeros-container {
+.conductores-container {
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: 100%;
+    height: 100vh;
     background-color: #f3bdff;
     font-family: var(--fuente-secundaria);
 }
 
 /* Encabezado */
-.header_pasajeros {
+.header_conductores {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -56,8 +57,8 @@ html {
     z-index: 10;
 }
 
-.menu-button_pasajeros,
-.persona-button_pasajeros {
+.menu-button_conductores,
+.persona-button_conductores {
     width: 3.5625rem;
     height: 3.5625rem;
     border-radius: 50%;
@@ -69,18 +70,18 @@ html {
     transition: background-color 0.3s ease;
 }
 
-.menu-button_pasajeros:hover,
-.persona-button_pasajeros:hover {
+.menu-button_conductores:hover,
+.persona-button_conductores:hover {
     background-color: #b58eea;
 }
 
-.menu-button_pasajeros img,
-.persona-button_pasajeros img {
+.menu-button_conductores img,
+.persona-button_conductores img {
     width: 1.5rem;
     height: 1.5rem;
 }
 
-.title_pasajeros {
+.title_conductores {
     font-size: var(--tam-fuente-titulo);
     font-weight: bold;
     color: var(--color-primario);
@@ -92,7 +93,7 @@ html {
 }
 
 /* Contenedor Principal */
-.main-content_pasajeros {
+.main-content_conductores {
     display: flex;
     flex-direction: row;
     margin-top: var(--altura-header);
@@ -102,7 +103,7 @@ html {
 }
 
 /* Sección Izquierda */
-.left-section_pasajeros {
+.left-section_conductores {
     width: var(--ancho-izquierda);
     background-color: var(--color-fondo);
     border-right: var(--border-thin) solid var(--color-primario);
@@ -111,12 +112,12 @@ html {
     overflow-y: auto;
     padding: 1rem;
     gap: 1rem;
-    position: relative; /* Posicionamiento relativo para el modal */
+    position: relative;
     z-index: 5;
 }
 
 /* Sección Derecha (Mapa) */
-.right-section_pasajeros {
+.right-section_conductores {
     width: var(--ancho-mapa);
     flex-shrink: 0;
     background-color: var(--color-fondo);
@@ -126,31 +127,38 @@ html {
 }
 
 /* Map Container */
-.map_pasajeros {
+.map_conductores {
     width: 100%;
     height: 100%;
 }
 
 /* Secciones dentro de la Sección Izquierda */
-.filters-section_pasajeros,
-.viajes-section_pasajeros {
+.filters-section_conductores,
+.viajes-section_conductores {
     background-color: var(--color-fondo);
     padding: 1rem;
     border-radius: var(--border-radius-small);
     box-shadow: 0 0.25rem 0.75rem var(--sombra);
 }
 
-.filters-section_pasajeros h3,
-.viajes-section_pasajeros h3 {
+.filters-section_conductores h3,
+.viajes-section_conductores h3 {
     margin-bottom: 0.625rem;
     color: var(--color-primario);
 }
 
-.form-group_pasajeros {
+.form-row_conductores {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+}
+
+.form-group_conductores {
+    flex: 1;
     margin-bottom: 0.938rem;
 }
 
-.form-group_pasajeros label {
+.form-group_conductores label {
     display: block;
     color: var(--color-contraste);
     font-weight: bold;
@@ -159,44 +167,44 @@ html {
 }
 
 /* Contenedor de Input con Icono */
-.input-container_pasajeros {
+.input-container_conductores {
     position: relative;
     display: flex;
     align-items: center;
-    position: center;
 }
 
-.input-icon_pasajeros {
+.input-icon_conductores {
     position: absolute;
     left: 0.75rem;
     width: 1rem;
     height: 1rem;
     border-radius: 50%;
-    background-color: #ccc; /* Color por defecto */
+    background-color: #ccc;
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
 
-.input-icon_pasajeros.inicio {
-    background-color: #2E8B57; /* Verde */
+.input-icon_conductores.inicio {
+    background-color: #2E8B57;
 }
 
-.input-icon_pasajeros.final {
-    background-color: #DC143C; /* Rojo */
+.input-icon_conductores.final {
+    background-color: #DC143C;
 }
 
-.input-icon_pasajeros.recogida {
-    background-color: #1E90FF; /* Azul */
+.input-icon_conductores.parada {
+    background-color: #1E90FF;
 }
 
-.input-icon_pasajeros.active {
-    background-color: #800080; /* Morado */
+.input-icon_conductores.active {
+    background-color: #800080;
 }
 
-.input-field_pasajeros {
+.input-field_conductores,
+.input-highlight_conductores {
     width: 100%;
     padding: 0.625rem;
-    padding-left: 2.5rem; /* Espacio suficiente para el icono */
+    padding-left: 2.5rem;
     border: var(--border-thin) solid var(--color-primario);
     border-radius: 1rem;
     font-family: var(--fuente-secundaria);
@@ -206,15 +214,17 @@ html {
     transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
-.input-field_pasajeros:focus {
+.input-field_conductores:focus,
+.input-highlight_conductores:focus {
     background-color: rgba(208, 162, 242, 0.75);
     border-color: #2e0e7c;
     outline: none;
 }
 
 /* Botones */
-.button-primary_pasajeros,
-.button-secondary_pasajeros {
+.button-status_conductores,
+.button-secondary_conductores,
+.button-exit_conductores {
     padding: 0.625rem 1rem;
     background-color: var(--color-contraste);
     color: var(--color-fondo);
@@ -230,50 +240,55 @@ html {
     justify-content: center;
 }
 
-.button-primary_pasajeros:hover {
+.button-status_conductores:hover {
     background-color: #563b6c;
 }
 
-.button-secondary_pasajeros {
+.button-status_conductores:disabled {
+    background-color: var(--color-contraste);
+    cursor: not-allowed;
+}
+
+.button-secondary_conductores {
     background-color: var(--color-error);
 }
 
-.button-secondary_pasajeros:hover {
+.button-secondary_conductores:hover {
     background-color: #cc0000;
 }
 
-.button-container_pasajeros {
+.button-exit_conductores {
+    background-color: var(--color-primario);
+}
+
+.button-exit_conductores:hover {
+    background-color: #2e0e7c;
+}
+
+.button-cancelar-parada_conductores {
+    padding: 0.25rem 0.5rem;
+    background-color: var(--color-contraste);
+    color: var(--color-fondo);
+    font-size: 0.75rem;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.button-cancelar-parada_conductores:hover {
+    background-color: var(--color-primario);
+}
+
+.button-container_conductores {
     display: flex;
     gap: 0.625rem;
     margin-top: 1rem;
-    justify-content: center; /* Alinear botones al centro */
-}
-
-/* Botón "Añadir parada" */
-.button-add_pasajeros {
-    width: 100%;
-    padding: 0.625rem 1rem;
-    background-color: var(--color-primario);
-    color: var(--color-fondo);
-    border: none;
-    border-radius: 0.75rem;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    font-family: var(--fuente-principal);
-    font-weight: 600;
-    font-size: 0.938rem;
-    display: flex;
-    align-items: center;
     justify-content: center;
-    margin-top: 0.5rem; /* Añadir margen superior para separación */
-}
-
-.button-add_pasajeros:hover {
-    background-color: #563b6c;
 }
 
 /* Lista de Viajes */
-.viajes-list_pasajeros {
+.viajes-list_conductores {
     list-style: none;
     padding: 0;
     display: flex;
@@ -281,7 +296,7 @@ html {
     gap: 1rem;
 }
 
-.viaje-item_pasajeros {
+.viaje-item_conductores {
     background-color: var(--color-fondo);
     padding: 1rem;
     border: var(--border-thin) solid var(--color-primario);
@@ -290,85 +305,86 @@ html {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.viaje-item_pasajeros:hover {
+.viaje-item_conductores:hover {
     transform: translateY(-0.3125rem);
     box-shadow: 0 0.5rem 1rem var(--sombra);
 }
 
-.viaje-item_pasajeros p {
+.viaje-item_conductores p {
     margin: 0.313rem 0;
     color: var(--color-contraste);
 }
 
-/* Overlay para el modal dentro de left-section_pasajeros */
-.modal-overlay_pasajeros {
+/* Lista de Paradas */
+.paradas-list_conductores {
+    list-style: none;
+    padding-left: 0;
+    margin-top: 0.5rem;
+    color: var(--color-primario);
+}
+
+.parada-item_conductores {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.313rem;
+    background-color: rgba(208, 162, 242, 0.2);
+    padding: 0.5rem;
+    border-radius: var(--border-radius-small);
+}
+
+/* Overlay Oscuro */
+.overlay-conductores {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Fondo semitransparente */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 10; /* Asegurarse de que esté encima del contenido de left-section */
+    background-color: rgba(0, 0, 0, 0.3);
+    z-index: 90;
 }
 
-/* Contenido del modal */
-.modal-content_pasajeros {
+/* Ventana Emergente de Detalles del Viaje */
+.popup-detalles_conductores {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: var(--popup-width);
+    height: var(--popup-height);
     background-color: var(--color-fondo);
-    padding: 2rem;
-    border-radius: 1rem;
-    box-shadow: 0 0.25rem 0.75rem var(--sombra);
-    width: 90%;
-    max-width: 500px;
-    z-index: 20; /* Para que esté encima del overlay */
+    border-radius: var(--border-radius-small);
+    box-shadow: 0 0.5rem 1rem var(--sombra);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
-.modal-content_pasajeros h3 {
+.popup-content_conductores {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.popup-content_conductores h3 {
     margin-bottom: 1rem;
     color: var(--color-primario);
+    text-align: center;
 }
 
-.input-highlight_pasajeros {
-    width: 100%;
-    padding: 0.625rem;
-    padding-left: 2.5rem; /* Espacio suficiente para el icono */
-    border: var(--border-thin) solid var(--color-primario);
-    border-radius: 1rem;
-    font-family: var(--fuente-secundaria);
-    font-size: 0.875rem;
-    color: var(--color-primario);
-    background-color: rgba(208, 162, 242, 0.5);
-    transition: background-color 0.3s ease, border-color 0.3s ease;
-}
-
-.input-highlight_pasajeros:focus {
-    background-color: rgba(208, 162, 242, 0.75);
-    border-color: #2e0e7c;
-    outline: none;
-}
-
-/* Alinear campos del viaje seleccionado */
-.detalles-section_pasajeros .form-row_pasajeros {
-    display: flex;
-    flex-direction: row;
-    gap: 1rem;
-}
-
-.detalles-section_pasajeros .form-group_pasajeros {
+.detalles-section_conductores {
     flex: 1;
+    overflow-y: auto;
+    padding-right: 0.5rem; /* Espacio para evitar que el contenido se oculte detrás del scrollbar */
 }
 
-/* Alinear Cupos, Hora y Fecha en los filtros */
-.form-row_pasajeros {
+.button-container_conductores {
     display: flex;
-    flex-direction: row;
-    gap: 1rem;
-}
-
-.form-row_pasajeros .form-group_pasajeros {
-    flex: 1;
+    gap: 0.625rem;
+    justify-content: center;
+    margin-top: 1rem;
 }
 
 /* Responsividad */
@@ -377,87 +393,77 @@ html {
         --ancho-izquierda: 100%;
         --ancho-mapa: 100%;
         --altura-mapa: 50vh;
+        --popup-width: 90%;
+        --popup-height: 90%;
     }
 
-    .main-content_pasajeros {
+    .main-content_conductores {
         flex-direction: column;
     }
 
-    .left-section_pasajeros {
+    .left-section_conductores {
         width: 100%;
         order: 1;
     }
 
-    .right-section_pasajeros {
+    .right-section_conductores {
         width: 100%;
         height: var(--altura-mapa);
         order: 2;
     }
 
-    .map_pasajeros {
+    .map_conductores {
         height: 100%;
     }
 
-    /* Modal */
-    .modal-content_pasajeros {
+    .popup-detalles_conductores {
         width: 90%;
+        height: 90%;
+    }
+
+    .parada-item_conductores {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .button-cancelar-parada_conductores {
+        margin-left: 0;
+        margin-top: 0.5rem;
     }
 }
 
 @media (max-width: 768px) {
-    .form-row_pasajeros {
+    .form-row_conductores {
         flex-direction: column;
     }
 
-    .button-container_pasajeros {
+    .button-container_conductores {
         flex-direction: column;
     }
 
-    .button-container_pasajeros button {
+    .button-container_conductores button {
         width: 100%;
     }
 
-    /* Ajustes para el modal en pantallas pequeñas */
-    .modal-content_pasajeros {
-        padding: 1rem;
-    }
-
-    /* Ajustes para input-add-button en pantallas pequeñas */
-    .form-group_pasajeros {
+    .form-group_conductores {
         display: flex;
         flex-direction: column;
     }
 
-    .form-group_pasajeros .input-field_pasajeros {
+    .form-group_conductores .input-field_conductores,
+    .form-group_conductores .input-highlight_conductores {
         margin-bottom: 0.5rem;
     }
 
-    /* Asegurar que el botón mantenga un tamaño adecuado */
-    .button-add_pasajeros {
+    .button-status_conductores,
+    .button-secondary_conductores,
+    .button-exit_conductores {
         padding: 0.375rem 0.75rem;
         font-size: 0.875rem;
     }
-}
 
-/* Estilos para el Botón "Añadir parada" */
-.button-add_pasajeros {
-    width: 100%;
-    padding: 0.625rem 1rem;
-    background-color: var(--color-primario);
-    color: var(--color-fondo);
-    border: none;
-    border-radius: 0.75rem;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    font-family: var(--fuente-principal);
-    font-weight: 600;
-    font-size: 0.938rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 0.5rem; /* Añadir margen superior para separación */
-}
-
-.button-add_pasajeros:hover {
-    background-color: #563b6c;
+    .button-cancelar-parada_conductores {
+        margin-left: 0;
+        margin-top: 0.5rem;
+    }
 }
