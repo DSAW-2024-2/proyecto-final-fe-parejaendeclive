@@ -10,6 +10,7 @@ import EditPerfil from './editar_perfil/editar_perfil';
 import Añadir_viaje from './añadir_viaje/añadir_viaje';
 import RegistroCarro from './registro_carro/registro_carro';
 import Conductor from './conductores/conductores'
+import Viajes_Reservados from './viajes_reservados/viajes_reservados';
 import { AuthProvider } from './Authentication';
 import ProtectedRoute from './routeProtected';
 import LoginRedirect from './login-redirect';
@@ -134,6 +135,18 @@ const App: React.FC = () => {
               </ProtectedRoute> 
               */
               <Conductor />
+            } 
+          />
+          {/* Fin de la ruta para /registro-carro */}
+          <Route 
+            path="/reservas" 
+            element={
+              /* 
+              <ProtectedRoute>
+                <EditPerfil />
+              </ProtectedRoute> 
+              */
+              <Viajes_Reservados />
             } 
           />
           {/* Fin de la ruta para /registro-carro */}

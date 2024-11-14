@@ -43,14 +43,18 @@ const Pasajeros = () => {
   // Estados para las coordenadas
   const [inicioCoords, setInicioCoords] = useState<[number, number] | null>(null);
   const [finalCoords, setFinalCoords] = useState<[number, number] | null>(null);
-  const [recogidaCoords, setRecogidaCoords] = useState<[number, number] | null>(null);
 
-  // Nuevo estado para el punto de recogida
-  const [puntoRecogida, setPuntoRecogida] = useState('');
-  const [puntoRecogidaInput, setPuntoRecogidaInput] = useState('');
+  // Nuevo estado para los puntos de recogida y sus coordenadas
+  const [puntoRecogidaInputs, setPuntoRecogidaInputs] = useState<string[]>([]);
+  const [recogidaCoordsArray, setRecogidaCoordsArray] = useState<Array<[number, number] | null>>([]);
 
   // Estado para determinar qué input está activo
-  const [activeInput, setActiveInput] = useState<'inicio' | 'final' | 'recogida' | null>(null);
+  const [activeInput, setActiveInput] = useState<{ type: 'inicio' | 'final' | 'recogida'; index?: number } | null>(
+    null
+  );
+
+  // Nuevo estado para la cantidad de cupos a reservar
+  const [cuposAReservar, setCuposAReservar] = useState(1);
 
   const opcionesCupos_pasajeros = Array.from({ length: 11 }, (_, index) => index);
 
@@ -229,15 +233,20 @@ const Pasajeros = () => {
         try {
           const address = await reverseGeocodeCoords(coords);
           if (address) {
-            if (activeInput === 'inicio') {
+            if (activeInput.type === 'inicio') {
               setInicioCoords(coords);
               setPuntoInicio_pasajeros(address);
-            } else if (activeInput === 'final') {
+            } else if (activeInput.type === 'final') {
               setFinalCoords(coords);
               setPuntoFinal_pasajeros(address);
-            } else if (activeInput === 'recogida') {
-              setRecogidaCoords(coords);
-              setPuntoRecogida(address);
+            } else if (activeInput.type === 'recogida' && activeInput.index !== undefined) {
+              const updatedCoordsArray = [...recogidaCoordsArray];
+              updatedCoordsArray[activeInput.index] = coords;
+              setRecogidaCoordsArray(updatedCoordsArray);
+
+              const updatedInputs = [...puntoRecogidaInputs];
+              updatedInputs[activeInput.index] = address;
+              setPuntoRecogidaInputs(updatedInputs);
             }
           }
         } catch (error) {
@@ -273,27 +282,26 @@ const Pasajeros = () => {
     }
   };
 
-  const handlePuntoRecogidaChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Función para manejar cambios en los inputs de puntos de recogida
+  const handlePuntoRecogidaChange = async (
+    index: number,
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const address = e.target.value;
-    setPuntoRecogidaInput(address);
+    const updatedInputs = [...puntoRecogidaInputs];
+    updatedInputs[index] = address;
+    setPuntoRecogidaInputs(updatedInputs);
 
     if (address) {
       const coords = await geocodeAddress(address);
-      setRecogidaCoords(coords);
+      const updatedCoordsArray = [...recogidaCoordsArray];
+      updatedCoordsArray[index] = coords;
+      setRecogidaCoordsArray(updatedCoordsArray);
     } else {
-      setRecogidaCoords(null);
+      const updatedCoordsArray = [...recogidaCoordsArray];
+      updatedCoordsArray[index] = null;
+      setRecogidaCoordsArray(updatedCoordsArray);
     }
-  };
-
-  // Función para agregar el punto de recogida
-  const handleAgregarPuntoRecogida = () => {
-    if (puntoRecogidaInput.trim() === '') {
-      alert('Por favor, ingresa un Punto de Recogida.');
-      return;
-    }
-    setPuntoRecogida(puntoRecogidaInput);
-    setPuntoRecogidaInput('');
-    alert('Punto de Recogida añadido.');
   };
 
   // Función para mover los marcadores
@@ -302,11 +310,13 @@ const Pasajeros = () => {
     setCoords,
     setAddress,
     type,
+    index,
   }: {
     coords: [number, number] | null;
-    setCoords: React.Dispatch<React.SetStateAction<[number, number] | null>>;
-    setAddress: React.Dispatch<React.SetStateAction<string>>;
+    setCoords: (coords: [number, number] | null) => void;
+    setAddress: (address: string) => void;
     type: 'inicio' | 'final' | 'recogida';
+    index?: number;
   }) => {
     const markerRef = React.useRef<L.Marker>(null);
 
@@ -327,16 +337,24 @@ const Pasajeros = () => {
     // Determinar el icono según el tipo
     const icon = useMemo(() => {
       if (type === 'inicio') {
-        return activeInput === 'inicio' ? activeIcon : inicioIcon;
+        return activeInput?.type === 'inicio' ? activeIcon : inicioIcon;
       } else if (type === 'final') {
-        return activeInput === 'final' ? activeIcon : finalIcon;
+        return activeInput?.type === 'final' ? activeIcon : finalIcon;
       } else {
-        return activeInput === 'recogida' ? activeIcon : paradaIcon;
+        return activeInput?.type === 'recogida' && activeInput.index === index
+          ? activeIcon
+          : paradaIcon;
       }
-    }, [activeInput, type, activeIcon, inicioIcon, finalIcon, paradaIcon]);
+    }, [activeInput, type, index, activeIcon, inicioIcon, finalIcon, paradaIcon]);
 
     return coords ? (
-      <Marker draggable eventHandlers={eventHandlers} position={coords} icon={icon} ref={markerRef}>
+      <Marker
+        draggable
+        eventHandlers={eventHandlers}
+        position={coords}
+        icon={icon}
+        ref={markerRef}
+      >
         <Popup>Mueve el marcador para ajustar la ubicación</Popup>
       </Marker>
     ) : null;
@@ -403,8 +421,10 @@ const Pasajeros = () => {
     // Limpiar las coordenadas de los filtros para que no se muestren en el mapa
     setInicioCoords(null);
     setFinalCoords(null);
-    setPuntoRecogida('');
-    setRecogidaCoords(null);
+
+    // Limpiar puntos de recogida
+    setPuntoRecogidaInputs(Array(cuposAReservar).fill(''));
+    setRecogidaCoordsArray(Array(cuposAReservar).fill(null));
 
     // Geocodificar las direcciones de inicio y final del viaje seleccionado
     const inicio = await geocodeAddress(viaje.inicio);
@@ -416,21 +436,32 @@ const Pasajeros = () => {
   // Cerrar el modal de detalles del viaje
   const handleCloseModal = () => {
     setViajeSeleccionado_pasajeros(null);
-    setPuntoRecogida('');
-    setRecogidaCoords(null);
+    setPuntoRecogidaInputs([]);
+    setRecogidaCoordsArray([]);
+    setCuposAReservar(1);
   };
 
   // Función para manejar la reserva
   const handleReservar = () => {
-    if (puntoRecogida.trim() === '') {
-      alert('Por favor, ingresa un Punto de Recogida para reservar.');
+    // Validar que todos los puntos de recogida estén completos
+    const inputsCompletos = puntoRecogidaInputs.every((input) => input.trim() !== '');
+    if (!inputsCompletos) {
+      alert('Por favor, ingresa todos los puntos de recogida para reservar.');
       return;
     }
     alert('Reserva realizada exitosamente.');
-    setPuntoRecogida('');
-    setRecogidaCoords(null);
+    setPuntoRecogidaInputs([]);
+    setRecogidaCoordsArray([]);
     setViajeSeleccionado_pasajeros(null);
   };
+
+  // useEffect para actualizar los arrays de puntos de recogida cuando cambia cuposAReservar
+  useEffect(() => {
+    if (viajeSeleccionado_pasajeros) {
+      setPuntoRecogidaInputs(Array(cuposAReservar).fill(''));
+      setRecogidaCoordsArray(Array(cuposAReservar).fill(null));
+    }
+  }, [cuposAReservar, viajeSeleccionado_pasajeros]);
 
   return (
     <div className="pasajeros-container">
@@ -457,8 +488,12 @@ const Pasajeros = () => {
                 <label>Punto de inicio</label>
                 <div className="input-container_pasajeros">
                   <span
-                    className={`input-icon_pasajeros ${activeInput === 'inicio' ? 'active' : ''}`}
-                    onClick={() => setActiveInput(activeInput === 'inicio' ? null : 'inicio')}
+                    className={`input-icon_pasajeros ${activeInput?.type === 'inicio' ? 'active' : ''}`}
+                    onClick={() =>
+                      setActiveInput(
+                        activeInput?.type === 'inicio' ? null : { type: 'inicio' }
+                      )
+                    }
                   ></span>
                   <input
                     type="text"
@@ -466,7 +501,7 @@ const Pasajeros = () => {
                     onChange={handlePuntoInicioChange_pasajeros}
                     placeholder="Punto salida"
                     className="input-field_pasajeros"
-                    onFocus={() => setActiveInput('inicio')}
+                    onFocus={() => setActiveInput({ type: 'inicio' })}
                   />
                 </div>
               </div>
@@ -474,8 +509,12 @@ const Pasajeros = () => {
                 <label>Punto final</label>
                 <div className="input-container_pasajeros">
                   <span
-                    className={`input-icon_pasajeros ${activeInput === 'final' ? 'active' : ''}`}
-                    onClick={() => setActiveInput(activeInput === 'final' ? null : 'final')}
+                    className={`input-icon_pasajeros ${activeInput?.type === 'final' ? 'active' : ''}`}
+                    onClick={() =>
+                      setActiveInput(
+                        activeInput?.type === 'final' ? null : { type: 'final' }
+                      )
+                    }
                   ></span>
                   <input
                     type="text"
@@ -483,7 +522,7 @@ const Pasajeros = () => {
                     onChange={handlePuntoFinalChange_pasajeros}
                     placeholder="Punto llegada"
                     className="input-field_pasajeros"
-                    onFocus={() => setActiveInput('final')}
+                    onFocus={() => setActiveInput({ type: 'final' })}
                   />
                 </div>
               </div>
@@ -650,35 +689,55 @@ const Pasajeros = () => {
                       className="input-highlight_pasajeros"
                     />
                   </div>
-                </div>
-
-                {/* Nuevo input para el Punto de Recogida con botón "Añadir parada" */}
-                <div className="form-group_pasajeros">
-                  <label>Punto de recogida:</label>
-                  <div className="input-container_pasajeros">
-                    <span
-                      className={`input-icon_pasajeros ${activeInput === 'recogida' ? 'active' : ''}`}
-                      onClick={() => setActiveInput(activeInput === 'recogida' ? null : 'recogida')}
-                    ></span>
+                  {/* Campo para seleccionar la cantidad de cupos a reservar */}
+                  <div className="form-group_pasajeros">
+                    <label>Cupos a reservar:</label>
                     <input
-                      type="text"
-                      value={puntoRecogidaInput}
-                      onChange={handlePuntoRecogidaChange}
-                      placeholder="Ingresa el punto de recogida"
-                      className="input-field_pasajeros"
-                      onFocus={() => setActiveInput('recogida')}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          handleAgregarPuntoRecogida();
+                      type="number"
+                      min="1"
+                      max={viajeSeleccionado_pasajeros.cupos}
+                      value={cuposAReservar}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value);
+                        if (value > viajeSeleccionado_pasajeros.cupos) {
+                          alert('No puedes reservar más cupos de los disponibles.');
+                          return;
                         }
+                        setCuposAReservar(value);
                       }}
+                      className="input-field_pasajeros"
                     />
                   </div>
-                  <button type="button" onClick={handleAgregarPuntoRecogida} className="button-add_pasajeros">
-                    Añadir parada
-                  </button>
                 </div>
+
+                {/* Inputs para los puntos de recogida */}
+                {Array.from({ length: cuposAReservar }, (_, index) => (
+                  <div className="form-group_pasajeros" key={index}>
+                    <label>Punto de recogida {index + 1}:</label>
+                    <div className="input-container_pasajeros">
+                      <span
+                        className={`input-icon_pasajeros ${
+                          activeInput?.type === 'recogida' && activeInput.index === index ? 'active' : ''
+                        }`}
+                        onClick={() =>
+                          setActiveInput(
+                            activeInput?.type === 'recogida' && activeInput.index === index
+                              ? null
+                              : { type: 'recogida', index }
+                          )
+                        }
+                      ></span>
+                      <input
+                        type="text"
+                        value={puntoRecogidaInputs[index] || ''}
+                        onChange={(e) => handlePuntoRecogidaChange(index, e)}
+                        placeholder={`Ingresa el punto de recogida ${index + 1}`}
+                        className="input-field_pasajeros"
+                        onFocus={() => setActiveInput({ type: 'recogida', index })}
+                      />
+                    </div>
+                  </div>
+                ))}
 
                 <div className="button-container_pasajeros">
                   <button className="button-primary_pasajeros" onClick={handleReservar}>
@@ -713,13 +772,32 @@ const Pasajeros = () => {
             {viajeSeleccionado_pasajeros ? (
               <>
                 {inicioCoords && (
-                  <StaticMarker coords={inicioCoords} label="Inicio del viaje" icon={activeInput === 'inicio' ? activeIcon : inicioIcon} />
+                  <StaticMarker
+                    coords={inicioCoords}
+                    label="Inicio del viaje"
+                    icon={activeInput?.type === 'inicio' ? activeIcon : inicioIcon}
+                  />
                 )}
                 {finalCoords && (
-                  <StaticMarker coords={finalCoords} label="Final del viaje" icon={activeInput === 'final' ? activeIcon : finalIcon} />
+                  <StaticMarker
+                    coords={finalCoords}
+                    label="Final del viaje"
+                    icon={activeInput?.type === 'final' ? activeIcon : finalIcon}
+                  />
                 )}
-                {recogidaCoords && (
-                  <StaticMarker coords={recogidaCoords} label="Parada de recogida" icon={activeInput === 'recogida' ? activeIcon : paradaIcon} />
+                {recogidaCoordsArray.map((coords, index) =>
+                  coords ? (
+                    <StaticMarker
+                      key={index}
+                      coords={coords}
+                      label={`Parada de recogida ${index + 1}`}
+                      icon={
+                        activeInput?.type === 'recogida' && activeInput.index === index
+                          ? activeIcon
+                          : paradaIcon
+                      }
+                    />
+                  ) : null
                 )}
               </>
             ) : (
@@ -735,12 +813,6 @@ const Pasajeros = () => {
                   setCoords={setFinalCoords}
                   setAddress={setPuntoFinal_pasajeros}
                   type="final"
-                />
-                <DraggableMarker
-                  coords={recogidaCoords}
-                  setCoords={setRecogidaCoords}
-                  setAddress={setPuntoRecogida}
-                  type="recogida"
                 />
               </>
             )}

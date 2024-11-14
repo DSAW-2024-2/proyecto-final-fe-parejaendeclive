@@ -105,7 +105,7 @@ const Menu = () => {
           <div className="option">
             <div
               className="option-label clickable"
-              onClick={() => navigate('/viajes-reservados')}
+              onClick={() => navigate('/reservas')}
             >
               <img src={viajesIcon} alt="Viajes reservados" className="icon" />
               <span>Viajes reservados</span>
