@@ -9,8 +9,8 @@ import menuIcon from '../assets/menu.png';
 import personaIcon from '../assets/persona.png';
 
 // Importar las imágenes de los iconos de Leaflet
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
+//import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+//import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
 // Definir la interfaz Viaje
@@ -142,19 +142,7 @@ const Pasajeros = () => {
   };
 
   // Definir un icono predeterminado usando useMemo para optimizar el rendimiento
-  const defaultIcon: Icon = useMemo(
-    () =>
-      new L.Icon({
-        iconRetinaUrl: markerIcon2x,
-        iconUrl: markerIcon,
-        shadowUrl: markerShadow,
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41],
-      }),
-    []
-  );
+  
 
   // Definir íconos personalizados para inicio, final y parada utilizando SVG data URLs
   const inicioIcon: Icon = useMemo(() => {
