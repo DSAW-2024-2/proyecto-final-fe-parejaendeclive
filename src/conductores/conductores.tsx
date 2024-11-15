@@ -9,8 +9,8 @@ import menuIcon from '../assets/menu.png';
 import personaIcon from '../assets/persona.png';
 
 // Importar las imágenes de los iconos de Leaflet
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
+//import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+//import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
 // Definir la interfaz Viaje
