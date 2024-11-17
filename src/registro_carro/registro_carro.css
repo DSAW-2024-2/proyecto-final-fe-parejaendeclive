@@ -20,14 +20,14 @@
   font-family: var(--font-family);
 }
 
-.registro_vehiculos {
+.registro_carro {
   width: 100vw;
   height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
-.header-añadir {
+.header-registro {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -38,14 +38,14 @@
   position: relative;
 }
 
-.letra-header-añadir {
+.letra-header-registro {
   font-size: var(--tam-fuente-titulo);
   color: var(--color-letra-header);
   text-align: center;
   margin: 0;
 }
 
-.registro_vehiculos_back-button {
+.registro_carro_back-button {
   position: absolute;
   left: 20px;
   background-color: var(--color-header);
@@ -62,19 +62,19 @@
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.registro_vehiculos_back-button:hover {
+.registro_carro_back-button:hover {
   background-color: var(--color-letra);
   color: var(--color-fondo);
 }
 
-.registro_vehiculos_content {
+.registro_carro_content {
   display: flex;
   flex-grow: 1;
   width: 100%;
 }
 
-.registro_vehiculos_left-section,
-.registro_vehiculos_right-section {
+.registro_carro_left-section,
+.registro_carro_right-section {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -83,40 +83,44 @@
   padding: 20px;
 }
 
-.registro_vehiculos_left-section {
+.registro_carro_left-section {
   background-color: var(--color-input);
   text-align: center;
 }
 
-.registro_vehiculos_right-section {
+.registro_carro_right-section {
   background-color: var(--color-fondo);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
 }
 
-.registro_vehiculos_car-photo-container {
+.registro_carro_car-photo-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 10px;
 }
 
-.registro_vehiculos_car-image {
+.registro_carro_car-image {
   width: 220px;
   height: 220px;
   border-radius: 10px;
   margin-bottom: 10px;
 }
 
-.registro_vehiculos_photo-text-container {
+.registro_carro_photo-text-container {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.registro_vehiculos_photo-text {
+.registro_carro_photo-text {
   color: var(--color-letra);
 }
 
-.registro_vehiculos_add-photo-circular {
+.registro_carro_add-photo-circular {
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -128,14 +132,14 @@
   cursor: pointer;
 }
 
-.registro_vehiculos_add-image-icon {
+.registro_carro_add-image-icon {
   width: 20px;
   height: 20px;
 }
 
-.registro_vehiculos_add-photo-square {
-  width: 100%;
-  padding: 8px;
+.registro_carro_add-photo-square {
+  width: 100%; /* Ajustado para coincidir con los inputs */
+  padding: 12px;
   background-color: var(--color-input);
   border: 1px solid var(--color-letra);
   border-radius: var(--border-radius-small);
@@ -144,20 +148,21 @@
   justify-content: center;
   cursor: pointer;
   margin-top: 10px;
-  margin-bottom: 15px;
+  margin-bottom: 15px; /* Ajustado para consistencia */
   text-align: center;
   color: var(--color-letra);
+  font-size: var(--tam-fuente-base);
 }
 
-.inputs-añadir {
-  width: 90%; /* Ajuste del ancho de los inputs */
-  padding: 12px; /* Padding más grande */
+.inputs-registro {
+  width: 100%; /* Ajustado para coincidir con el formulario */
+  padding: 12px;
   font-size: var(--tam-fuente-base);
   background-color: var(--color-input);
   border: 1px solid var(--color-letra);
-  border-radius: var(--border-radius-small); /* Bordes más circulares */
+  border-radius: var(--border-radius-small);
   color: var(--color-letra);
-  margin-bottom: 25px; /* Espaciado mayor entre inputs */
+  margin-bottom: 15px; /* Reducido para mejor espaciado */
 }
 
 .input-error {
@@ -165,30 +170,37 @@
   color: var(--color-error);
 }
 
-.letrainpitstitulo_añadir::placeholder {
+.letrainpitstitulo_registro::placeholder {
   color: var(--color-letrainputstitulo);
   font-size: var(--tam-fuente-base);
 }
 
-.registro_vehiculos_error {
+.registro_carro_error {
   color: var(--color-error);
   font-size: 14px;
   margin-top: -5px;
   margin-bottom: 10px;
 }
 
-.registro_vehiculos_soat-label,
-.registro_vehiculos_soat-expiry-label {
+.registro_carro_soat-label,
+.registro_carro_soat-expiry-label {
+  width: 100%; /* Asegura que las etiquetas ocupen todo el ancho */
   font-size: 16px;
   color: var(--color-letra);
-  display: block; /* Para asegurar que estén en una línea separada */
-  margin-top: 20px; /* Espaciado superior adicional */
-  margin-bottom: 8px; /* Espaciado inferior */
+  margin-top: 20px;
+  margin-bottom: 8px;
 }
 
-.registro_vehiculos_submit-button {
+.registro_carro_button-container {
+  width: 100%; /* Ajustado para coincidir con los inputs */
+  margin: 20px 0 0 0; /* Solo margen superior */
+  display: flex;
+  justify-content: center;
+}
+
+.registro_carro_submit-button {
+  width: 100%; /* Asegura que el botón ocupe todo el contenedor */
   padding: 12px;
-  width: 90%; /* Ancho consistente con los inputs */
   background-color: var(--color-letra);
   color: var(--color-fondo);
   border: none;
@@ -197,4 +209,9 @@
   text-align: center;
   font-weight: bold;
   font-size: var(--tam-fuente-base);
+  transition: background-color 0.3s ease;
+}
+
+.registro_carro_submit-button:hover {
+  background-color: #2e004f;
 }

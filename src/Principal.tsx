@@ -11,9 +11,10 @@ import Añadir_viaje from './añadir_viaje/añadir_viaje';
 import RegistroCarro from './registro_carro/registro_carro';
 import Conductor from './conductores/conductores'
 import Viajes_Reservados from './viajes_reservados/viajes_reservados';
+import Editar_carro from './editar_carro/editar_carro';
 import { AuthProvider } from './Authentication';
-import ProtectedRoute from './routeProtected';
-import LoginRedirect from './login-redirect';
+/*import ProtectedRoute from './routeProtected';
+import LoginRedirect from './login-redirect';*/
 
 const Principal: React.FC = () => {
   return (
@@ -147,6 +148,18 @@ const App: React.FC = () => {
               </ProtectedRoute> 
               */
               <Viajes_Reservados />
+            } 
+          />
+          {/* Fin de la ruta para /registro-carro */}
+          <Route 
+            path="/editar_carro" 
+            element={
+              /* 
+              <ProtectedRoute>
+                <EditPerfil />
+              </ProtectedRoute> 
+              */
+              <Editar_carro />
             } 
           />
           {/* Fin de la ruta para /registro-carro */}

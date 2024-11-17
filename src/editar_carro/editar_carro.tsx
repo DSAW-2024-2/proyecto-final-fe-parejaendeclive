@@ -1,9 +1,9 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './registro_carro.css'; // Aseguramos que la ruta del CSS es correcta
+import './editar_carro.css';
 import masIcon from '../assets/+.png';
 
-const AgregarVehiculo: React.FC = () => {
+const EditarVehiculo: React.FC = () => {
   const navigate = useNavigate();
   const [carImage, setCarImage] = useState<string | null>(null);
   const [soatImage, setSoatImage] = useState<string | null>(null);
@@ -14,17 +14,29 @@ const AgregarVehiculo: React.FC = () => {
   const carImageInputRef = useRef<HTMLInputElement | null>(null);
   const soatImageInputRef = useRef<HTMLInputElement | null>(null);
 
+  // Información existente del vehículo (simulada)
+  const existingVehicleData = {
+    vehiclePlate: 'ABC123',
+    passengerCapacity: '4',
+    vehicleBrand: 'Toyota',
+    vehicleModel: '2020',
+    soatExpiryDate: '2025-12-31',
+    carImage: null, // Puedes poner una URL de imagen si tienes una
+    soatImage: null, // Puedes poner una URL de imagen si tienes una
+  };
+
   const [formData, setFormData] = useState({
-    vehiclePlate: '',
-    passengerCapacity: '',
-    vehicleBrand: '',
-    vehicleModel: '',
+    vehiclePlate: existingVehicleData.vehiclePlate,
+    passengerCapacity: existingVehicleData.passengerCapacity,
+    vehicleBrand: existingVehicleData.vehicleBrand,
+    vehicleModel: existingVehicleData.vehicleModel,
   });
 
-  // Información existente del vehículo (si aplica)
-  useEffect(() => {
-    // Aquí puedes cargar la información existente si estás editando
-    // Por ahora, lo dejamos vacío para agregar un nuevo vehículo
+  // Prellenar la fecha de vencimiento del SOAT
+  React.useEffect(() => {
+    setSoatExpiryDate(existingVehicleData.soatExpiryDate);
+    setCarImage(existingVehicleData.carImage);
+    setSoatImage(existingVehicleData.soatImage);
   }, []);
 
   const handleImageUpload = (
@@ -86,34 +98,40 @@ const AgregarVehiculo: React.FC = () => {
   const handleGuardarCambios = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateInputs()) {
-      // Aquí puedes implementar la lógica para agregar el vehículo
-      alert('Vehículo agregado exitosamente.');
+      // Aquí puedes implementar la lógica para guardar los cambios
+      alert('Cambios guardados exitosamente.');
       navigate('/menu');
     }
   };
 
+  const handleEliminarVehiculo = () => {
+    // Aquí puedes implementar la lógica para eliminar el vehículo
+    alert('Vehículo eliminado.');
+    navigate('/menu');
+  };
+
   return (
-    <div className="registro_carro">
-      <header className="header-registro">
-        <button className="registro_carro_back-button" onClick={() => navigate('/menu')}>
+    <div className="editar_vehiculo">
+      <header className="header-editar">
+        <button className="editar_vehiculo_back-button" onClick={() => navigate('/menu')}>
           ←
         </button>
-        <h1 className="letra-header-registro">Agregar vehículo</h1>
+        <h1 className="letra-header-editar">Editar vehículo</h1>
       </header>
-      <div className="registro_carro_content">
-        <div className="registro_carro_left-section">
-          <div className="registro_carro_car-photo-container">
-            {carImage && <img src={carImage} alt="Carro" className="registro_carro_car-image" />}
-            <div className="registro_carro_photo-text-container">
-              <p className="registro_carro_photo-text">Agregar foto del carro</p>
+      <div className="editar_vehiculo_content">
+        <div className="editar_vehiculo_left-section">
+          <div className="editar_vehiculo_car-photo-container">
+            {carImage && <img src={carImage} alt="Carro" className="editar_vehiculo_car-image" />}
+            <div className="editar_vehiculo_photo-text-container">
+              <p className="editar_vehiculo_photo-text">Editar foto del carro</p>
               <div
-                className="registro_carro_add-photo-circular"
+                className="editar_vehiculo_add-photo-circular"
                 onClick={() => carImageInputRef.current?.click()}
               >
-                <img src={masIcon} alt="Agregar Foto" className="registro_carro_add-image-icon" />
+                <img src={masIcon} alt="Editar Foto" className="editar_vehiculo_add-image-icon" />
               </div>
             </div>
-            {errors.carImage && <p className="registro_carro_error">{errors.carImage}</p>}
+            {errors.carImage && <p className="editar_vehiculo_error">{errors.carImage}</p>}
             <input
               type="file"
               accept="image/*"
@@ -123,25 +141,27 @@ const AgregarVehiculo: React.FC = () => {
             />
           </div>
         </div>
-        <div className="registro_carro_right-section">
-          <form onSubmit={handleGuardarCambios} className="registro_carro_car-form">
+        <div className="editar_vehiculo_right-section">
+          <form onSubmit={handleGuardarCambios} className="editar_vehiculo_car-form">
             <input
               type="text"
               id="vehiclePlate"
               value={formData.vehiclePlate}
               onChange={handleInputChange}
               placeholder="Placa vehículo"
-              className={`inputs-registro letrainpitstitulo_registro ${errors.vehiclePlate ? 'input-error' : ''}`}
+              className={`inputs-editar letrainpitstitulo_editar ${
+                errors.vehiclePlate ? 'input-error' : ''
+              }`}
               required
             />
-            {errors.vehiclePlate && <p className="registro_carro_error">{errors.vehiclePlate}</p>}
+            {errors.vehiclePlate && <p className="editar_vehiculo_error">{errors.vehiclePlate}</p>}
             <input
               type="number"
               id="passengerCapacity"
               value={formData.passengerCapacity}
               onChange={handleInputChange}
               placeholder="Capacidad pasajeros"
-              className="inputs-registro letrainpitstitulo_registro"
+              className="inputs-editar letrainpitstitulo_editar"
               required
             />
             <input
@@ -150,22 +170,26 @@ const AgregarVehiculo: React.FC = () => {
               value={formData.vehicleBrand}
               onChange={handleInputChange}
               placeholder="Marca vehículo"
-              className={`inputs-registro letrainpitstitulo_registro ${errors.vehicleBrand ? 'input-error' : ''}`}
+              className={`inputs-editar letrainpitstitulo_editar ${
+                errors.vehicleBrand ? 'input-error' : ''
+              }`}
               required
             />
-            {errors.vehicleBrand && <p className="registro_carro_error">{errors.vehicleBrand}</p>}
+            {errors.vehicleBrand && <p className="editar_vehiculo_error">{errors.vehicleBrand}</p>}
             <input
               type="number"
               id="vehicleModel"
               value={formData.vehicleModel}
               onChange={handleInputChange}
               placeholder="Modelo vehículo (año)"
-              className={`inputs-registro letrainpitstitulo_registro ${errors.vehicleModel ? 'input-error' : ''}`}
+              className={`inputs-editar letrainpitstitulo_editar ${
+                errors.vehicleModel ? 'input-error' : ''
+              }`}
               required
             />
-            {errors.vehicleModel && <p className="registro_carro_error">{errors.vehicleModel}</p>}
+            {errors.vehicleModel && <p className="editar_vehiculo_error">{errors.vehicleModel}</p>}
 
-            <label className="registro_carro_soat-expiry-label" htmlFor="soatExpiryDate">
+            <label className="editar_vehiculo_soat-expiry-label" htmlFor="soatExpiryDate">
               Fecha de vencimiento del SOAT
             </label>
             <input
@@ -176,14 +200,16 @@ const AgregarVehiculo: React.FC = () => {
                 setSoatExpiryDate(e.target.value);
                 setErrors((prev) => ({ ...prev, soatExpiryDate: '' }));
               }}
-              className={`inputs-registro letrainpitstitulo_registro ${errors.soatExpiryDate ? 'input-error' : ''}`}
+              className={`inputs-editar letrainpitstitulo_editar ${
+                errors.soatExpiryDate ? 'input-error' : ''
+              }`}
               required
             />
-            {errors.soatExpiryDate && <p className="registro_carro_error">{errors.soatExpiryDate}</p>}
+            {errors.soatExpiryDate && <p className="editar_vehiculo_error">{errors.soatExpiryDate}</p>}
 
-            <p className="registro_carro_soat-label">Agregar foto del SOAT</p>
+            <p className="editar_vehiculo_soat-label">Editar foto del SOAT</p>
             <div
-              className="registro_carro_add-photo-square"
+              className="editar_vehiculo_add-photo-square"
               onClick={() => soatImageInputRef.current?.click()}
             >
               {soatImage ? (
@@ -192,7 +218,7 @@ const AgregarVehiculo: React.FC = () => {
                 <span>Escoja un archivo</span>
               )}
             </div>
-            {errors.soatImage && <p className="registro_carro_error">{errors.soatImage}</p>}
+            {errors.soatImage && <p className="editar_vehiculo_error">{errors.soatImage}</p>}
             <input
               type="file"
               accept="image/*"
@@ -201,9 +227,16 @@ const AgregarVehiculo: React.FC = () => {
               onChange={(e) => handleImageUpload(e, setSoatImage, setSoatFileName)}
             />
 
-            <div className="registro_carro_button-container">
-              <button type="submit" className="registro_carro_submit-button">
-                Añadir Vehículo
+            <div className="editar_vehiculo_button-container">
+              <button type="submit" className="editar_vehiculo_submit-button">
+                Guardar cambios
+              </button>
+              <button
+                type="button"
+                className="editar_vehiculo_delete-button"
+                onClick={handleEliminarVehiculo}
+              >
+                Eliminar vehículo
               </button>
             </div>
           </form>
@@ -213,4 +246,4 @@ const AgregarVehiculo: React.FC = () => {
   );
 };
 
-export default AgregarVehiculo;
+export default EditarVehiculo;

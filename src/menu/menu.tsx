@@ -130,6 +130,15 @@ const Menu = () => {
             </div>
           </div>
           {/* Nueva opción de Añadir carro */}
+          <div className="option">
+            <div
+              className="option-label clickable"
+              onClick={() => navigate('/editar_carro')}
+            >
+              <img src={carroIcon} alt="Añadir vehículo" className="icon" />
+              <span>Editar vehiculo</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

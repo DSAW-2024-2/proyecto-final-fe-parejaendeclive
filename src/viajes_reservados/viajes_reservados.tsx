@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './viajes_reservados.css';
 
@@ -11,13 +11,14 @@ interface Viaje {
   tarifa: number;
   cupos: number;
   placa: string;
+  celular: string; // Nuevo campo para el número celular
   estado: 'En curso' | 'Finalizado';
   paradas: string[];
 }
 
 const ViajesReservados = () => {
   const navigate = useNavigate();
-  const [viajes, setViajes] = useState<Viaje[]>([
+  const [viajes] = useState<Viaje[]>([
     {
       id: 1,
       inicio: 'Terminal Norte',
@@ -27,6 +28,7 @@ const ViajesReservados = () => {
       tarifa: 5000,
       cupos: 2,
       placa: 'ABC123',
+      celular: '3123456789', // Número celular añadido
       estado: 'En curso',
       paradas: ['Parada 1', 'Parada 2'],
     },
@@ -39,6 +41,7 @@ const ViajesReservados = () => {
       tarifa: 4500,
       cupos: 1,
       placa: 'XYZ789',
+      celular: '3109876543', // Número celular añadido
       estado: 'Finalizado',
       paradas: ['Parada A', 'Parada B'],
     },
@@ -174,6 +177,15 @@ const ViajesReservados = () => {
                 <input
                   type="text"
                   value={viajeSeleccionado.placa}
+                  readOnly
+                  className="input-highlight-viajes"
+                />
+              </div>
+              <div className="form-group-viajes">
+                <label>Celular:</label>
+                <input
+                  type="text"
+                  value={viajeSeleccionado.celular}
                   readOnly
                   className="input-highlight-viajes"
                 />

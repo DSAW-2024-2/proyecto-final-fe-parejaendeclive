@@ -9,8 +9,6 @@ import menuIcon from '../assets/menu.png';
 import personaIcon from '../assets/persona.png';
 
 // Importar las imágenes de los iconos de Leaflet
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
 // Definir la interfaz Viaje
@@ -23,6 +21,7 @@ interface Viaje {
   fecha: string; // Nuevo campo para la fecha
   tarifa: number;
   placa: string;
+  celular: string; // Nuevo campo para el número celular
   inicioCoords?: [number, number] | null;
   finalCoords?: [number, number] | null;
   recogidaCoords?: [number, number] | null;
@@ -69,6 +68,7 @@ const Pasajeros = () => {
       fecha: '2024-11-15',
       tarifa: 6000,
       placa: 'ABC123',
+      celular: '3123456789', // Número celular añadido
     },
     {
       id: 2,
@@ -79,6 +79,7 @@ const Pasajeros = () => {
       fecha: '2024-11-16',
       tarifa: 5500,
       placa: 'XYZ789',
+      celular: '3109876543', // Número celular añadido
     },
     {
       id: 3,
@@ -89,6 +90,7 @@ const Pasajeros = () => {
       fecha: '2024-11-15',
       tarifa: 6500,
       placa: 'JKL456',
+      celular: '3204567890', // Número celular añadido
     },
   ];
 
@@ -142,19 +144,6 @@ const Pasajeros = () => {
   };
 
   // Definir un icono predeterminado usando useMemo para optimizar el rendimiento
-  const defaultIcon: Icon = useMemo(
-    () =>
-      new L.Icon({
-        iconRetinaUrl: markerIcon2x,
-        iconUrl: markerIcon,
-        shadowUrl: markerShadow,
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41],
-      }),
-    []
-  );
 
   // Definir íconos personalizados para inicio, final y parada utilizando SVG data URLs
   const inicioIcon: Icon = useMemo(() => {
@@ -689,25 +678,34 @@ const Pasajeros = () => {
                       className="input-highlight_pasajeros"
                     />
                   </div>
-                  {/* Campo para seleccionar la cantidad de cupos a reservar */}
                   <div className="form-group_pasajeros">
-                    <label>Cupos a reservar:</label>
+                    <label>Celular:</label>
                     <input
-                      type="number"
-                      min="1"
-                      max={viajeSeleccionado_pasajeros.cupos}
-                      value={cuposAReservar}
-                      onChange={(e) => {
-                        const value = parseInt(e.target.value);
-                        if (value > viajeSeleccionado_pasajeros.cupos) {
-                          alert('No puedes reservar más cupos de los disponibles.');
-                          return;
-                        }
-                        setCuposAReservar(value);
-                      }}
-                      className="input-field_pasajeros"
+                      type="text"
+                      value={viajeSeleccionado_pasajeros.celular}
+                      readOnly
+                      className="input-highlight_pasajeros"
                     />
                   </div>
+                </div>
+                {/* Campo para seleccionar la cantidad de cupos a reservar */}
+                <div className="form-group_pasajeros">
+                  <label>Cupos a reservar:</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max={viajeSeleccionado_pasajeros.cupos}
+                    value={cuposAReservar}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value);
+                      if (value > viajeSeleccionado_pasajeros.cupos) {
+                        alert('No puedes reservar más cupos de los disponibles.');
+                        return;
+                      }
+                      setCuposAReservar(value);
+                    }}
+                    className="input-field_pasajeros"
+                  />
                 </div>
 
                 {/* Inputs para los puntos de recogida */}
