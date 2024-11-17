@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './viajes_reservados.css';
 
@@ -17,7 +17,7 @@ interface Viaje {
 
 const ViajesReservados = () => {
   const navigate = useNavigate();
-  const [viajes, setViajes] = useState<Viaje[]>([
+  const [viajes] = useState<Viaje[]>([
     {
       id: 1,
       inicio: 'Terminal Norte',

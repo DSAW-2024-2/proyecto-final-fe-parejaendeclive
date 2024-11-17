@@ -9,8 +9,9 @@ import Perfil from './perfil/perfil';
 import EditPerfil from './editar_perfil/editar_perfil';
 import Añadir_viaje from './añadir_viaje/añadir_viaje';
 import RegistroCarro from './registro_carro/registro_carro';
-import Conductor from './conductores/conductores'
+import Conductor from './conductores/conductores';
 import Viajes_Reservados from './viajes_reservados/viajes_reservados';
+import Editar_carro from './editar_carro/editar_carro';
 import { AuthProvider } from './Authentication';
 import ProtectedRoute from './routeProtected';
 import LoginRedirect from './login-redirect';
@@ -38,118 +39,105 @@ const App: React.FC = () => {
     <AuthProvider> {/* Envolver toda la aplicación con el contexto de autenticación */}
       <Router>
         <Routes>
+          {/* Rutas Públicas */}
           <Route path="/" element={<Principal />} />
           <Route path="/principal" element={<Principal />} />
           <Route path="/registro" element={<Registro />} />
-          
+
+          {/* Ruta de Inicio de Sesión con Redirección para Usuarios Autenticados */}
           <Route 
             path="/login" 
             element={
-              /* 
               <LoginRedirect>
                 <Login />
-              </LoginRedirect> 
-              */
-              <Login />
+              </LoginRedirect>
             } 
           />
-          
+
+          {/* Rutas Protegidas */}
           <Route 
             path="/pasajeros" 
             element={
-              /* 
               <ProtectedRoute>
                 <Pasajero />
-              </ProtectedRoute> 
-              */
-              <Pasajero />
+              </ProtectedRoute>
             } 
           />
           
           <Route 
             path="/menu" 
             element={
-              /* 
               <ProtectedRoute>
                 <Menu />
-              </ProtectedRoute> 
-              */
-              <Menu />
+              </ProtectedRoute>
             } 
           />
           
           <Route 
             path="/perfil" 
             element={
-              /* 
               <ProtectedRoute>
                 <Perfil />
-              </ProtectedRoute> 
-              */
-              <Perfil />
+              </ProtectedRoute>
             } 
           />
 
           <Route 
             path="/editar-perfil" 
             element={
-              /* 
               <ProtectedRoute>
                 <EditPerfil />
-              </ProtectedRoute> 
-              */
-              <EditPerfil />
+              </ProtectedRoute>
             } 
           />
-          
-          {/* Añadir la ruta para /registro-carro */}
+
           <Route 
             path="/registro-carro" 
             element={
-              /*
               <ProtectedRoute>
                 <RegistroCarro />
               </ProtectedRoute>
-              */
-              <RegistroCarro />
             } 
           />
+
           <Route 
             path="/añadir_viaje" 
             element={
-              /* 
               <ProtectedRoute>
-                <EditPerfil />
-              </ProtectedRoute> 
-              */
-              <Añadir_viaje />
+                <Añadir_viaje />
+              </ProtectedRoute>
             } 
           />
-          {/* Fin de la ruta para /registro-carro */}
+
           <Route 
             path="/conductores" 
             element={
-              /* 
               <ProtectedRoute>
-                <EditPerfil />
-              </ProtectedRoute> 
-              */
-              <Conductor />
+                <Conductor />
+              </ProtectedRoute>
             } 
           />
-          {/* Fin de la ruta para /registro-carro */}
+
           <Route 
             path="/reservas" 
             element={
-              /* 
               <ProtectedRoute>
-                <EditPerfil />
-              </ProtectedRoute> 
-              */
-              <Viajes_Reservados />
+                <Viajes_Reservados />
+              </ProtectedRoute>
             } 
           />
-          {/* Fin de la ruta para /registro-carro */}
+
+          <Route 
+            path="/editar_carro" 
+            element={
+              <ProtectedRoute>
+                <Editar_carro />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* Rutas No Encontradas (Opcional) */}
+          {/* <Route path="*" element={<NotFound />} /> */}
         </Routes>
       </Router>
     </AuthProvider>
