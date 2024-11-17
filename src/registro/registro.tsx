@@ -112,7 +112,7 @@ const Registro: React.FC = () => {
     event.preventDefault();
     if (validarFormulario()) {
       try {
-        let response;
+        let response;        
         if (fileInputRef.current && fileInputRef.current.files && fileInputRef.current.files[0]) {
           // Si hay una foto, usamos FormData
           const formDataToSend = new FormData();

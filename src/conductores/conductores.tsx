@@ -9,8 +9,7 @@ import menuIcon from '../assets/menu.png';
 import personaIcon from '../assets/persona.png';
 
 // Importar las imágenes de los iconos de Leaflet
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
+
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
 // Definir la interfaz Viaje
@@ -190,21 +189,7 @@ const Conductores = () => {
   }, []);
 
   // Definir icono morado para indicar selección activa
-  const activeIcon: Icon = useMemo(() => {
-    const svg = encodeURIComponent(`
-      <svg xmlns='http://www.w3.org/2000/svg' width='25' height='41' viewBox='0 0 25 41'>
-        <path fill='#800080' d='M12.5 0C5.6 0 0 5.6 0 12.5c0 11.3 12.5 29.5 12.5 29.5S25 23.8 25 12.5C25 5.6 19.4 0 12.5 0zm0 18.8a6.3 6.3 0 1 1 0-12.6 6.3 6.3 0 0 1 0 12.6z'/>
-      </svg>
-    `);
-    return new L.Icon({
-      iconUrl: `data:image/svg+xml;charset=UTF-8,${svg}`,
-      iconSize: [25, 41],
-      iconAnchor: [12, 41],
-      popupAnchor: [1, -34],
-      shadowUrl: markerShadow,
-      shadowSize: [41, 41],
-    });
-  }, []);
+
 
   // Manejo de cambios en los filtros
   const handleHoraSalidaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
