@@ -20,6 +20,7 @@ const EditarVehiculo: React.FC = () => {
   const soatImageInputRef = useRef<HTMLInputElement | null>(null);
 
   const [formData, setFormData] = useState({
+    vehiclePlate: '',
     passengerCapacity: '',
     vehicleBrand: '',
     vehicleModel: '',
@@ -69,6 +70,7 @@ const EditarVehiculo: React.FC = () => {
 
         // Prellenar los datos del vehículo
         setFormData({
+          vehiclePlate: carData.carID || '',
           passengerCapacity: carData.carPassengers.toString() || '',
           vehicleBrand: carData.carBrand || '',
           vehicleModel: carData.carModel || '',
@@ -119,20 +121,28 @@ const EditarVehiculo: React.FC = () => {
   };
 
   const validateInputs = () => {
+    const plateRegex = /^[A-Za-z]{3}\d{3}$/;
+    const brandRegex = /^[A-Za-z]+$/;
+    const today = new Date();
+    const selectedDate = new Date(inputDate);
+
     const newErrors: { [key: string]: string } = {};
 
-    if (!formData.passengerCapacity || isNaN(Number(formData.passengerCapacity))) {
-      newErrors.passengerCapacity = 'Debe ser un número válido.';
+    if (!plateRegex.test(formData.vehiclePlate)) {
+      newErrors.vehiclePlate = 'La placa debe ser 3 letras y 3 números.';
     }
-    if (!formData.vehicleBrand) {
-      newErrors.vehicleBrand = 'La marca es obligatoria.';
+    if (!brandRegex.test(formData.vehicleBrand)) {
+      newErrors.vehicleBrand = 'La marca solo puede contener letras.';
     }
     if (!formData.vehicleModel || isNaN(Number(formData.vehicleModel))) {
       newErrors.vehicleModel = 'El modelo debe ser un año válido.';
     }
+    if (!inputDate || selectedDate <= today) {
+      newErrors.soatExpiryDate = 'La fecha de vencimiento debe ser mayor a la fecha actual.';
+    }
     if (!soatExpiryDate) {
       newErrors.soatExpiryDate = 'La fecha de vencimiento es obligatoria.';
-    }
+    }
     if (!carImage) {
       newErrors.carImage = 'Debe añadir una foto del carro.';
     }
@@ -167,8 +177,9 @@ const EditarVehiculo: React.FC = () => {
         await axios.put(
           `${api_URL}/car/${carId}`,
           {
+            carID: formData.vehiclePlate,
             photoCar: carImage,
-            CarPassengers: formData.passengerCapacity,
+            carPassengers: formData.passengerCapacity,
             photoSOAT: soatImage,
             carBrand: formData.vehicleBrand,
             carModel: formData.vehicleModel,
@@ -229,6 +240,18 @@ const EditarVehiculo: React.FC = () => {
         <div className="editar_vehiculo_right-section">
           <form onSubmit={handleGuardarCambios} className="editar_vehiculo_car-form">
             <input
+              type="text"
+              id="vehiclePlate"
+              value={formData.vehiclePlate}
+              onChange={handleInputChange}
+              placeholder="Placa vehículo"
+              className={`inputs-editar letrainpitstitulo_editar ${
+                errors.vehiclePlate ? 'input-error' : ''
+              }`}
+              required
+            />
+            {errors.vehiclePlate && <p className="editar_vehiculo_error">{errors.vehiclePlate}</p>}
+            <input
               type="number"
               id="passengerCapacity"
               value={formData.passengerCapacity}
@@ -246,7 +269,9 @@ const EditarVehiculo: React.FC = () => {
               value={formData.vehicleBrand}
               onChange={handleInputChange}
               placeholder="Marca vehículo"
-              className="inputs-editar letrainpitstitulo_editar"
+              className={`inputs-editar letrainpitstitulo_editar ${
+                errors.vehicleBrand ? 'input-error' : ''
+              }`}
               required
             />
             {errors.vehicleBrand && (
@@ -258,7 +283,9 @@ const EditarVehiculo: React.FC = () => {
               value={formData.vehicleModel}
               onChange={handleInputChange}
               placeholder="Modelo vehículo (año)"
-              className="inputs-editar letrainpitstitulo_editar"
+              className={`inputs-editar letrainpitstitulo_editar ${
+                errors.vehicleModel ? 'input-error' : ''
+              }`}
               required
             />
             {errors.vehicleModel && (

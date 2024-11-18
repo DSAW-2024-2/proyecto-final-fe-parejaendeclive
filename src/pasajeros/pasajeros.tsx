@@ -8,8 +8,6 @@ import './pasajeros.css';
 import menuIcon from '../assets/menu.png';
 import personaIcon from '../assets/persona.png';
 
-// Importar las imágenes de los iconos de Leaflet
-
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
 // Definir la interfaz Viaje
@@ -147,9 +145,6 @@ const Pasajeros = () => {
       return null;
     }
   };
-
-  // Definir un icono predeterminado usando useMemo para optimizar el rendimiento
-  
 
   // Definir íconos personalizados para inicio, final y parada utilizando SVG data URLs
   const inicioIcon: Icon = useMemo(() => {
