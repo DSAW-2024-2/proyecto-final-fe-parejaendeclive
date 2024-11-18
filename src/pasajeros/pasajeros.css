@@ -192,7 +192,9 @@ html {
     background-color: #800080; /* Morado */
 }
 
-.input-field_pasajeros {
+/* Estilos para inputs y selects en filtros y modal */
+input.input-field_pasajeros,
+select.input-field_pasajeros {
     width: 100%;
     padding: 0.625rem;
     padding-left: 2.5rem; /* Espacio suficiente para el icono */
@@ -205,10 +207,22 @@ html {
     transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
-.input-field_pasajeros:focus {
+input.input-field_pasajeros:focus,
+select.input-field_pasajeros:focus {
     background-color: rgba(208, 162, 242, 0.75);
     border-color: #2e0e7c;
     outline: none;
+}
+
+/* Estilos específicos para textarea "Ruta" en el modal */
+.modal-content_pasajeros textarea.input-field_pasajeros {
+    min-height: 3rem;
+    max-height: 10rem;
+    resize: vertical;
+    overflow-y: auto;
+    background-color: rgba(208, 162, 242, 0.5); /* Mismo fondo que los otros inputs */
+    color: var(--color-primario); /* Mismo color de texto */
+    padding-left: 2.5rem; /* Espacio para el icono si es necesario */
 }
 
 /* Botones */
@@ -329,37 +343,7 @@ html {
     color: var(--color-primario);
 }
 
-.input-highlight_pasajeros {
-    width: 100%;
-    padding: 0.625rem;
-    padding-left: 2.5rem; /* Espacio suficiente para el icono */
-    border: var(--border-thin) solid var(--color-primario);
-    border-radius: 1rem;
-    font-family: var(--fuente-secundaria);
-    font-size: 0.875rem;
-    color: var(--color-primario);
-    background-color: rgba(208, 162, 242, 0.5);
-    transition: background-color 0.3s ease, border-color 0.3s ease;
-}
-
-.input-highlight_pasajeros:focus {
-    background-color: rgba(208, 162, 242, 0.75);
-    border-color: #2e0e7c;
-    outline: none;
-}
-
-/* Alinear campos del viaje seleccionado */
-.detalles-section_pasajeros .form-row_pasajeros {
-    display: flex;
-    flex-direction: row;
-    gap: 1rem;
-}
-
-.detalles-section_pasajeros .form-group_pasajeros {
-    flex: 1;
-}
-
-/* Alinear Cupos, Hora y Fecha en los filtros */
+/* Alinear Cupos, Ruta y otros campos en el modal */
 .form-row_pasajeros {
     display: flex;
     flex-direction: row;
@@ -407,27 +391,4 @@ html {
 @media (max-width: 768px) {
     /* Puedes eliminar o dejar vacías estas media queries si ya no son necesarias */
     /* Si decides mantenerlas para otras funcionalidades, ajusta según sea necesario */
-}
-
-/* Estilos para el Botón "Añadir parada" */
-.button-add_pasajeros {
-    width: 100%;
-    padding: 0.625rem 1rem;
-    background-color: var(--color-primario);
-    color: var(--color-fondo);
-    border: none;
-    border-radius: 0.75rem;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    font-family: var(--fuente-principal);
-    font-weight: 600;
-    font-size: 0.938rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 0.5rem; /* Añadir margen superior para separación */
-}
-
-.button-add_pasajeros:hover {
-    background-color: #563b6c;
 }
