@@ -197,23 +197,6 @@ const Conductores = () => {
     });
   }, []);
 
-  // Definir icono morado para indicar selección activa
-  const activeIcon: Icon = useMemo(() => {
-    const svg = encodeURIComponent(`
-      <svg xmlns='http://www.w3.org/2000/svg' width='25' height='41' viewBox='0 0 25 41'>
-        <path fill='#800080' d='M12.5 0C5.6 0 0 5.6 0 12.5c0 11.3 12.5 29.5 12.5 29.5S25 23.8 25 12.5C25 5.6 19.4 0 12.5 0zm0 18.8a6.3 6.3 0 1 1 0-12.6 6.3 6.3 0 0 1 0 12.6z'/>
-      </svg>
-    `);
-    return new L.Icon({
-      iconUrl: `data:image/svg+xml;charset=UTF-8,${svg}`,
-      iconSize: [25, 41],
-      iconAnchor: [12, 41],
-      popupAnchor: [1, -34],
-      shadowUrl: markerShadow,
-      shadowSize: [41, 41],
-    });
-  }, []);
-
   // Manejo de cambios en los filtros
   const handleHoraSalidaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setHoraSalida_conductores(e.target.value);
@@ -280,6 +263,13 @@ const Conductores = () => {
       updatedParadas.splice(index, 1); // Elimina la parada en el índice especificado
       setViajeSeleccionado_conductores({ ...viajeSeleccionado_conductores, paradas: updatedParadas });
       setParadasCoords(updatedParadas);
+    }
+  };
+
+  // Función para manejar el cambio del estado del viaje
+  const handleChangeEstadoViaje = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    if (viajeSeleccionado_conductores) {
+      setViajeSeleccionado_conductores({ ...viajeSeleccionado_conductores, estado: e.target.value });
     }
   };
 
@@ -503,9 +493,16 @@ const Conductores = () => {
                   </div>
 
                   <div className="button-container_conductores">
-                    <button className="button-status_conductores" disabled>
-                      Estado: {viajeSeleccionado_conductores.estado}
-                    </button>
+                    {/* Modificar Estado del Viaje */}
+                    <select
+                      value={viajeSeleccionado_conductores.estado}
+                      onChange={handleChangeEstadoViaje}
+                      className="button-status-select_conductores"
+                    >
+                      <option value="Disponible">Disponible</option>
+                      <option value="En curso">En curso</option>
+                      <option value="Finalizado">Finalizado</option>
+                    </select>
                     <button className="button-secondary_conductores" onClick={handleCancelarViaje}>
                       Cancelar Viaje
                     </button>
