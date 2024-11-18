@@ -1,6 +1,7 @@
+// src/pasajeros/Pasajeros.tsx
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
 import L, { Icon, LeafletMouseEvent } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -12,7 +13,7 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
 // Definir la interfaz Viaje
 interface Viaje {
-  id: number;
+  id: string;
   startTrip: string;
   endTrip: string;
   availablePlaces: number;
@@ -22,15 +23,21 @@ interface Viaje {
   carID: string;
   number: string; // Nuevo campo para el teléfono
   route: string; // Nuevo campo para la ruta
-  stops?: string | null;
-  reservedBy?: string | null;
+  stops?: string[] | null;
+  reservedBy?: string[] | null;
   status?: string;
   startCoords?: [number, number] | null;
   endCoords?: [number, number] | null;
   pickupCoords?: [number, number] | null;
 }
 
-const Pasajeros = () => {
+// Definir la interfaz de la respuesta de la API
+interface TripsResponse {
+  message: string;
+  trips: Viaje[];
+}
+
+const Pasajeros: React.FC = () => {
   const navigate = useNavigate();
 
   // Estados para los filtros y datos
@@ -39,6 +46,7 @@ const Pasajeros = () => {
   const [availablePlaces_pasajeros, setAvailablePlaces_pasajeros] = useState(2);
   const [timeTrip_pasajeros, setTimeTrip_pasajeros] = useState('');
   const [date_pasajeros, setDate_pasajeros] = useState(''); // Nuevo estado para la fecha
+  const [todosViajes, setTodosViajes] = useState<Viaje[]>([]); // Nuevo estado para todos los viajes
   const [viajes_pasajeros, setViajes_pasajeros] = useState<Viaje[]>([]);
   const [viajeSeleccionado_pasajeros, setViajeSeleccionado_pasajeros] = useState<Viaje | null>(null);
 
@@ -58,56 +66,30 @@ const Pasajeros = () => {
   // Nuevo estado para la cantidad de availablePlaces a reservar
   const [placesToReserve, setPlacesToReserve] = useState(1);
 
+  // Estados para carga y error
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
   const opcionesPlaces_pasajeros = Array.from({ length: 11 }, (_, index) => index);
 
-  // Viajes disponibles (simulación) con coordenadas y fechas
-  const todosViajes: Viaje[] = [
-    {
-      id: 1,
-      startTrip: 'Titan Plaza',
-      endTrip: 'Universidad de La Sabana',
-      availablePlaces: 2,
-      timeTrip: '09:00',
-      date: '2024-11-15',
-      priceTrip: 6000,
-      carID: 'ABC123',
-      number: '3101234567',
-      route: 'Ruta principal desde Titan Plaza hacia la Universidad de La Sabana pasando por la Avenida Central y el Parque Central.',
-      stops: null,
-      reservedBy: null,
-      status: 'available'
-    },
-    {
-      id: 2,
-      startTrip: 'Estación Calle 100',
-      endTrip: 'Universidad de La Sabana',
-      availablePlaces: 3,
-      timeTrip: '10:00',
-      date: '2024-11-16',
-      priceTrip: 5500,
-      carID: 'XYZ789',
-      number: '3107654321',
-      route: 'Ruta alterna desde Estación Calle 100 hacia la Universidad de La Sabana pasando por la Avenida El Dorado.',
-      stops: null,
-      reservedBy: null,
-      status: 'available'
-    },
-    {
-      id: 3,
-      startTrip: 'Estación Calle 85',
-      endTrip: 'Universidad de Los Andes',
-      availablePlaces: 2,
-      timeTrip: '09:30',
-      date: '2024-11-15',
-      priceTrip: 6500,
-      carID: 'JKL456',
-      number: '3101122334',
-      route: 'Ruta directa desde Estación Calle 85 hacia la Universidad de Los Andes, pasando por la Avenida Boyacá.',
-      stops: null,
-      reservedBy: null,
-      status: 'available'
-    }
-  ];
+  // Obtener la URL de la API desde el .env
+  const apiUrl = import.meta.env.VITE_API_URL;
+
+  // Obtener el token de localStorage
+  const token = localStorage.getItem('token');
+
+  // Configurar Axios con el token de autenticación
+  const axiosInstance = useMemo(() => {
+    const instance = axios.create({
+      baseURL: apiUrl,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: token ? `Bearer ${token}` : '',
+      },
+      withCredentials: true,
+    });
+    return instance;
+  }, [apiUrl, token]);
 
   // Caché para geocodificación
   const geocodeCache = useMemo(() => new Map<string, [number, number]>(), []);
@@ -127,7 +109,7 @@ const Pasajeros = () => {
         },
       });
 
-      if (response.data && response.data.length > 0) {
+      if (response.data && Array.isArray(response.data) && response.data.length > 0) {
         const { lat, lon } = response.data[0];
         const coords: [number, number] = [parseFloat(lat), parseFloat(lon)];
         geocodeCache.set(address, coords);
@@ -158,7 +140,7 @@ const Pasajeros = () => {
     }
   };
 
-  // Definir íconos personalizados para start, end y parada utilizando SVG data URLs
+  // Definir íconos personalizados para start, end y pickup utilizando SVG data URLs
   const startIcon: Icon = useMemo(() => {
     const svg = encodeURIComponent(`
       <svg xmlns='http://www.w3.org/2000/svg' width='25' height='41' viewBox='0 0 25 41'>
@@ -225,7 +207,7 @@ const Pasajeros = () => {
   }, []);
 
   // Componente para manejar eventos en el mapa y seleccionar puntos de start, end o pickup
-  const LocationSelector = () => {
+  const LocationSelector: React.FC = () => {
     useMapEvents({
       click: async (e: LeafletMouseEvent) => {
         if (!activeInput) return;
@@ -307,19 +289,13 @@ const Pasajeros = () => {
   };
 
   // Función para mover los marcadores
-  const DraggableMarker = ({
-    coords,
-    setCoords,
-    setAddress,
-    type,
-    index,
-  }: {
+  const DraggableMarker: React.FC<{
     coords: [number, number] | null;
     setCoords: (coords: [number, number] | null) => void;
     setAddress: (address: string) => void;
     type: 'start' | 'end' | 'pickup';
     index?: number;
-  }) => {
+  }> = ({ coords, setCoords, setAddress, type, index }) => {
     const markerRef = React.useRef<L.Marker>(null);
 
     const eventHandlers = {
@@ -363,15 +339,11 @@ const Pasajeros = () => {
   };
 
   // Función para mostrar marcadores no movibles
-  const StaticMarker = ({
-    coords,
-    label,
-    icon,
-  }: {
+  const StaticMarker: React.FC<{
     coords: [number, number];
     label: string;
     icon: Icon;
-  }) => (
+  }> = ({ coords, label, icon }) => (
     <Marker position={coords} icon={icon}>
       <Popup>{label}</Popup>
     </Marker>
@@ -388,6 +360,13 @@ const Pasajeros = () => {
 
   // Función de filtrado
   const filterViajes = () => {
+    if (!Array.isArray(todosViajes)) {
+      console.error('todosViajes no es un array:', todosViajes);
+      setError('Error interno de la aplicación.');
+      setViajes_pasajeros([]);
+      return;
+    }
+
     const viajesFiltrados = todosViajes.filter((viaje) => {
       const coincideStart = puntoStart
         ? viaje.startTrip.toLowerCase().includes(puntoStart.toLowerCase()) ||
@@ -397,7 +376,9 @@ const Pasajeros = () => {
         ? viaje.endTrip.toLowerCase().includes(puntoEnd.toLowerCase()) ||
           puntoEnd.toLowerCase().includes(viaje.endTrip.toLowerCase())
         : true;
-      const coincidePlaces = availablePlaces_pasajeros ? viaje.availablePlaces >= availablePlaces_pasajeros : true;
+      const coincidePlaces = availablePlaces_pasajeros
+        ? viaje.availablePlaces >= availablePlaces_pasajeros
+        : true;
       const coincideTime = timeTrip_pasajeros ? viaje.timeTrip === timeTrip_pasajeros : true;
       const coincideDate = date_pasajeros ? viaje.date === date_pasajeros : true;
 
@@ -410,12 +391,59 @@ const Pasajeros = () => {
   // useEffect para filtrar automáticamente cuando cambien los filtros
   useEffect(() => {
     filterViajes();
-  }, [puntoStart, puntoEnd, availablePlaces_pasajeros, timeTrip_pasajeros, date_pasajeros]);
+  }, [puntoStart, puntoEnd, availablePlaces_pasajeros, timeTrip_pasajeros, date_pasajeros, todosViajes]);
 
-  // Inicializar viajes_pasajeros con todos los viajes al montar el componente
+  // useEffect para obtener los viajes desde la API al montar el componente
   useEffect(() => {
-    setViajes_pasajeros(todosViajes);
-  }, []);
+    const fetchViajes = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await axiosInstance.get<TripsResponse>('/trips'); // Endpoint correcto
+
+        console.log('Respuesta de la API:', response.data); // Verificar la respuesta
+
+        if (Array.isArray(response.data.trips)) {
+          setTodosViajes(response.data.trips);
+          setViajes_pasajeros(response.data.trips);
+        } else {
+          console.error('Respuesta inesperada de la API:', response.data);
+          setError('Formato de datos inesperado recibido desde el servidor.');
+          setTodosViajes([]);
+          setViajes_pasajeros([]);
+        }
+      } catch (err) {
+        console.error('Error fetching viajes:', err);
+        if (axios.isAxiosError(err)) {
+          const axiosError = err as AxiosError;
+          if (axiosError.response) {
+            if (axiosError.response.status === 401) {
+              setError('No autorizado. Por favor, inicia sesión nuevamente.');
+              navigate('/login');
+            } else {
+              setError('Error al obtener los viajes disponibles. Por favor, inténtalo de nuevo más tarde.');
+            }
+          } else if (axiosError.request) {
+            setError('No se recibió respuesta del servidor. Por favor, intenta de nuevo más tarde.');
+          } else {
+            setError('Error al configurar la solicitud. Por favor, intenta de nuevo.');
+          }
+        } else {
+          setError('Ocurrió un error desconocido. Por favor, intenta de nuevo.');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Verificar si el token está presente antes de intentar la solicitud
+    if (token) {
+      fetchViajes();
+    } else {
+      setError('No estás autenticado. Por favor, inicia sesión.');
+      navigate('/login');
+    }
+  }, [axiosInstance, navigate, token]);
 
   // Seleccionar un viaje de la lista
   const handleSeleccionarViaje_pasajeros = async (viaje: Viaje) => {
@@ -567,8 +595,20 @@ Número de Teléfono del Viaje: ${viajeSeleccionado_pasajeros?.number}`);
             </div>
           )}
 
+          {/* Manejo de estados de carga y error */}
+          {loading && !error && (
+            <div className="loading-overlay">
+              <p>Cargando viajes disponibles...</p>
+            </div>
+          )}
+          {error && (
+            <div className="error-overlay">
+              <p className="error-message_pasajeros">{error}</p>
+            </div>
+          )}
+
           {/* Viajes Disponibles */}
-          {!viajeSeleccionado_pasajeros && (
+          {!viajeSeleccionado_pasajeros && !loading && !error && (
             <>
               {viajes_pasajeros.length > 0 ? (
                 <div className="viajes-section_pasajeros">
