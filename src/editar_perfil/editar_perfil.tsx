@@ -25,7 +25,7 @@ const EditarPerfil: React.FC = () => {
     email: '',
     number: '',
     password: '',
-    photoUser: ''
+    photoUser: '',
   });
   const [errores, setErrores] = useState({
     name: '',
@@ -33,30 +33,26 @@ const EditarPerfil: React.FC = () => {
     idUser: '',
     email: '',
     number: '',
-    password: ''
+    password: '',
   });
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
-  
+
   useEffect(() => {
-    // Obtener la información del usuario al cargar la página
     const fetchUserData = async () => {
-      
       if (token) {
         try {
-          // Decodificar el token manualmente para obtener el userId
           const payloadBase64 = token.split('.')[1];
           const decodedPayload = JSON.parse(atob(payloadBase64));
           const userId = decodedPayload.userId;
 
-          // Realizar la solicitud GET al backend con el userId
           const response = await axios.get(`${api_URL}/user/${userId}`, {
             headers: {
-              'Authorization': `Bearer ${token}`
+              Authorization: `Bearer ${token}`,
             },
-            withCredentials: true
+            withCredentials: true,
           });
 
           if (response.status === 200) {
@@ -67,8 +63,8 @@ const EditarPerfil: React.FC = () => {
               idUser: userData.idUser,
               email: userData.email,
               number: userData.number,
-              password: '', // Por razones de seguridad, no mostramos la contraseña original
-              photoUser: userData.photoUser || ''
+              password: '',
+              photoUser: userData.photoUser || '',
             });
             setImagenPerfil(userData.photoUser || null);
           }
@@ -88,12 +84,7 @@ const EditarPerfil: React.FC = () => {
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        const result = reader.result as string;
-        setImagenPerfil(result);
-        setFormData(prevFormData => ({
-          ...prevFormData,
-          photoUser: result
-        }));
+        setImagenPerfil(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
@@ -107,7 +98,7 @@ const EditarPerfil: React.FC = () => {
 
   const validarFormulario = () => {
     let esValido = true;
-    let erroresTemp = { ...errores };
+    const erroresTemp = { ...errores };
 
     if (!formData.name || /\d/.test(formData.name)) {
       erroresTemp.name = 'El nombre no debe contener números';
@@ -121,13 +112,6 @@ const EditarPerfil: React.FC = () => {
       esValido = false;
     } else {
       erroresTemp.LastName = '';
-    }
-
-    if (!/^[0]{4}\d{6}$/.test(formData.idUser)) {
-      erroresTemp.idUser = 'El ID debe contener 10 números y comenzar con 4 ceros';
-      esValido = false;
-    } else {
-      erroresTemp.idUser = '';
     }
 
     if (!/\S+@\S+\.\S+/.test(formData.email)) {
@@ -144,8 +128,6 @@ const EditarPerfil: React.FC = () => {
       erroresTemp.number = '';
     }
 
-    
-
     setErrores(erroresTemp);
     return esValido;
   };
@@ -154,57 +136,54 @@ const EditarPerfil: React.FC = () => {
     event.preventDefault();
     if (validarFormulario()) {
       try {
-        let newFormData = { ...formData };
+        const payloadBase64 = token?.split('.')[1] || '';
+        const decodedPayload = JSON.parse(atob(payloadBase64));
+        const userId = decodedPayload.userId;
+
+        let response;
 
         if (fileInputRef.current && fileInputRef.current.files && fileInputRef.current.files[0]) {
-          newFormData = {
-            ...formData,
-            photoUser: fileInputRef.current.files[0].name || ''
-          };
+          const formDataToSend = new FormData();
+          formDataToSend.append('name', formData.name);
+          formDataToSend.append('LastName', formData.LastName);
+          formDataToSend.append('idUser', formData.idUser);
+          formDataToSend.append('email', formData.email);
+          formDataToSend.append('number', formData.number);
+          formDataToSend.append('photoUser', fileInputRef.current.files[0]);
+
+          // Logs para verificar FormData
+          for (let [key, value] of formDataToSend.entries()) {
+                console.log(`${key}:`, value);
+          }
+          response = await axios.put(`${api_URL}/user/${userId}`, formDataToSend, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              Authorization: `Bearer ${token}`,
+            },
+          });
+        } else {
+          response = await axios.put(`${api_URL}/user/${userId}`, formData, {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          });
         }
-        if(token){
-          const payloadBase64 = token.split('.')[1];
-          const decodedPayload = JSON.parse(atob(payloadBase64));
-          const userId = decodedPayload.userId;
-        
-        await axios.put(`${api_URL}/user/${userId}`, newFormData, {
-          
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          withCredentials: true
-        });
-      }
+
         alert('Perfil actualizado exitosamente.');
         navigate('/perfil');
       } catch (error) {
-        if (axios.isAxiosError(error)) {
-          console.error('Error de Axios al actualizar perfil:', error.toJSON());
-          if (error.response) {
-            console.error('Respuesta del servidor:', error.response.data);
-            alert(`Error en la actualización: ${error.response.data.message}`);
-          } else if (error.request) {
-            console.error('No se recibió respuesta del servidor:', error.request);
-            alert('No se recibió respuesta del servidor. Por favor, intenta de nuevo más tarde.');
-          } else {
-            console.error('Error al configurar la solicitud:', error.message);
-            alert(`Error al configurar la solicitud: ${error.message}`);
-          }
-        } else {
-          console.error('Error desconocido:', error);
-          alert('Ocurrió un error desconocido. Por favor, intenta de nuevo.');
-        }
+        console.error('Error al actualizar el perfil:', error);
+        alert('Ocurrió un error al actualizar el perfil.');
       }
     }
-  
   };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setFormData({
       ...formData,
-      [name]: value
+      [name]: value,
     });
   };
 
@@ -257,41 +236,29 @@ const EditarPerfil: React.FC = () => {
           name="idUser"
           value={formData.idUser}
           onChange={handleChange}
-          className={errores.idUser ? 'input-error' : ''}
-          disabled // Desactivar para que el usuario no pueda cambiar su ID
+          disabled
         />
-        {errores.idUser && <p className="error">{errores.idUser}</p>}
-
         <input
           type="email"
           placeholder="Correo institucional"
           name="email"
           value={formData.email}
           onChange={handleChange}
-          className={errores.email ? 'input-error' : ''}
         />
-        {errores.email && <p className="error">{errores.email}</p>}
-
         <input
           type="tel"
           placeholder="Número de contacto"
           name="number"
           value={formData.number}
           onChange={handleChange}
-          className={errores.number ? 'input-error' : ''}
         />
-        {errores.number && <p className="error">{errores.number}</p>}
-
         <input
           type="password"
           placeholder="Contraseña"
           name="password"
           value={formData.password}
           onChange={handleChange}
-          className={errores.password ? 'input-error' : ''}
         />
-        {errores.password && <p className="error">{errores.password}</p>}
-
         <button type="submit">Guardar</button>
       </form>
     </div>

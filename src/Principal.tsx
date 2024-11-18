@@ -9,11 +9,12 @@ import Perfil from './perfil/perfil';
 import EditPerfil from './editar_perfil/editar_perfil';
 import Añadir_viaje from './añadir_viaje/añadir_viaje';
 import RegistroCarro from './registro_carro/registro_carro';
-import Conductor from './conductores/conductores'
+import Conductor from './conductores/conductores';
 import Viajes_Reservados from './viajes_reservados/viajes_reservados';
+import EditarVehiculo from './editar_carro/editar_carro'; // Importar EditarVehiculo
 import { AuthProvider } from './Authentication';
-import ProtectedRoute from './routeProtected';
-import LoginRedirect from './login-redirect';
+//import ProtectedRoute from './routeProtected';
+//import LoginRedirect from './login-redirect';
 
 const Principal: React.FC = () => {
   return (
@@ -41,7 +42,6 @@ const App: React.FC = () => {
           <Route path="/" element={<Principal />} />
           <Route path="/principal" element={<Principal />} />
           <Route path="/registro" element={<Registro />} />
-          
           <Route 
             path="/login" 
             element={
@@ -53,7 +53,6 @@ const App: React.FC = () => {
               <Login />
             } 
           />
-          
           <Route 
             path="/pasajeros" 
             element={
@@ -65,7 +64,6 @@ const App: React.FC = () => {
               <Pasajero />
             } 
           />
-          
           <Route 
             path="/menu" 
             element={
@@ -77,7 +75,6 @@ const App: React.FC = () => {
               <Menu />
             } 
           />
-          
           <Route 
             path="/perfil" 
             element={
@@ -89,7 +86,6 @@ const App: React.FC = () => {
               <Perfil />
             } 
           />
-
           <Route 
             path="/editar-perfil" 
             element={
@@ -101,8 +97,6 @@ const App: React.FC = () => {
               <EditPerfil />
             } 
           />
-          
-          {/* Añadir la ruta para /registro-carro */}
           <Route 
             path="/registro-carro" 
             element={
@@ -125,7 +119,6 @@ const App: React.FC = () => {
               <Añadir_viaje />
             } 
           />
-          {/* Fin de la ruta para /registro-carro */}
           <Route 
             path="/conductores" 
             element={
@@ -137,7 +130,6 @@ const App: React.FC = () => {
               <Conductor />
             } 
           />
-          {/* Fin de la ruta para /registro-carro */}
           <Route 
             path="/reservas" 
             element={
@@ -149,7 +141,13 @@ const App: React.FC = () => {
               <Viajes_Reservados />
             } 
           />
-          {/* Fin de la ruta para /registro-carro */}
+          {/* Añadiendo la ruta para EditarVehiculo */}
+          <Route 
+            path="/editar_carro" 
+            element={
+              <EditarVehiculo />
+            } 
+          />
         </Routes>
       </Router>
     </AuthProvider>

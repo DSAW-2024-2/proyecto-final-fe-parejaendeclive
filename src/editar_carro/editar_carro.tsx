@@ -1,44 +1,98 @@
-
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './editar_carro.css';
 import masIcon from '../assets/+.png';
+import axios from 'axios';
+
+const api_URL = import.meta.env.VITE_API_URL;
 
 const EditarVehiculo: React.FC = () => {
   const navigate = useNavigate();
   const [carImage, setCarImage] = useState<string | null>(null);
   const [soatImage, setSoatImage] = useState<string | null>(null);
   const [soatFileName, setSoatFileName] = useState<string | null>(null);
-  const [soatExpiryDate, setSoatExpiryDate] = useState<string>('');
+  const [soatExpiryDate, setSoatExpiryDate] = useState<string>(''); // Mantiene DD-MM-YYYY
+  const [inputDate, setInputDate] = useState<string>(''); // Para YYYY-MM-DD
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [carId, setCarId] = useState<string | null>(null);
 
   const carImageInputRef = useRef<HTMLInputElement | null>(null);
   const soatImageInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Información existente del vehículo (simulada)
-  const existingVehicleData = {
-    vehiclePlate: 'ABC123',
-    passengerCapacity: '4',
-    vehicleBrand: 'Toyota',
-    vehicleModel: '2020',
-    soatExpiryDate: '2025-12-31',
-    carImage: null, // Puedes poner una URL de imagen si tienes una
-    soatImage: null, // Puedes poner una URL de imagen si tienes una
-  };
-
   const [formData, setFormData] = useState({
-    vehiclePlate: existingVehicleData.vehiclePlate,
-    passengerCapacity: existingVehicleData.passengerCapacity,
-    vehicleBrand: existingVehicleData.vehicleBrand,
-    vehicleModel: existingVehicleData.vehicleModel,
+    passengerCapacity: '',
+    vehicleBrand: '',
+    vehicleModel: '',
   });
 
-  // Prellenar la fecha de vencimiento del SOAT
-  React.useEffect(() => {
-    setSoatExpiryDate(existingVehicleData.soatExpiryDate);
-    setCarImage(existingVehicleData.carImage);
-    setSoatImage(existingVehicleData.soatImage);
-  }, []);
+  // Obtener información del vehículo
+  useEffect(() => {
+    const fetchCarData = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          alert('No se encontró el token de autenticación.');
+          navigate('/');
+          return;
+        }
+
+        const { userId } = JSON.parse(atob(token.split('.')[1])); // Decodificar el token
+
+        // Solicitar información del usuario
+        const response = await axios.get(`${api_URL}/user/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const { carIDs } = response.data.data;
+
+        if (!carIDs || carIDs.length === 0) {
+          alert('No se encontró información del vehículo.');
+          navigate('/menu');
+          return;
+        }
+
+        const carID = carIDs[0]; // Usar el primer carro asociado
+        setCarId(carID);
+
+        // Solicitar información del vehículo usando el carID
+        const carResponse = await axios.get(`${api_URL}/car/${carID}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const carData = carResponse.data.data;
+
+        console.log('Datos del vehículo:', carData);
+
+        // Prellenar los datos del vehículo
+        setFormData({
+          passengerCapacity: carData.carPassengers.toString() || '',
+          vehicleBrand: carData.carBrand || '',
+          vehicleModel: carData.carModel || '',
+        });
+
+        // Mantener el formato original y convertir al formato de entrada para <input type="date">
+        const convertDateToInputFormat = (date: string): string => {
+          const [day, month, year] = date.split('-');
+          return `${year}-${month}-${day}`;
+        };
+
+        setSoatExpiryDate(carData.soatExpiration || ''); // Mantener DD-MM-YYYY
+        setInputDate(convertDateToInputFormat(carData.soatExpiration || '')); // Convertir a YYYY-MM-DD
+        setCarImage(carData.photoCar || null);
+        setSoatImage(carData.photoSOAT || null);
+      } catch (error) {
+        console.error('Error al obtener información del vehículo:', error);
+        alert('Error al cargar los datos del vehículo.');
+        navigate('/menu');
+      }
+    };
+
+    fetchCarData();
+  }, [navigate]);
 
   const handleImageUpload = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -65,24 +119,19 @@ const EditarVehiculo: React.FC = () => {
   };
 
   const validateInputs = () => {
-    const plateRegex = /^[A-Za-z]{3}\d{3}$/;
-    const brandRegex = /^[A-Za-z]+$/;
-    const today = new Date();
-    const selectedDate = new Date(soatExpiryDate);
-
     const newErrors: { [key: string]: string } = {};
 
-    if (!plateRegex.test(formData.vehiclePlate)) {
-      newErrors.vehiclePlate = 'La placa debe ser 3 letras y 3 números.';
+    if (!formData.passengerCapacity || isNaN(Number(formData.passengerCapacity))) {
+      newErrors.passengerCapacity = 'Debe ser un número válido.';
     }
-    if (!brandRegex.test(formData.vehicleBrand)) {
-      newErrors.vehicleBrand = 'La marca solo puede contener letras.';
+    if (!formData.vehicleBrand) {
+      newErrors.vehicleBrand = 'La marca es obligatoria.';
     }
     if (!formData.vehicleModel || isNaN(Number(formData.vehicleModel))) {
       newErrors.vehicleModel = 'El modelo debe ser un año válido.';
     }
-    if (!soatExpiryDate || selectedDate <= today) {
-      newErrors.soatExpiryDate = 'La fecha de vencimiento debe ser mayor a la fecha actual.';
+    if (!soatExpiryDate) {
+      newErrors.soatExpiryDate = 'La fecha de vencimiento es obligatoria.';
     }
     if (!carImage) {
       newErrors.carImage = 'Debe añadir una foto del carro.';
@@ -96,21 +145,56 @@ const EditarVehiculo: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleGuardarCambios = (e: React.FormEvent) => {
+  const handleGuardarCambios = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateInputs()) {
-      // Aquí puedes implementar la lógica para guardar los cambios
-      alert('Cambios guardados exitosamente.');
-      navigate('/menu');
+    if (validateInputs() && carId) {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          alert('No se encontró el token de autenticación.');
+          navigate('/');
+          return;
+        }
+  
+        // Diagnóstico: Verifica el token
+        console.log('Token usado:', token);
+  
+        const convertInputDateToOriginalFormat = (date: string): string => {
+          const [year, month, day] = date.split('-');
+          return `${day}-${month}-${year}`;
+        };
+  
+        await axios.put(
+          `${api_URL}/car/${carId}`,
+          {
+            photoCar: carImage,
+            CarPassengers: formData.passengerCapacity,
+            photoSOAT: soatImage,
+            carBrand: formData.vehicleBrand,
+            carModel: formData.vehicleModel,
+            soatExpiration: convertInputDateToOriginalFormat(inputDate),
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+  
+        alert('Cambios guardados exitosamente.');
+        navigate('/menu');
+      } catch (error: any) {
+        console.error('Error al guardar los cambios:', error);
+  
+        // Diagnóstico: Si el backend devuelve detalles, los mostramos
+        if (error.response) {
+          console.error('Respuesta del servidor:', error.response.data);
+        }
+  
+        alert('Error al guardar los cambios.');
+      }
     }
   };
-
-  const handleEliminarVehiculo = () => {
-    // Aquí puedes implementar la lógica para eliminar el vehículo
-    alert('Vehículo eliminado.');
-    navigate('/menu');
-  };
-
   return (
     <div className="editar_vehiculo">
       <header className="header-editar">
@@ -145,18 +229,6 @@ const EditarVehiculo: React.FC = () => {
         <div className="editar_vehiculo_right-section">
           <form onSubmit={handleGuardarCambios} className="editar_vehiculo_car-form">
             <input
-              type="text"
-              id="vehiclePlate"
-              value={formData.vehiclePlate}
-              onChange={handleInputChange}
-              placeholder="Placa vehículo"
-              className={`inputs-editar letrainpitstitulo_editar ${
-                errors.vehiclePlate ? 'input-error' : ''
-              }`}
-              required
-            />
-            {errors.vehiclePlate && <p className="editar_vehiculo_error">{errors.vehiclePlate}</p>}
-            <input
               type="number"
               id="passengerCapacity"
               value={formData.passengerCapacity}
@@ -165,30 +237,33 @@ const EditarVehiculo: React.FC = () => {
               className="inputs-editar letrainpitstitulo_editar"
               required
             />
+            {errors.passengerCapacity && (
+              <p className="editar_vehiculo_error">{errors.passengerCapacity}</p>
+            )}
             <input
               type="text"
               id="vehicleBrand"
               value={formData.vehicleBrand}
               onChange={handleInputChange}
               placeholder="Marca vehículo"
-              className={`inputs-editar letrainpitstitulo_editar ${
-                errors.vehicleBrand ? 'input-error' : ''
-              }`}
+              className="inputs-editar letrainpitstitulo_editar"
               required
             />
-            {errors.vehicleBrand && <p className="editar_vehiculo_error">{errors.vehicleBrand}</p>}
+            {errors.vehicleBrand && (
+              <p className="editar_vehiculo_error">{errors.vehicleBrand}</p>
+            )}
             <input
               type="number"
               id="vehicleModel"
               value={formData.vehicleModel}
               onChange={handleInputChange}
               placeholder="Modelo vehículo (año)"
-              className={`inputs-editar letrainpitstitulo_editar ${
-                errors.vehicleModel ? 'input-error' : ''
-              }`}
+              className="inputs-editar letrainpitstitulo_editar"
               required
             />
-            {errors.vehicleModel && <p className="editar_vehiculo_error">{errors.vehicleModel}</p>}
+            {errors.vehicleModel && (
+              <p className="editar_vehiculo_error">{errors.vehicleModel}</p>
+            )}
 
             <label className="editar_vehiculo_soat-expiry-label" htmlFor="soatExpiryDate">
               Fecha de vencimiento del SOAT
@@ -196,17 +271,18 @@ const EditarVehiculo: React.FC = () => {
             <input
               type="date"
               id="soatExpiryDate"
-              value={soatExpiryDate}
+              value={inputDate} // YYYY-MM-DD para el navegador
               onChange={(e) => {
-                setSoatExpiryDate(e.target.value);
-                setErrors((prev) => ({ ...prev, soatExpiryDate: '' }));
+                setInputDate(e.target.value); // Almacenar en formato YYYY-MM-DD
+                const [year, month, day] = e.target.value.split('-');
+                setSoatExpiryDate(`${day}-${month}-${year}`); // Convertir al formato DD-MM-YYYY
               }}
-              className={`inputs-editar letrainpitstitulo_editar ${
-                errors.soatExpiryDate ? 'input-error' : ''
-              }`}
+              className={`inputs-editar letrainpitstitulo_editar ${errors.soatExpiryDate ? 'input-error' : ''}`}
               required
             />
-            {errors.soatExpiryDate && <p className="editar_vehiculo_error">{errors.soatExpiryDate}</p>}
+            {errors.soatExpiryDate && (
+              <p className="editar_vehiculo_error">{errors.soatExpiryDate}</p>
+            )}
 
             <p className="editar_vehiculo_soat-label">Editar foto del SOAT</p>
             <div
@@ -232,13 +308,6 @@ const EditarVehiculo: React.FC = () => {
               <button type="submit" className="editar_vehiculo_submit-button">
                 Guardar cambios
               </button>
-              <button
-                type="button"
-                className="editar_vehiculo_delete-button"
-                onClick={handleEliminarVehiculo}
-              >
-                Eliminar vehículo
-              </button>
             </div>
           </form>
         </div>
@@ -247,4 +316,4 @@ const EditarVehiculo: React.FC = () => {
   );
 };
 
-export default EditarVehiculo;
+export default EditarVehiculo;
