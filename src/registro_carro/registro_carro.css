@@ -134,8 +134,8 @@
 }
 
 .registro_vehiculos_add-photo-square {
-  width: 100%;
-  padding: 8px;
+  width: 90%; /* Ajustado para coincidir con los inputs */
+  padding: 12px; /* Padding consistente con los inputs */
   background-color: var(--color-input);
   border: 1px solid var(--color-letra);
   border-radius: var(--border-radius-small);
@@ -144,14 +144,15 @@
   justify-content: center;
   cursor: pointer;
   margin-top: 10px;
-  margin-bottom: 15px;
+  margin-bottom: 25px; /* Ajustado para coincidir con los márgenes de los inputs */
   text-align: center;
   color: var(--color-letra);
+  font-size: var(--tam-fuente-base);
 }
 
 .inputs-añadir {
-  width: 90%; /* Ajuste del ancho de los inputs */
-  padding: 12px; /* Padding más grande */
+  width: 90%; /* Ancho consistente con los contenedores de archivos */
+  padding: 12px; /* Padding más grande para uniformidad */
   font-size: var(--tam-fuente-base);
   background-color: var(--color-input);
   border: 1px solid var(--color-letra);
@@ -187,8 +188,8 @@
 }
 
 .registro_vehiculos_submit-button {
-  padding: 12px;
-  width: 90%; /* Ancho consistente con los inputs */
+  width: 90%; /* Ajustado para coincidir con los inputs */
+  padding: 12px; /* Padding consistente con los inputs */
   background-color: var(--color-letra);
   color: var(--color-fondo);
   border: none;
@@ -197,4 +198,10 @@
   text-align: center;
   font-weight: bold;
   font-size: var(--tam-fuente-base);
+  transition: background-color 0.3s ease;
+  margin-top: 10px; /* Espaciado consistente */
+}
+
+.registro_vehiculos_submit-button:hover {
+  background-color: #2e004f;
 }
