@@ -9,7 +9,6 @@ import menuIcon from '../assets/menu.png';
 import personaIcon from '../assets/persona.png';
 
 // Importar las imágenes de los iconos de Leaflet
-
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
 // Definir la interfaz Viaje
@@ -24,6 +23,7 @@ interface Viaje {
   placa: string;
   estado: string;
   paradas: { direccion: string; coords: [number, number]; celular: string }[]; // Añadido 'celular'
+  ruta: string; // Nuevo campo para la ruta
 }
 
 const Conductores = () => {
@@ -52,16 +52,17 @@ const Conductores = () => {
       tarifa: 6000,
       placa: 'ABC123',
       estado: 'Disponible',
+      ruta: 'Ruta principal desde Titan Plaza hacia la Universidad de La Sabana pasando por la Calle 50 y la Avenida Central.',
       paradas: [
         {
           direccion: 'Parada 1 - Calle 50',
           coords: [4.711, -74.0721],
-          celular: '3101112222', // Añadido
+          celular: '3101112222',
         },
         {
           direccion: 'Parada 2 - Calle 60',
           coords: [4.712, -74.073],
-          celular: '3103334444', // Añadido
+          celular: '3103334444',
         },
       ],
     },
@@ -75,11 +76,12 @@ const Conductores = () => {
       tarifa: 5500,
       placa: 'XYZ789',
       estado: 'Disponible',
+      ruta: 'Ruta alterna desde Estación Calle 100 hacia la Universidad de La Sabana pasando por la Calle 110.',
       paradas: [
         {
           direccion: 'Parada 1 - Calle 110',
           coords: [4.713, -74.074],
-          celular: '3105556666', // Añadido
+          celular: '3105556666',
         },
       ],
     },
@@ -93,21 +95,22 @@ const Conductores = () => {
       tarifa: 6500,
       placa: 'JKL456',
       estado: 'Disponible',
+      ruta: 'Ruta directa desde Estación Calle 85 hacia la Universidad de Los Andes, pasando por la Calle 90 y la Calle 95.',
       paradas: [
         {
           direccion: 'Parada 1 - Calle 90',
           coords: [4.714, -74.075],
-          celular: '3107778888', // Añadido
+          celular: '3107778888',
         },
         {
           direccion: 'Parada 2 - Calle 95',
           coords: [4.715, -74.076],
-          celular: '3109990000', // Añadido
+          celular: '3109990000',
         },
         {
           direccion: 'Parada 3 - Calle 100',
           coords: [4.716, -74.077],
-          celular: '3101213141', // Añadido
+          celular: '3101213141',
         },
       ],
     },
@@ -317,7 +320,7 @@ const Conductores = () => {
                     type="time"
                     value={horaSalida_conductores}
                     onChange={handleHoraSalidaChange}
-                    className="input-highlight_conductores" // Usar la misma clase que los demás inputs
+                    className="input-field_conductores" // Usar la misma clase que los demás inputs
                   />
                 </div>
                 <div className="form-group_conductores">
@@ -326,7 +329,7 @@ const Conductores = () => {
                     type="date"
                     value={fechaSalida_conductores}
                     onChange={handleFechaSalidaChange}
-                    className="input-highlight_conductores" // Usar la misma clase que los demás inputs
+                    className="input-field_conductores" // Usar la misma clase que los demás inputs
                   />
                 </div>
               </div>
@@ -457,6 +460,18 @@ const Conductores = () => {
                           value={viajeSeleccionado_conductores.placa}
                           readOnly
                           className="input-highlight_conductores"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Nuevo Campo para Ruta */}
+                    <div className="form-row_conductores">
+                      <div className="form-group_conductores">
+                        <label>Ruta:</label>
+                        <textarea
+                          value={viajeSeleccionado_conductores.ruta}
+                          readOnly
+                          className="input-field_conductores"
                         />
                       </div>
                     </div>

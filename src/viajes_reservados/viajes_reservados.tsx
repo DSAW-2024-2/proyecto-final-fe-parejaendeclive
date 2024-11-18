@@ -11,7 +11,8 @@ interface Viaje {
   tarifa: number;
   cupos: number;
   placa: string;
-  telefono: string; // Nuevo campo para el teléfono
+  ruta: string; // Nuevo campo para la ruta
+  telefono: string;
   estado: 'En curso' | 'Finalizado';
   paradas: string[];
 }
@@ -28,7 +29,8 @@ const ViajesReservados = () => {
       tarifa: 5000,
       cupos: 2,
       placa: 'ABC123',
-      telefono: '3101234567', // Añadido
+      ruta: 'Ruta detallada del viaje 1.',
+      telefono: '3101234567',
       estado: 'En curso',
       paradas: ['Parada 1', 'Parada 2'],
     },
@@ -41,7 +43,8 @@ const ViajesReservados = () => {
       tarifa: 4500,
       cupos: 1,
       placa: 'XYZ789',
-      telefono: '3107654321', // Añadido
+      ruta: 'Ruta detallada del viaje 2.',
+      telefono: '3107654321',
       estado: 'Finalizado',
       paradas: ['Parada A', 'Parada B'],
     },
@@ -54,7 +57,6 @@ const ViajesReservados = () => {
 
   return (
     <div className="viajes-reservados-container">
-      {/* Encabezado */}
       <header className="header-viajes-reservados">
         <button className="back-button" onClick={handleBack} aria-label="Regresar">
           ←
@@ -62,38 +64,21 @@ const ViajesReservados = () => {
         <h1 className="header-title">Viajes Reservados</h1>
       </header>
 
-      {/* Contenido Principal */}
       <div className="main-content-viajes">
-        {/* Lista de Viajes */}
         <div className="viajes-section-viajes">
           <ul className="viajes-list-viajes">
             {viajes.map((viaje) => (
               <li key={viaje.id} className="viaje-item-viajes">
                 <div>
-                  <p>
-                    <strong>Inicio:</strong> {viaje.inicio}
-                  </p>
-                  <p>
-                    <strong>Final:</strong> {viaje.final}
-                  </p>
-                  <p>
-                    <strong>Hora:</strong> {viaje.hora}
-                  </p>
-                  <p>
-                    <strong>Fecha:</strong> {viaje.fecha}
-                  </p>
-                  <p>
-                    <strong>Tarifa:</strong> ${viaje.tarifa}
-                  </p>
-                  <p>
-                    <strong>Cupos:</strong> {viaje.cupos}
-                  </p>
-                  <p>
-                    <strong>Placa:</strong> {viaje.placa}
-                  </p>
-                  <p>
-                    <strong>Teléfono:</strong> {viaje.telefono} {/* Añadido */}
-                  </p>
+                  <p><strong>Inicio:</strong> {viaje.inicio}</p>
+                  <p><strong>Final:</strong> {viaje.final}</p>
+                  <p><strong>Hora:</strong> {viaje.hora}</p>
+                  <p><strong>Fecha:</strong> {viaje.fecha}</p>
+                  <p><strong>Tarifa:</strong> ${viaje.tarifa}</p>
+                  <p><strong>Cupos:</strong> {viaje.cupos}</p>
+                  <p><strong>Placa:</strong> {viaje.placa}</p>
+                  <p><strong>Ruta:</strong> {viaje.ruta}</p>
+                  <p><strong>Teléfono:</strong> {viaje.telefono}</p>
                   <button
                     className={`button-estado-viajes ${
                       viaje.estado === 'En curso' ? 'en-curso' : 'finalizado'
@@ -109,7 +94,6 @@ const ViajesReservados = () => {
         </div>
       </div>
 
-      {/* Modal de Detalles del Viaje */}
       {viajeSeleccionado && (
         <div className="modal-overlay-viajes" onClick={handleCloseModal}>
           <div className="modal-content-viajes" onClick={(e) => e.stopPropagation()}>
@@ -117,85 +101,50 @@ const ViajesReservados = () => {
             <div className="form-row-viajes">
               <div className="form-group-viajes">
                 <label>Inicio viaje:</label>
-                <input
-                  type="text"
-                  value={viajeSeleccionado.inicio}
-                  readOnly
-                  className="input-highlight-viajes"
-                />
+                <input type="text" value={viajeSeleccionado.inicio} readOnly className="input-highlight-viajes" />
               </div>
               <div className="form-group-viajes">
                 <label>Final viaje:</label>
-                <input
-                  type="text"
-                  value={viajeSeleccionado.final}
-                  readOnly
-                  className="input-highlight-viajes"
-                />
+                <input type="text" value={viajeSeleccionado.final} readOnly className="input-highlight-viajes" />
               </div>
             </div>
             <div className="form-row-viajes">
               <div className="form-group-viajes">
                 <label>Hora inicio:</label>
-                <input
-                  type="text"
-                  value={viajeSeleccionado.hora}
-                  readOnly
-                  className="input-highlight-viajes"
-                />
+                <input type="text" value={viajeSeleccionado.hora} readOnly className="input-highlight-viajes" />
               </div>
               <div className="form-group-viajes">
                 <label>Fecha salida:</label>
-                <input
-                  type="text"
-                  value={viajeSeleccionado.fecha}
-                  readOnly
-                  className="input-highlight-viajes"
-                />
+                <input type="text" value={viajeSeleccionado.fecha} readOnly className="input-highlight-viajes" />
               </div>
             </div>
             <div className="form-row-viajes">
               <div className="form-group-viajes">
                 <label>Tarifa:</label>
-                <input
-                  type="text"
-                  value={`$${viajeSeleccionado.tarifa}`}
-                  readOnly
-                  className="input-highlight-viajes"
-                />
+                <input type="text" value={`$${viajeSeleccionado.tarifa}`} readOnly className="input-highlight-viajes" />
               </div>
               <div className="form-group-viajes">
                 <label>Cupos disponibles:</label>
-                <input
-                  type="text"
-                  value={`${viajeSeleccionado.cupos} cupos`}
-                  readOnly
-                  className="input-highlight-viajes"
-                />
+                <input type="text" value={`${viajeSeleccionado.cupos} cupos`} readOnly className="input-highlight-viajes" />
               </div>
             </div>
             <div className="form-row-viajes">
               <div className="form-group-viajes">
                 <label>Placa:</label>
-                <input
-                  type="text"
-                  value={viajeSeleccionado.placa}
-                  readOnly
-                  className="input-highlight-viajes"
-                />
+                <input type="text" value={viajeSeleccionado.placa} readOnly className="input-highlight-viajes" />
               </div>
               <div className="form-group-viajes">
+                <label>Ruta:</label>
+                <textarea value={viajeSeleccionado.ruta} readOnly className="input-highlight-viajes textarea-ruta" />
+              </div>
+            </div>
+            <div className="form-row-viajes">
+              <div className="form-group-viajes">
                 <label>Número de Teléfono:</label>
-                <input
-                  type="tel"
-                  value={viajeSeleccionado.telefono}
-                  readOnly
-                  className="input-highlight-viajes" // Usar la misma clase que los demás inputs
-                />
+                <input type="tel" value={viajeSeleccionado.telefono} readOnly className="input-highlight-viajes" />
               </div>
             </div>
 
-            {/* Añadido: Paradas */}
             <div className="form-group-viajes">
               <label>Paradas:</label>
               <ul className="paradas-list-viajes">

@@ -193,6 +193,17 @@ html {
     outline: none;
 }
 
+/* Estilos específicos para textarea "Ruta" en el modal */
+.modal-content_conductores textarea.input-field_conductores {
+    min-height: 3rem;
+    max-height: 10rem;
+    resize: vertical;
+    overflow-y: auto;
+    background-color: rgba(208, 162, 242, 0.5); /* Mismo fondo que los otros inputs */
+    color: var(--color-primario); /* Mismo color de texto */
+    padding-left: 2.5rem; /* Espacio para el icono si es necesario */
+}
+
 /* Botones */
 .button-status_conductores,
 .button-secondary_conductores,
@@ -364,7 +375,7 @@ html {
     margin-top: 1.5rem; /* Aumentar margen superior */
 }
 
-/* Responsividad para celulares (menos de 425px) */
+/* Responsividad para celulares (menos de 700px) */
 @media (max-width: 700px) {
     :root {
         --ancho-izquierda: 100%;
