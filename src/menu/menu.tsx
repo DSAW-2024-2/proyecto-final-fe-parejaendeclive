@@ -17,18 +17,34 @@ const Menu = () => {
   const navigate = useNavigate();
 
   const handlePassengerSwitch = () => {
-    if (!isPassenger) {
+    if (isPassenger) {
+      // Si se desactiva Pasajero, activar Conductor
+      setIsPassenger(false);
+      setIsDriver(true);
+    } else {
+      // Si se activa Pasajero, desactivar Conductor
       setIsPassenger(true);
       setIsDriver(false);
-      // Acciones adicionales al activar "Pasajero"
     }
   };
 
   const handleDriverSwitch = () => {
-    if (!isDriver) {
+    if (isDriver) {
+      // Si se desactiva Conductor, activar Pasajero
+      setIsDriver(false);
+      setIsPassenger(true);
+    } else {
+      // Si se activa Conductor, desactivar Pasajero
       setIsDriver(true);
       setIsPassenger(false);
-      // Acciones adicionales al activar "Conductor"
+    }
+  };
+
+  const handleMenuClick = () => {
+    if (isPassenger) {
+      navigate('/pasajeros');
+    } else if (isDriver) {
+      navigate('/conductores');
     }
   };
 
@@ -36,11 +52,24 @@ const Menu = () => {
     <div className="perfil-container">
       {/* Encabezado con perfil e icono de persona */}
       <header className="perfil-header">
-        <button className="perfil-button" onClick={() => navigate('/pasajeros')} aria-label="Perfil">
+        <button
+          className="perfil-button"
+          onClick={handleMenuClick}
+          aria-label="Ir al modo activo"
+        >
           <img src={menuIcon} alt="Perfil" />
         </button>
-        <span className="perfil-title">Menu</span>
-        <div className="persona-button" onClick={() => navigate('/perfil')} role="button">
+        <span className="perfil-title">Menú</span>
+        <div
+          className="persona-button"
+          onClick={() => navigate('/perfil')}
+          role="button"
+          tabIndex={0}
+          onKeyPress={(e) => {
+            if (e.key === 'Enter') navigate('/perfil');
+          }}
+          aria-label="Ir al perfil"
+        >
           <img src={personaIcon} alt="Perfil" />
         </div>
       </header>
@@ -62,6 +91,12 @@ const Menu = () => {
             <div
               className="option-label clickable"
               onClick={() => navigate('/pasajeros')}
+              role="button"
+              tabIndex={0}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') navigate('/pasajeros');
+              }}
+              aria-label="Ir al modo Pasajero"
             >
               <img src={pasajeroIcon} alt="Pasajero" className="icon" />
               <span>Pasajero</span>
@@ -84,6 +119,12 @@ const Menu = () => {
             <div
               className="option-label clickable"
               onClick={() => navigate('/conductores')}
+              role="button"
+              tabIndex={0}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') navigate('/conductores');
+              }}
+              aria-label="Ir al modo Conductor"
             >
               <img src={carroIcon} alt="Conductor" className="icon" />
               <span>Conductor</span>
@@ -106,6 +147,12 @@ const Menu = () => {
             <div
               className="option-label clickable"
               onClick={() => navigate('/reservas')}
+              role="button"
+              tabIndex={0}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') navigate('/reservas');
+              }}
+              aria-label="Ir a Viajes Reservados"
             >
               <img src={viajesIcon} alt="Viajes reservados" className="icon" />
               <span>Viajes reservados</span>
@@ -115,6 +162,12 @@ const Menu = () => {
             <div
               className="option-label clickable"
               onClick={() => navigate('/registro-carro')}
+              role="button"
+              tabIndex={0}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') navigate('/registro-carro');
+              }}
+              aria-label="Añadir vehículo"
             >
               <img src={carroIcon} alt="Añadir vehículo" className="icon" />
               <span>Añadir vehículo</span>
@@ -124,18 +177,30 @@ const Menu = () => {
             <div
               className="option-label clickable"
               onClick={() => navigate('/añadir_viaje')}
+              role="button"
+              tabIndex={0}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') navigate('/añadir_viaje');
+              }}
+              aria-label="Añadir viaje"
             >
               <img src={viajesIcon} alt="Añadir viaje" className="icon" />
               <span>Añadir viaje</span>
             </div>
           </div>
-          {/* Nueva opción de Añadir carro */}
+          {/* Nueva opción de Editar vehículo */}
           <div className="option">
             <div
               className="option-label clickable"
               onClick={() => navigate('/editar_carro')}
+              role="button"
+              tabIndex={0}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') navigate('/editar_carro');
+              }}
+              aria-label="Editar vehículo"
             >
-              <img src={carroIcon} alt="Añadir vehículo" className="icon" />
+              <img src={carroIcon} alt="Editar vehículo" className="icon" />
               <span>Editar vehiculo</span>
             </div>
           </div>

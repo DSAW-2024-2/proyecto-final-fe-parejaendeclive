@@ -8,9 +8,6 @@ import './pasajeros.css';
 import menuIcon from '../assets/menu.png';
 import personaIcon from '../assets/persona.png';
 
-// Importar las imágenes de los iconos de Leaflet
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
 // Definir la interfaz Viaje
@@ -23,6 +20,7 @@ interface Viaje {
   fecha: string; // Nuevo campo para la fecha
   tarifa: number;
   placa: string;
+  telefono: string; // Nuevo campo para el teléfono
   inicioCoords?: [number, number] | null;
   finalCoords?: [number, number] | null;
   recogidaCoords?: [number, number] | null;
@@ -69,6 +67,7 @@ const Pasajeros = () => {
       fecha: '2024-11-15',
       tarifa: 6000,
       placa: 'ABC123',
+      telefono: '3101234567',
     },
     {
       id: 2,
@@ -79,6 +78,7 @@ const Pasajeros = () => {
       fecha: '2024-11-16',
       tarifa: 5500,
       placa: 'XYZ789',
+      telefono: '3107654321',
     },
     {
       id: 3,
@@ -89,6 +89,7 @@ const Pasajeros = () => {
       fecha: '2024-11-15',
       tarifa: 6500,
       placa: 'JKL456',
+      telefono: '3101122334',
     },
   ];
 
@@ -140,21 +141,6 @@ const Pasajeros = () => {
       return null;
     }
   };
-
-  // Definir un icono predeterminado usando useMemo para optimizar el rendimiento
-  const defaultIcon: Icon = useMemo(
-    () =>
-      new L.Icon({
-        iconRetinaUrl: markerIcon2x,
-        iconUrl: markerIcon,
-        shadowUrl: markerShadow,
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41],
-      }),
-    []
-  );
 
   // Definir íconos personalizados para inicio, final y parada utilizando SVG data URLs
   const inicioIcon: Icon = useMemo(() => {
@@ -449,7 +435,7 @@ const Pasajeros = () => {
       alert('Por favor, ingresa todos los puntos de recogida para reservar.');
       return;
     }
-    alert('Reserva realizada exitosamente.');
+    alert(`Reserva realizada exitosamente.\nNúmero de Teléfono del Viaje: ${viajeSeleccionado_pasajeros?.telefono}`);
     setPuntoRecogidaInputs([]);
     setRecogidaCoordsArray([]);
     setViajeSeleccionado_pasajeros(null);
@@ -591,6 +577,9 @@ const Pasajeros = () => {
                           <p>
                             <strong>Cupos disponibles:</strong> {viaje.cupos}
                           </p>
+                          <p>
+                            <strong>Teléfono:</strong> {viaje.telefono}
+                          </p>
                           <button
                             className="button-primary_pasajeros"
                             onClick={() => handleSeleccionarViaje_pasajeros(viaje)}
@@ -682,14 +671,33 @@ const Pasajeros = () => {
                 <div className="form-row_pasajeros">
                   <div className="form-group_pasajeros">
                     <label>Placa:</label>
-                    <input
-                      type="text"
-                      value={viajeSeleccionado_pasajeros.placa}
-                      readOnly
-                      className="input-highlight_pasajeros"
-                    />
+                    <div className="input-container_pasajeros">
+                      {/* Eliminado el span de ícono de placa */}
+                      <input
+                        type="text"
+                        value={viajeSeleccionado_pasajeros.placa}
+                        readOnly
+                        className="input-highlight_pasajeros"
+                      />
+                    </div>
                   </div>
-                  {/* Campo para seleccionar la cantidad de cupos a reservar */}
+                  {/* Nuevo Campo para el Número de Teléfono (Solo Lectura) */}
+                  <div className="form-group_pasajeros">
+                    <label>Número de Teléfono:</label>
+                    <div className="input-container_pasajeros">
+                      {/* Eliminado el span de ícono de teléfono */}
+                      <input
+                        type="tel"
+                        value={viajeSeleccionado_pasajeros.telefono}
+                        readOnly
+                        className="input-field_pasajeros"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Nuevo Campo para Cupos a Reservar */}
+                <div className="form-row_pasajeros">
                   <div className="form-group_pasajeros">
                     <label>Cupos a reservar:</label>
                     <input
@@ -750,6 +758,7 @@ const Pasajeros = () => {
               </div>
             </div>
           )}
+
         </div>
 
         {/* Sección Derecha (Mapa) */}

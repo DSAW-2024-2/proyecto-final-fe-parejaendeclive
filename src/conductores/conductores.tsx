@@ -23,7 +23,7 @@ interface Viaje {
   tarifa: number;
   placa: string;
   estado: string;
-  paradas: { direccion: string; coords: [number, number] }[]; // Paradas predefinidas
+  paradas: { direccion: string; coords: [number, number]; celular: string }[]; // Añadido 'celular'
 }
 
 const Conductores = () => {
@@ -38,7 +38,7 @@ const Conductores = () => {
   // Estados para las coordenadas del viaje seleccionado
   const [inicioCoords, setInicioCoords] = useState<[number, number] | null>(null);
   const [finalCoords, setFinalCoords] = useState<[number, number] | null>(null);
-  const [paradasCoords, setParadasCoords] = useState<{ direccion: string; coords: [number, number] }[]>([]);
+  const [paradasCoords, setParadasCoords] = useState<{ direccion: string; coords: [number, number]; celular: string }[]>([]);
 
   // Viajes disponibles (simulación) con coordenadas, fechas, estados y paradas predefinidas
   const todosViajes: Viaje[] = [
@@ -56,10 +56,12 @@ const Conductores = () => {
         {
           direccion: 'Parada 1 - Calle 50',
           coords: [4.711, -74.0721],
+          celular: '3101112222', // Añadido
         },
         {
           direccion: 'Parada 2 - Calle 60',
           coords: [4.712, -74.073],
+          celular: '3103334444', // Añadido
         },
       ],
     },
@@ -77,6 +79,7 @@ const Conductores = () => {
         {
           direccion: 'Parada 1 - Calle 110',
           coords: [4.713, -74.074],
+          celular: '3105556666', // Añadido
         },
       ],
     },
@@ -94,14 +97,17 @@ const Conductores = () => {
         {
           direccion: 'Parada 1 - Calle 90',
           coords: [4.714, -74.075],
+          celular: '3107778888', // Añadido
         },
         {
           direccion: 'Parada 2 - Calle 95',
           coords: [4.715, -74.076],
+          celular: '3109990000', // Añadido
         },
         {
           direccion: 'Parada 3 - Calle 100',
           coords: [4.716, -74.077],
+          celular: '3101213141', // Añadido
         },
       ],
     },
@@ -189,7 +195,21 @@ const Conductores = () => {
   }, []);
 
   // Definir icono morado para indicar selección activa
-
+  const activeIcon: Icon = useMemo(() => {
+    const svg = encodeURIComponent(`
+      <svg xmlns='http://www.w3.org/2000/svg' width='25' height='41' viewBox='0 0 25 41'>
+        <path fill='#800080' d='M12.5 0C5.6 0 0 5.6 0 12.5c0 11.3 12.5 29.5 12.5 29.5S25 23.8 25 12.5C25 5.6 19.4 0 12.5 0zm0 18.8a6.3 6.3 0 1 1 0-12.6 6.3 6.3 0 0 1 0 12.6z'/>
+      </svg>
+    `);
+    return new L.Icon({
+      iconUrl: `data:image/svg+xml;charset=UTF-8,${svg}`,
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowUrl: markerShadow,
+      shadowSize: [41, 41],
+    });
+  }, []);
 
   // Manejo de cambios en los filtros
   const handleHoraSalidaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -297,7 +317,7 @@ const Conductores = () => {
                     type="time"
                     value={horaSalida_conductores}
                     onChange={handleHoraSalidaChange}
-                    className="input-field_conductores"
+                    className="input-highlight_conductores" // Usar la misma clase que los demás inputs
                   />
                 </div>
                 <div className="form-group_conductores">
@@ -306,7 +326,7 @@ const Conductores = () => {
                     type="date"
                     value={fechaSalida_conductores}
                     onChange={handleFechaSalidaChange}
-                    className="input-field_conductores"
+                    className="input-highlight_conductores" // Usar la misma clase que los demás inputs
                   />
                 </div>
               </div>
@@ -364,7 +384,7 @@ const Conductores = () => {
           {/* Overlay Oscuro y Ventana Emergente */}
           {viajeSeleccionado_conductores && (
             <>
-              <div className="overlay-conductores"></div>
+              <div className="overlay-conductores" onClick={handleCerrarDetalles}></div>
               <div className="popup-detalles_conductores">
                 <div className="popup-content_conductores">
                   <h3>Detalles del Viaje Seleccionado</h3>
@@ -372,27 +392,21 @@ const Conductores = () => {
                     <div className="form-row_conductores">
                       <div className="form-group_conductores">
                         <label>Inicio viaje:</label>
-                        <div className="input-container_conductores">
-                          <span className={`input-icon_conductores inicio`}></span>
-                          <input
-                            type="text"
-                            value={viajeSeleccionado_conductores.inicio}
-                            readOnly
-                            className="input-highlight_conductores"
-                          />
-                        </div>
+                        <input
+                          type="text"
+                          value={viajeSeleccionado_conductores.inicio}
+                          readOnly
+                          className="input-highlight_conductores" // Usar la misma clase que los demás inputs
+                        />
                       </div>
                       <div className="form-group_conductores">
                         <label>Final viaje:</label>
-                        <div className="input-container_conductores">
-                          <span className={`input-icon_conductores final`}></span>
-                          <input
-                            type="text"
-                            value={viajeSeleccionado_conductores.final}
-                            readOnly
-                            className="input-highlight_conductores"
-                          />
-                        </div>
+                        <input
+                          type="text"
+                          value={viajeSeleccionado_conductores.final}
+                          readOnly
+                          className="input-highlight_conductores" // Usar la misma clase que los demás inputs
+                        />
                       </div>
                     </div>
                     <div className="form-row_conductores">
@@ -447,20 +461,25 @@ const Conductores = () => {
                       </div>
                     </div>
 
-                    {/* Sección de Paradas Predefinidas */}
+                    {/* Sección de Paradas Predefinidas con Celular */}
                     <div className="form-group_conductores">
                       <label>Paradas:</label>
                       <ul className="paradas-list_conductores">
                         {viajeSeleccionado_conductores.paradas.map((parada, index) => (
                           <li key={index} className="parada-item_conductores">
-                            <div className="parada-info">
-                              <span>{parada.direccion}</span>
+                            <div className="parada-info_conductores">
+                              <p>
+                                <strong>Celular:</strong> {parada.celular}
+                              </p>
+                              <p>
+                                <strong>Dirección:</strong> {parada.direccion}
+                              </p>
                             </div>
                             <button
                               className="button-cancelar-parada_conductores"
                               onClick={() => handleCancelarParada(index)}
                             >
-                              Cancelar Parada
+                              Cancelar
                             </button>
                           </li>
                         ))}

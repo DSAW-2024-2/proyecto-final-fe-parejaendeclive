@@ -5,11 +5,12 @@ import { AuthContext } from '../Authentication'; // Añadido para importar AuthC
 import './inicio_sesion.css';
 import perfilPredefinido from '../assets/persona.png'; // Icono de usuario
 import candadoIcon from '../assets/candado.png'; // Icono de candado
+
 const api_URL = import.meta.env.VITE_API_URL;
 
 const InicioSesion = () => {
   const navigate = useNavigate();
-  const { setIsAuthenticated } = useContext(AuthContext); // Añadido para acceder a setIsAuthenticated del contexto
+  const { setIsAuthenticated } = useContext(AuthContext); // Acceder a setIsAuthenticated del contexto
   const [formData, setFormData] = useState({
     email: '', // "correo del usuario"
     password: '' // "contraseña"
@@ -21,7 +22,7 @@ const InicioSesion = () => {
     return emailRegex.test(email);
   };
 
-  // Nueva función para verificar el token de localStorage
+  // Función para verificar el token de localStorage
   const verifyToken = async () => {
     const token = localStorage.getItem('token');
     if (!token) return; // Si no hay token, no se hace nada
@@ -52,6 +53,9 @@ const InicioSesion = () => {
   const handleSubmit = async () => {
     const { email, password } = formData;
 
+    // Resetear el mensaje de error al iniciar el envío
+    setErrorMessage('');
+
     if (!email || !password) {
       setErrorMessage('Todos los campos son obligatorios');
       return;
@@ -71,25 +75,29 @@ const InicioSesion = () => {
       // Almacenar el token en el local storage
       localStorage.setItem('token', accessToken);
 
-      setIsAuthenticated(true); // Añadido para actualizar el estado de autenticación a true
+      setIsAuthenticated(true); // Actualizar el estado de autenticación a true
 
-      // Clear the error message on successful login
+      // Limpiar el mensaje de error en caso de inicio de sesión exitoso
       setErrorMessage('');
 
       // Redirigir a la página de pasajeros
       navigate('/pasajeros');
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        // Manejar errores conocidos (por ejemplo, credenciales incorrectas)
-        setErrorMessage(error.response.data.error || 'Error en el inicio de sesión');
+        // Manejar errores conocidos basados en el código de estado
+        if (error.response.status === 404) {
+          setErrorMessage('Correo no encontrado');
+        } else if (error.response.status === 401) {
+          setErrorMessage('Contraseña incorrecta');
+        } else {
+          // Manejar otros errores conocidos
+          setErrorMessage(error.response.data.error || 'Error en el inicio de sesión');
+        }
       } else {
         // Manejar errores inesperados
         setErrorMessage('Error al conectar con el servidor');
       }
     }
-
-    // Si todo es válido, limpiar el mensaje de error
-    setErrorMessage('');
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,8 +109,8 @@ const InicioSesion = () => {
   };
 
   return (
-    <div className="full-screen"> {/* Este div abarca toda la pantalla */ }
-      <div className="login-wrapper"> {/* Este div aplica el fondo violeta */ }
+    <div className="full-screen"> {/* Este div abarca toda la pantalla */}
+      <div className="login-wrapper"> {/* Este div aplica el fondo violeta */}
         <div className="login-container">
           <h2 className="login-title">Iniciar sesión</h2>
           <div className="input-group">
@@ -141,7 +149,7 @@ const InicioSesion = () => {
 
           <div className="register-prompt">
             <span>¿No tienes cuenta?</span>
-            <button className="register-link" onClick={() => navigate('/registro')}>Registrate</button>
+            <button className="register-link" onClick={() => navigate('/registro')}>Regístrate</button>
           </div>
         </div>
       </div>
