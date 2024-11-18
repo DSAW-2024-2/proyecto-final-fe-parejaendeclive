@@ -19,9 +19,7 @@
     --popup-height: 650px;
 }
 
-*,
-*::before,
-*::after {
+*, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -366,8 +364,8 @@ html {
     margin-top: 1.5rem; /* Aumentar margen superior */
 }
 
-/* Responsividad */
-@media (max-width: 1024px) {
+/* Responsividad para celulares (menos de 425px) */
+@media (max-width: 700px) {
     :root {
         --ancho-izquierda: 100%;
         --ancho-mapa: 100%;
@@ -380,68 +378,90 @@ html {
         flex-direction: column;
     }
 
-    .left-section_conductores {
-        width: 100%;
-        order: 1;
-    }
-
+    /* Reordenar las secciones: mapa primero */
     .right-section_conductores {
         width: 100%;
         height: var(--altura-mapa);
-        order: 2;
+        order: 1; /* Aparece primero */
+    }
+
+    .left-section_conductores {
+        width: 100%;
+        order: 2; /* Aparece después */
     }
 
     .map_conductores {
         height: 100%;
     }
 
+    /* Modal */
     .popup-detalles_conductores {
         width: 90%;
         height: 90%;
+        max-width: 90%; /* Asegurar que no exceda el ancho de pantalla */
+        max-height: 90%; /* Asegurar que no exceda la altura de pantalla */
+        border-radius: 0.5rem; /* Reducir el radio para pantallas pequeñas */
     }
 
-    .parada-item_conductores {
-        flex-direction: column;
-        align-items: flex-start;
+    .popup-content_conductores {
+        padding: 1rem; /* Reducir padding para pantallas pequeñas */
     }
 
-    .button-cancelar-parada_conductores {
-        width: 100%; /* Asegurar que ocupe el ancho completo en pantallas pequeñas */
-        height: 3rem; /* Aumentar aún más la altura si es necesario */
+    .popup-content_conductores h3 {
+        font-size: 1.25rem; /* Reducir tamaño de fuente */
+        margin-bottom: 1rem; /* Reducir margen inferior */
     }
-}
 
-@media (max-width: 768px) {
-    .form-row_conductores {
-        flex-direction: column;
+    .detalles-section_conductores {
+        padding-right: 0.5rem; /* Reducir padding */
     }
 
     .button-container_conductores {
         flex-direction: column;
-    }
-
-    .button-container_conductores button {
-        width: 100%;
-    }
-
-    .form-group_conductores {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .form-group_conductores .input-highlight_conductores {
-        margin-bottom: 0.75rem;
+        gap: 0.5rem; /* Reducir gap entre botones */
     }
 
     .button-status_conductores,
     .button-secondary_conductores,
     .button-exit_conductores {
-        padding: 0.5rem 1rem;
-        font-size: 0.875rem;
+        width: 100%; /* Botones ocupan todo el ancho disponible */
+        padding: 0.5rem 1rem; /* Reducir padding */
+        font-size: 0.875rem; /* Reducir tamaño de fuente */
     }
 
+    /* Botón "Cancelar Parada" en el Modal */
     .button-cancelar-parada_conductores {
-        width: 100%; /* Asegurar que ocupe el ancho completo en pantallas pequeñas */
-        height: 3rem; /* Aumentar aún más la altura si es necesario */
+        width: 100%; /* Ocupa todo el ancho */
+        height: auto; /* Ajusta la altura automáticamente */
+        padding: 0.5rem 1rem; /* Reducir padding */
+        font-size: 0.75rem; /* Reducir tamaño de fuente */
     }
+
+    /* Ajustes adicionales para asegurar que el contenido no se desborde */
+    .popup-content_conductores {
+        overflow-y: auto; /* Permitir scroll si el contenido excede */
+    }
+}
+
+/* Estilos para el Botón "Añadir parada" */
+.button-add_conductores {
+    width: 100%;
+    padding: 0.625rem 1rem;
+    background-color: var(--color-primario);
+    color: var(--color-fondo);
+    border: none;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-family: var(--fuente-principal);
+    font-weight: 600;
+    font-size: 0.938rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.5rem; /* Añadir margen superior para separación */
+}
+
+.button-add_conductores:hover {
+    background-color: #563b6c;
 }

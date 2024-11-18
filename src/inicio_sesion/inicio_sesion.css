@@ -153,3 +153,59 @@ body, html {
       transform: translateY(0);
   }
 }
+
+/* Ventana de carga que cubre toda la pantalla */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5); /* Fondo semitransparente */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Asegura que esté por encima de otros elementos */
+}
+
+/* Contenido de la ventana de carga */
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: rgba(64, 17, 99, 0.9); /* Fondo oscuro con opacidad */
+  padding: 20px 40px;
+  border-radius: 12px;
+}
+
+/* Spinner */
+.spinner {
+  border: 8px solid rgba(255, 255, 255, 0.3);
+  border-top: 8px solid white;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px; /* Espacio entre el spinner y el texto */
+}
+
+/* Texto de carga */
+.loading-text {
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* Animación del spinner */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Opcional: Deshabilitar el botón de inicio de sesión cuando está cargando */
+.login-button:disabled {
+  background-color: rgba(104,68,131, 0.6);
+  cursor: not-allowed;
+}

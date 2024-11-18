@@ -118,6 +118,15 @@ const AñadirViaje: React.FC = () => {
     }
   };
 
+  // Obtener la fecha actual en formato YYYY-MM-DD
+  const getTodayDate = (): string => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0'); // Los meses en JavaScript van de 0 a 11
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   // Manejo de cambios en el campo de fecha de salida
   const handleFechaSalidaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const fecha = e.target.value;
@@ -186,6 +195,9 @@ const AñadirViaje: React.FC = () => {
     setEndPoint(null);
   };
 
+  // Obtener la fecha actual para establecer el mínimo en el calendario
+  const today = getTodayDate();
+
   return (
     <div className="añadir_viaje">
       <header className="header-añadir">
@@ -248,7 +260,7 @@ const AñadirViaje: React.FC = () => {
               className="inputs-añadir letrainpitstitulo_añadir"
               required
             />
-            {/* Nuevo Input para Fecha de Salida */}
+            {/* Nuevo Input para Fecha de Salida con atributo min */}
             <input
               type="date"
               name="fechaSalida"
@@ -257,6 +269,7 @@ const AñadirViaje: React.FC = () => {
               placeholder="Fecha de salida"
               className="inputs-añadir letrainpitstitulo_añadir"
               required
+              min={today} // Establecer la fecha mínima como hoy
             />
             <input
               type="time"
