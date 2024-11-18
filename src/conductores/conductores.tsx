@@ -14,12 +14,12 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 // Definir la interfaz Viaje
 interface Viaje {
   id: number;
-  inicio: string;
-  final: string;
-  cupos: number;
-  hora: string;
-  fecha: string;
-  tarifa: number;
+  startTrip: string;
+  endTrip: string;
+  availablePlaces: number;
+  timeTrip: string;
+  date: string;
+  priceTrip: number;
   placa: string;
   estado: string;
   paradas: { direccion: string; coords: [number, number]; celular: string }[]; // Añadido 'celular'
@@ -30,26 +30,26 @@ const Conductores = () => {
   const navigate = useNavigate();
 
   // Estados para los filtros y datos
-  const [horaSalida_conductores, setHoraSalida_conductores] = useState('');
-  const [fechaSalida_conductores, setFechaSalida_conductores] = useState('');
+  const [timeTripSalida_conductores, settimeTripSalida_conductores] = useState('');
+  const [dateSalida_conductores, setdateSalida_conductores] = useState('');
   const [viajes_conductores, setViajes_conductores] = useState<Viaje[]>([]);
   const [viajeSeleccionado_conductores, setViajeSeleccionado_conductores] = useState<Viaje | null>(null);
 
   // Estados para las coordenadas del viaje seleccionado
-  const [inicioCoords, setInicioCoords] = useState<[number, number] | null>(null);
-  const [finalCoords, setFinalCoords] = useState<[number, number] | null>(null);
+  const [startTripCoords, setstartTripCoords] = useState<[number, number] | null>(null);
+  const [endTripCoords, setendTripCoords] = useState<[number, number] | null>(null);
   const [paradasCoords, setParadasCoords] = useState<{ direccion: string; coords: [number, number]; celular: string }[]>([]);
 
-  // Viajes disponibles (simulación) con coordenadas, fechas, estados y paradas predefinidas
+  // Viajes disponibles (simulación) con coordenadas, dates, estados y paradas predefinidas
   const todosViajes: Viaje[] = [
     {
       id: 1,
-      inicio: 'Titan Plaza',
-      final: 'Universidad de La Sabana',
-      cupos: 2,
-      hora: '09:00',
-      fecha: '2024-11-15',
-      tarifa: 6000,
+      startTrip: 'Titan Plaza',
+      endTrip: 'Universidad de La Sabana',
+      availablePlaces: 2,
+      timeTrip: '09:00',
+      date: '2024-11-15',
+      priceTrip: 6000,
       placa: 'ABC123',
       estado: 'Disponible',
       ruta: 'Ruta principal desde Titan Plaza hacia la Universidad de La Sabana pasando por la Calle 50 y la Avenida Central.',
@@ -68,12 +68,12 @@ const Conductores = () => {
     },
     {
       id: 2,
-      inicio: 'Estación Calle 100',
-      final: 'Universidad de La Sabana',
-      cupos: 3,
-      hora: '10:00',
-      fecha: '2024-11-16',
-      tarifa: 5500,
+      startTrip: 'Estación Calle 100',
+      endTrip: 'Universidad de La Sabana',
+      availablePlaces: 3,
+      timeTrip: '10:00',
+      date: '2024-11-16',
+      priceTrip: 5500,
       placa: 'XYZ789',
       estado: 'Disponible',
       ruta: 'Ruta alterna desde Estación Calle 100 hacia la Universidad de La Sabana pasando por la Calle 110.',
@@ -87,12 +87,12 @@ const Conductores = () => {
     },
     {
       id: 3,
-      inicio: 'Estación Calle 85',
-      final: 'Universidad de Los Andes',
-      cupos: 2,
-      hora: '09:30',
-      fecha: '2024-11-15',
-      tarifa: 6500,
+      startTrip: 'Estación Calle 85',
+      endTrip: 'Universidad de Los Andes',
+      availablePlaces: 2,
+      timeTrip: '09:30',
+      date: '2024-11-15',
+      priceTrip: 6500,
       placa: 'JKL456',
       estado: 'Disponible',
       ruta: 'Ruta directa desde Estación Calle 85 hacia la Universidad de Los Andes, pasando por la Calle 90 y la Calle 95.',
@@ -148,8 +148,8 @@ const Conductores = () => {
     }
   };
 
-  // Definir íconos personalizados para inicio, final y parada utilizando SVG data URLs
-  const inicioIcon: Icon = useMemo(() => {
+  // Definir íconos personalizados para startTrip, endTrip y parada utilizando SVG data URLs
+  const startTripIcon: Icon = useMemo(() => {
     const svg = encodeURIComponent(`
       <svg xmlns='http://www.w3.org/2000/svg' width='25' height='41' viewBox='0 0 25 41'>
         <path fill='#2E8B57' d='M12.5 0C5.6 0 0 5.6 0 12.5c0 11.3 12.5 29.5 12.5 29.5S25 23.8 25 12.5C25 5.6 19.4 0 12.5 0zm0 18.8a6.3 6.3 0 1 1 0-12.6 6.3 6.3 0 0 1 0 12.6z'/>
@@ -165,7 +165,7 @@ const Conductores = () => {
     });
   }, []);
 
-  const finalIcon: Icon = useMemo(() => {
+  const endTripIcon: Icon = useMemo(() => {
     const svg = encodeURIComponent(`
       <svg xmlns='http://www.w3.org/2000/svg' width='25' height='41' viewBox='0 0 25 41'>
         <path fill='#DC143C' d='M12.5 0C5.6 0 0 5.6 0 12.5c0 11.3 12.5 29.5 12.5 29.5S25 23.8 25 12.5C25 5.6 19.4 0 12.5 0zm0 18.8a6.3 6.3 0 1 1 0-12.6 6.3 6.3 0 0 1 0 12.6z'/>
@@ -198,21 +198,21 @@ const Conductores = () => {
   }, []);
 
   // Manejo de cambios en los filtros
-  const handleHoraSalidaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setHoraSalida_conductores(e.target.value);
+  const handletimeTripSalidaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    settimeTripSalida_conductores(e.target.value);
   };
 
-  const handleFechaSalidaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFechaSalida_conductores(e.target.value);
+  const handledateSalidaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setdateSalida_conductores(e.target.value);
   };
 
   // Función de filtrado
   const filterViajes = () => {
     const viajesFiltrados = todosViajes.filter((viaje) => {
-      const coincideHora = horaSalida_conductores ? viaje.hora === horaSalida_conductores : true;
-      const coincideFecha = fechaSalida_conductores ? viaje.fecha === fechaSalida_conductores : true;
+      const coincidetimeTrip = timeTripSalida_conductores ? viaje.timeTrip === timeTripSalida_conductores : true;
+      const coincidedate = dateSalida_conductores ? viaje.date === dateSalida_conductores : true;
 
-      return coincideHora && coincideFecha;
+      return coincidetimeTrip && coincidedate;
     });
 
     setViajes_conductores(viajesFiltrados);
@@ -221,7 +221,7 @@ const Conductores = () => {
   // useEffect para filtrar automáticamente cuando cambien los filtros
   useEffect(() => {
     filterViajes();
-  }, [horaSalida_conductores, fechaSalida_conductores]);
+  }, [timeTripSalida_conductores, dateSalida_conductores]);
 
   // Inicializar viajes_conductores con todos los viajes al montar el componente
   useEffect(() => {
@@ -232,18 +232,18 @@ const Conductores = () => {
   const handleSeleccionarViaje_conductores = async (viaje: Viaje) => {
     setViajeSeleccionado_conductores(viaje);
     setParadasCoords(viaje.paradas);
-    // Geocodificar las direcciones de inicio y final del viaje seleccionado
-    const inicio = await geocodeAddress(viaje.inicio);
-    const final = await geocodeAddress(viaje.final);
-    setInicioCoords(inicio);
-    setFinalCoords(final);
+    // Geocodificar las direcciones de startTrip y endTrip del viaje seleccionado
+    const startTrip = await geocodeAddress(viaje.startTrip);
+    const endTrip = await geocodeAddress(viaje.endTrip);
+    setstartTripCoords(startTrip);
+    setendTripCoords(endTrip);
   };
 
   // Cerrar la ventana emergente de detalles del viaje
   const handleCerrarDetalles = () => {
     setViajeSeleccionado_conductores(null);
-    setInicioCoords(null);
-    setFinalCoords(null);
+    setstartTripCoords(null);
+    setendTripCoords(null);
     setParadasCoords([]);
   };
 
@@ -305,20 +305,20 @@ const Conductores = () => {
               <h3>Filtrar viajes del conductor</h3>
               <div className="form-row_conductores">
                 <div className="form-group_conductores">
-                  <label>Hora salida</label>
+                  <label>timeTrip salida</label>
                   <input
                     type="time"
-                    value={horaSalida_conductores}
-                    onChange={handleHoraSalidaChange}
+                    value={timeTripSalida_conductores}
+                    onChange={handletimeTripSalidaChange}
                     className="input-field_conductores" // Usar la misma clase que los demás inputs
                   />
                 </div>
                 <div className="form-group_conductores">
-                  <label>Fecha salida</label>
+                  <label>date salida</label>
                   <input
                     type="date"
-                    value={fechaSalida_conductores}
-                    onChange={handleFechaSalidaChange}
+                    value={dateSalida_conductores}
+                    onChange={handledateSalidaChange}
                     className="input-field_conductores" // Usar la misma clase que los demás inputs
                   />
                 </div>
@@ -337,22 +337,22 @@ const Conductores = () => {
                       <li key={viaje.id} className="viaje-item_conductores">
                         <div>
                           <p>
-                            <strong>Inicio:</strong> {viaje.inicio}
+                            <strong>startTrip:</strong> {viaje.startTrip}
                           </p>
                           <p>
-                            <strong>Final:</strong> {viaje.final}
+                            <strong>endTrip:</strong> {viaje.endTrip}
                           </p>
                           <p>
-                            <strong>Hora:</strong> {viaje.hora}
+                            <strong>timeTrip:</strong> {viaje.timeTrip}
                           </p>
                           <p>
-                            <strong>Fecha:</strong> {viaje.fecha}
+                            <strong>date:</strong> {viaje.date}
                           </p>
                           <p>
-                            <strong>Tarifa:</strong> ${viaje.tarifa}
+                            <strong>priceTrip:</strong> ${viaje.priceTrip}
                           </p>
                           <p>
-                            <strong>Cupos disponibles:</strong> {viaje.cupos}
+                            <strong>availablePlaces disponibles:</strong> {viaje.availablePlaces}
                           </p>
                           <p>
                             <strong>Estado:</strong> {viaje.estado}
@@ -384,19 +384,19 @@ const Conductores = () => {
                   <div className="detalles-section_conductores">
                     <div className="form-row_conductores">
                       <div className="form-group_conductores">
-                        <label>Inicio viaje:</label>
+                        <label>startTrip viaje:</label>
                         <input
                           type="text"
-                          value={viajeSeleccionado_conductores.inicio}
+                          value={viajeSeleccionado_conductores.startTrip}
                           readOnly
                           className="input-highlight_conductores" // Usar la misma clase que los demás inputs
                         />
                       </div>
                       <div className="form-group_conductores">
-                        <label>Final viaje:</label>
+                        <label>endTrip viaje:</label>
                         <input
                           type="text"
-                          value={viajeSeleccionado_conductores.final}
+                          value={viajeSeleccionado_conductores.endTrip}
                           readOnly
                           className="input-highlight_conductores" // Usar la misma clase que los demás inputs
                         />
@@ -404,19 +404,19 @@ const Conductores = () => {
                     </div>
                     <div className="form-row_conductores">
                       <div className="form-group_conductores">
-                        <label>Hora inicio:</label>
+                        <label>timeTrip startTrip:</label>
                         <input
                           type="text"
-                          value={viajeSeleccionado_conductores.hora}
+                          value={viajeSeleccionado_conductores.timeTrip}
                           readOnly
                           className="input-highlight_conductores"
                         />
                       </div>
                       <div className="form-group_conductores">
-                        <label>Fecha salida:</label>
+                        <label>date salida:</label>
                         <input
                           type="text"
-                          value={viajeSeleccionado_conductores.fecha}
+                          value={viajeSeleccionado_conductores.date}
                           readOnly
                           className="input-highlight_conductores"
                         />
@@ -424,35 +424,25 @@ const Conductores = () => {
                     </div>
                     <div className="form-row_conductores">
                       <div className="form-group_conductores">
-                        <label>Tarifa:</label>
+                        <label>priceTrip:</label>
                         <input
                           type="text"
-                          value={`$${viajeSeleccionado_conductores.tarifa}`}
+                          value={`$${viajeSeleccionado_conductores.priceTrip}`}
                           readOnly
                           className="input-highlight_conductores"
                         />
                       </div>
                       <div className="form-group_conductores">
-                        <label>Cupos disponibles:</label>
+                        <label>availablePlaces disponibles:</label>
                         <input
                           type="text"
-                          value={`${viajeSeleccionado_conductores.cupos} cupos`}
+                          value={`${viajeSeleccionado_conductores.availablePlaces} availablePlaces`}
                           readOnly
                           className="input-highlight_conductores"
                         />
                       </div>
                     </div>
-                    <div className="form-row_conductores">
-                      <div className="form-group_conductores">
-                        <label>Placa:</label>
-                        <input
-                          type="text"
-                          value={viajeSeleccionado_conductores.placa}
-                          readOnly
-                          className="input-highlight_conductores"
-                        />
-                      </div>
-                    </div>
+                    
 
                     {/* Nuevo Campo para Ruta */}
                     <div className="form-row_conductores">
@@ -531,14 +521,14 @@ const Conductores = () => {
             {/* Marcadores según el estado */}
             {viajeSeleccionado_conductores && (
               <>
-                {inicioCoords && (
-                  <Marker position={inicioCoords} icon={inicioIcon}>
-                    <LeafletPopup>Inicio del viaje: {viajeSeleccionado_conductores.inicio}</LeafletPopup>
+                {startTripCoords && (
+                  <Marker position={startTripCoords} icon={startTripIcon}>
+                    <LeafletPopup>startTrip del viaje: {viajeSeleccionado_conductores.startTrip}</LeafletPopup>
                   </Marker>
                 )}
-                {finalCoords && (
-                  <Marker position={finalCoords} icon={finalIcon}>
-                    <LeafletPopup>Final del viaje: {viajeSeleccionado_conductores.final}</LeafletPopup>
+                {endTripCoords && (
+                  <Marker position={endTripCoords} icon={endTripIcon}>
+                    <LeafletPopup>endTrip del viaje: {viajeSeleccionado_conductores.endTrip}</LeafletPopup>
                   </Marker>
                 )}
                 {paradasCoords.map((parada, index) => (
