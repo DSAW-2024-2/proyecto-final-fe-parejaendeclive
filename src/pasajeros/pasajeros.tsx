@@ -22,6 +22,8 @@ interface Viaje {
   fecha: string; // Nuevo campo para la fecha
   tarifa: number;
   placa: string;
+  telefono: string; // Nuevo campo para el teléfono
+  ruta: string; // Nuevo campo para la ruta
   inicioCoords?: [number, number] | null;
   finalCoords?: [number, number] | null;
   recogidaCoords?: [number, number] | null;
@@ -68,6 +70,8 @@ const Pasajeros = () => {
       fecha: '2024-11-15',
       tarifa: 6000,
       placa: 'ABC123',
+      telefono: '3101234567',
+      ruta: 'Ruta principal desde Titan Plaza hacia la Universidad de La Sabana pasando por la Avenida Central y el Parque Central.',
     },
     {
       id: 2,
@@ -78,6 +82,8 @@ const Pasajeros = () => {
       fecha: '2024-11-16',
       tarifa: 5500,
       placa: 'XYZ789',
+      telefono: '3107654321',
+      ruta: 'Ruta alterna desde Estación Calle 100 hacia la Universidad de La Sabana pasando por la Avenida El Dorado.',
     },
     {
       id: 3,
@@ -88,6 +94,8 @@ const Pasajeros = () => {
       fecha: '2024-11-15',
       tarifa: 6500,
       placa: 'JKL456',
+      telefono: '3101122334',
+      ruta: 'Ruta directa desde Estación Calle 85 hacia la Universidad de Los Andes, pasando por la Avenida Boyacá.',
     },
   ];
 
@@ -436,7 +444,7 @@ const Pasajeros = () => {
       alert('Por favor, ingresa todos los puntos de recogida para reservar.');
       return;
     }
-    alert('Reserva realizada exitosamente.');
+    alert(`Reserva realizada exitosamente.\nNúmero de Teléfono del Viaje: ${viajeSeleccionado_pasajeros?.telefono}`);
     setPuntoRecogidaInputs([]);
     setRecogidaCoordsArray([]);
     setViajeSeleccionado_pasajeros(null);
@@ -475,7 +483,7 @@ const Pasajeros = () => {
                 <label>Punto de inicio</label>
                 <div className="input-container_pasajeros">
                   <span
-                    className={`input-icon_pasajeros ${activeInput?.type === 'inicio' ? 'active' : ''}`}
+                    className={`input-icon_pasajeros ${activeInput?.type === 'inicio' ? 'active inicio' : 'inicio'}`}
                     onClick={() =>
                       setActiveInput(
                         activeInput?.type === 'inicio' ? null : { type: 'inicio' }
@@ -496,7 +504,7 @@ const Pasajeros = () => {
                 <label>Punto final</label>
                 <div className="input-container_pasajeros">
                   <span
-                    className={`input-icon_pasajeros ${activeInput?.type === 'final' ? 'active' : ''}`}
+                    className={`input-icon_pasajeros ${activeInput?.type === 'final' ? 'active final' : 'final'}`}
                     onClick={() =>
                       setActiveInput(
                         activeInput?.type === 'final' ? null : { type: 'final' }
@@ -578,6 +586,9 @@ const Pasajeros = () => {
                           <p>
                             <strong>Cupos disponibles:</strong> {viaje.cupos}
                           </p>
+                          <p>
+                            <strong>Teléfono:</strong> {viaje.telefono}
+                          </p>
                           <button
                             className="button-primary_pasajeros"
                             onClick={() => handleSeleccionarViaje_pasajeros(viaje)}
@@ -604,7 +615,7 @@ const Pasajeros = () => {
                   <div className="form-group_pasajeros">
                     <label>Inicio viaje:</label>
                     <div className="input-container_pasajeros">
-                      <span className={`input-icon_pasajeros ${'inicio'}`}></span>
+                      <span className={`input-icon_pasajeros inicio`}></span>
                       <input
                         type="text"
                         value={viajeSeleccionado_pasajeros.inicio}
@@ -616,7 +627,7 @@ const Pasajeros = () => {
                   <div className="form-group_pasajeros">
                     <label>Final viaje:</label>
                     <div className="input-container_pasajeros">
-                      <span className={`input-icon_pasajeros ${'final'}`}></span>
+                      <span className={`input-icon_pasajeros final`}></span>
                       <input
                         type="text"
                         value={viajeSeleccionado_pasajeros.final}
@@ -669,14 +680,33 @@ const Pasajeros = () => {
                 <div className="form-row_pasajeros">
                   <div className="form-group_pasajeros">
                     <label>Placa:</label>
-                    <input
-                      type="text"
-                      value={viajeSeleccionado_pasajeros.placa}
-                      readOnly
-                      className="input-highlight_pasajeros"
-                    />
+                    <div className="input-container_pasajeros">
+                      {/* Eliminado el span de ícono de placa */}
+                      <input
+                        type="text"
+                        value={viajeSeleccionado_pasajeros.placa}
+                        readOnly
+                        className="input-highlight_pasajeros"
+                      />
+                    </div>
                   </div>
-                  {/* Campo para seleccionar la cantidad de cupos a reservar */}
+                  {/* Nuevo Campo para el Número de Teléfono (Solo Lectura) */}
+                  <div className="form-group_pasajeros">
+                    <label>Número de Teléfono:</label>
+                    <div className="input-container_pasajeros">
+                      {/* Eliminado el span de ícono de teléfono */}
+                      <input
+                        type="tel"
+                        value={viajeSeleccionado_pasajeros.telefono}
+                        readOnly
+                        className="input-highlight_pasajeros"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Nuevo Campo para Cupos a Reservar y Ruta */}
+                <div className="form-row_pasajeros">
                   <div className="form-group_pasajeros">
                     <label>Cupos a reservar:</label>
                     <input
@@ -695,6 +725,20 @@ const Pasajeros = () => {
                       className="input-field_pasajeros"
                     />
                   </div>
+                  <div className="form-group_pasajeros">
+                    <label>Ruta:</label>
+                    <textarea
+                      value={viajeSeleccionado_pasajeros.ruta}
+                      readOnly
+                      className="input-field_pasajeros"
+                      style={{
+                        resize: 'vertical',
+                        minHeight: '3rem',
+                        maxHeight: '10rem',
+                        overflowY: 'auto',
+                      }}
+                    />
+                  </div>
                 </div>
 
                 {/* Inputs para los puntos de recogida */}
@@ -704,7 +748,7 @@ const Pasajeros = () => {
                     <div className="input-container_pasajeros">
                       <span
                         className={`input-icon_pasajeros ${
-                          activeInput?.type === 'recogida' && activeInput.index === index ? 'active' : ''
+                          activeInput?.type === 'recogida' && activeInput.index === index ? 'active recogida' : 'recogida'
                         }`}
                         onClick={() =>
                           setActiveInput(
@@ -737,6 +781,7 @@ const Pasajeros = () => {
               </div>
             </div>
           )}
+
         </div>
 
         {/* Sección Derecha (Mapa) */}

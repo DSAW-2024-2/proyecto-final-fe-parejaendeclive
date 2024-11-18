@@ -11,6 +11,7 @@ interface Viaje {
   tarifa: number;
   cupos: number;
   placa: string;
+  telefono: string; // Nuevo campo para el teléfono
   estado: 'En curso' | 'Finalizado';
   paradas: string[];
 }
@@ -27,6 +28,7 @@ const ViajesReservados = () => {
       tarifa: 5000,
       cupos: 2,
       placa: 'ABC123',
+      telefono: '3101234567', // Añadido
       estado: 'En curso',
       paradas: ['Parada 1', 'Parada 2'],
     },
@@ -39,6 +41,7 @@ const ViajesReservados = () => {
       tarifa: 4500,
       cupos: 1,
       placa: 'XYZ789',
+      telefono: '3107654321', // Añadido
       estado: 'Finalizado',
       paradas: ['Parada A', 'Parada B'],
     },
@@ -87,6 +90,9 @@ const ViajesReservados = () => {
                   </p>
                   <p>
                     <strong>Placa:</strong> {viaje.placa}
+                  </p>
+                  <p>
+                    <strong>Teléfono:</strong> {viaje.telefono} {/* Añadido */}
                   </p>
                   <button
                     className={`button-estado-viajes ${
@@ -176,6 +182,15 @@ const ViajesReservados = () => {
                   value={viajeSeleccionado.placa}
                   readOnly
                   className="input-highlight-viajes"
+                />
+              </div>
+              <div className="form-group-viajes">
+                <label>Número de Teléfono:</label>
+                <input
+                  type="tel"
+                  value={viajeSeleccionado.telefono}
+                  readOnly
+                  className="input-highlight-viajes" // Usar la misma clase que los demás inputs
                 />
               </div>
             </div>

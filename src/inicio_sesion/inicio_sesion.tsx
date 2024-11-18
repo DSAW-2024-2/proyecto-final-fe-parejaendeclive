@@ -1,56 +1,60 @@
-import { useState, useContext, useEffect } from 'react'; // Añadido useEffect para verificar el token
+import { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { AuthContext } from '../Authentication'; // Añadido para importar AuthContext
+import { AuthContext } from '../Authentication';
 import './inicio_sesion.css';
-import perfilPredefinido from '../assets/persona.png'; // Icono de usuario
-import candadoIcon from '../assets/candado.png'; // Icono de candado
+import perfilPredefinido from '../assets/persona.png';
+import candadoIcon from '../assets/candado.png';
+
 const api_URL = import.meta.env.VITE_API_URL;
 
 const InicioSesion = () => {
   const navigate = useNavigate();
-  const { setIsAuthenticated } = useContext(AuthContext); // Añadido para acceder a setIsAuthenticated del contexto
+  const { setIsAuthenticated } = useContext(AuthContext);
   const [formData, setFormData] = useState({
-    email: '', // "correo del usuario"
-    password: '' // "contraseña"
+    email: '',
+    password: ''
   });
   const [errorMessage, setErrorMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false); // Estado de carga
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
-  // Nueva función para verificar el token de localStorage
   const verifyToken = async () => {
     const token = localStorage.getItem('token');
-    if (!token) return; // Si no hay token, no se hace nada
+    if (!token) return;
+
+    setIsLoading(true); // Iniciar carga
 
     try {
       const response = await axios.get(`${api_URL}/login`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
-      // Si el token es válido, se actualiza el estado de autenticación
+
       if (response.status === 200) {
         setIsAuthenticated(true);
         navigate('/pasajeros');
       }
     } catch (error) {
-      // Si el token es inválido, se borra del localStorage y se muestra un error
       localStorage.removeItem('token');
       setErrorMessage('Sesión expirada, por favor inicia sesión nuevamente');
       setIsAuthenticated(false);
+    } finally {
+      setIsLoading(false); // Finalizar carga
     }
   };
 
-  // Verificar token al cargar el componente
   useEffect(() => {
     verifyToken();
   }, []);
 
   const handleSubmit = async () => {
     const { email, password } = formData;
+
+    setErrorMessage('');
 
     if (!email || !password) {
       setErrorMessage('Todos los campos son obligatorios');
@@ -62,34 +66,35 @@ const InicioSesion = () => {
       return;
     }
 
+    setIsLoading(true); // Iniciar carga
+
     try {
       const response = await axios.post(`${api_URL}/login`, { email, password });
-  
-      // Asumiendo que el backend devuelve { accessToken: string }
+
       const { accessToken } = response.data;
-  
-      // Almacenar el token en el local storage
+
       localStorage.setItem('token', accessToken);
 
-      setIsAuthenticated(true); // Añadido para actualizar el estado de autenticación a true
+      setIsAuthenticated(true);
 
-      // Clear the error message on successful login
       setErrorMessage('');
 
-      // Redirigir a la página de pasajeros
       navigate('/pasajeros');
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        // Manejar errores conocidos (por ejemplo, credenciales incorrectas)
-        setErrorMessage(error.response.data.error || 'Error en el inicio de sesión');
+        if (error.response.status === 404) {
+          setErrorMessage('Correo no encontrado');
+        } else if (error.response.status === 401) {
+          setErrorMessage('Contraseña incorrecta');
+        } else {
+          setErrorMessage(error.response.data.error || 'Error en el inicio de sesión');
+        }
       } else {
-        // Manejar errores inesperados
         setErrorMessage('Error al conectar con el servidor');
       }
+    } finally {
+      setIsLoading(false); // Finalizar carga
     }
-
-    // Si todo es válido, limpiar el mensaje de error
-    setErrorMessage('');
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,8 +106,8 @@ const InicioSesion = () => {
   };
 
   return (
-    <div className="full-screen"> {/* Este div abarca toda la pantalla */ }
-      <div className="login-wrapper"> {/* Este div aplica el fondo violeta */ }
+    <div className="full-screen">
+      <div className="login-wrapper">
         <div className="login-container">
           <h2 className="login-title">Iniciar sesión</h2>
           <div className="input-group">
@@ -110,11 +115,12 @@ const InicioSesion = () => {
               <img src={perfilPredefinido} alt="icono usuario" className="input-icon-inside" />
               <input
                 type="email"
-                name="email" // Mismo nombre "correo del usuario"
+                name="email"
                 placeholder="Correo"
                 className="input-field"
                 value={formData.email}
                 onChange={handleChange}
+                disabled={isLoading} // Deshabilitar mientras carga
               />
             </div>
           </div>
@@ -124,27 +130,39 @@ const InicioSesion = () => {
               <img src={candadoIcon} alt="icono candado" className="input-icon-inside" />
               <input
                 type="password"
-                name="password" // Mismo nombre "contraseña"
+                name="password"
                 placeholder="Contraseña"
                 className="input-field"
                 value={formData.password}
                 onChange={handleChange}
+                disabled={isLoading} // Deshabilitar mientras carga
               />
             </div>
           </div>
 
           {errorMessage && <p className="error-message">{errorMessage}</p>}
 
-          <button className="login-button" onClick={handleSubmit}>
+          <button className="login-button" onClick={handleSubmit} disabled={isLoading}>
             Iniciar sesión
           </button>
 
           <div className="register-prompt">
             <span>¿No tienes cuenta?</span>
-            <button className="register-link" onClick={() => navigate('/registro')}>Registrate</button>
+            <button className="register-link" onClick={() => navigate('/registro')} disabled={isLoading}>
+              Regístrate
+            </button>
           </div>
         </div>
       </div>
+
+      {isLoading && (
+        <div className="loading-overlay">
+          <div className="loading-content">
+            <div className="spinner"></div>
+            <p className="loading-text">Iniciando sesión...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
