@@ -7,7 +7,7 @@ import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { useNavigate } from 'react-router-dom';
-
+const api_URL = import.meta.env.VITE_API_URL;
 const defaultIcon: Icon = new L.Icon({
   iconRetinaUrl: markerIcon2x,
   iconUrl: markerIcon,
@@ -19,18 +19,37 @@ const defaultIcon: Icon = new L.Icon({
 });
 
 const AñadirViaje: React.FC = () => {
+  // Decodificar el token manualmente (sin librerías externas)
+const decodeToken = (token: string) => {
+  try {
+    const base64Payload = token.split('.')[1]; // Extraer la segunda parte del token
+    const decodedPayload = atob(base64Payload); // Decodificar de Base64
+    return JSON.parse(decodedPayload); // Parsear el JSON
+  } catch (error) {
+    console.error('Error decodificando el token:', error);
+    return null;
+  }
+};
+
+const token = localStorage.getItem('token');
+console.log(token);
+const decodedToken = token ? decodeToken(token) : null;
+
+if (!decodedToken) {
+  console.error('Token inválido o no encontrado');
+}
+
   const navigate = useNavigate();
   const [startPoint, setStartPoint] = useState<LatLng | null>(null);
   const [endPoint, setEndPoint] = useState<LatLng | null>(null);
   const [formData, setFormData] = useState({
-    puntoInicio: '',
-    puntoFinal: '',
-    fechaSalida: '', // Nueva propiedad para la fecha de salida
-    horaSalida: '',
-    cuposDisponibles: '',
-    tarifaPorPasajero: '',
-    ruta: '',
-    placa: '',
+    startTrip: '',
+    endTrip: '',
+    date: '', // Nueva propiedad para la fecha de salida
+    timeTrip: '',
+    availablePlaces: '',
+    priceTrip: '',
+    route: '',
   });
 
   const geocodeCache = new Map<string, [number, number]>();
@@ -93,9 +112,9 @@ const AñadirViaje: React.FC = () => {
   };
 
   // Manejo de cambios en el campo de punto de inicio
-  const handlePuntoInicioChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlestartTripChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const address = e.target.value;
-    setFormData({ ...formData, puntoInicio: address });
+    setFormData({ ...formData, startTrip: address });
     const coords = await geocodeAddress(address);
     if (coords) {
       const [lat, lon] = coords;
@@ -106,9 +125,9 @@ const AñadirViaje: React.FC = () => {
   };
 
   // Manejo de cambios en el campo de punto final
-  const handlePuntoFinalChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleendTripChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const address = e.target.value;
-    setFormData({ ...formData, puntoFinal: address });
+    setFormData({ ...formData, endTrip: address });
     const coords = await geocodeAddress(address);
     if (coords) {
       const [lat, lon] = coords;
@@ -128,9 +147,9 @@ const AñadirViaje: React.FC = () => {
   };
 
   // Manejo de cambios en el campo de fecha de salida
-  const handleFechaSalidaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handledateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const fecha = e.target.value;
-    setFormData({ ...formData, fechaSalida: fecha });
+    setFormData({ ...formData, date: fecha });
   };
 
   // Componente de eventos del mapa
@@ -152,13 +171,13 @@ const AñadirViaje: React.FC = () => {
   // Actualiza el punto de inicio con el nombre del lugar
   const updateStartLocation = async (coords: LatLng) => {
     const locationName = await reverseGeocode(coords);
-    setFormData({ ...formData, puntoInicio: locationName });
+    setFormData({ ...formData, startTrip: locationName });
   };
 
   // Actualiza el punto final con el nombre del lugar
   const updateEndLocation = async (coords: LatLng) => {
     const locationName = await reverseGeocode(coords);
-    setFormData({ ...formData, puntoFinal: locationName });
+    setFormData({ ...formData, endTrip: locationName });
   };
 
   // Función para actualizar el punto de inicio al mover el marcador
@@ -176,24 +195,90 @@ const AñadirViaje: React.FC = () => {
     setEndPoint(position);
     updateEndLocation(position);
   };
+  const [carId, setCarId] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Formulario enviado:', formData);
-    // Aquí puedes agregar la lógica para enviar los datos al backend
-    setFormData({
-      puntoInicio: '',
-      puntoFinal: '',
-      fechaSalida: '', // Reiniciar la fecha de salida
-      horaSalida: '',
-      cuposDisponibles: '',
-      tarifaPorPasajero: '',
-      ruta: '',
-      placa: '',
-    });
-    setStartPoint(null);
-    setEndPoint(null);
-  };
+// Obtener el carID al montar el componente
+React.useEffect(() => {
+  if (decodedToken && decodedToken.userId) {
+    const userId = decodedToken.userId;
+
+    // Petición para obtener la información del usuario
+    axios
+      .get(`${api_URL}/user/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        
+        const carIDs = response.data.data.carIDs;
+        console.log('carIDs encontrados:', carIDs);
+        if (carIDs && carIDs.length > 0) {
+          setCarId(carIDs[0]); // Usar el primer carID (ajusta según necesidad)
+        } else {
+          console.error('No se encontraron carIDs en el usuario');
+        }
+      })
+      .catch((error) => {
+        console.error('Error obteniendo carID:', error);
+      });
+  }
+}, [decodedToken, token]);
+
+const formatDateToBackend = (date: string): string => {
+  const [year, month, day] = date.split('-'); // Divide la fecha en partes
+  return `${day}-${month}-${year}`; // Reorganiza al formato DD-MM-YYYY
+};
+
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  if (!carId) {
+      console.error('No se encontró el carID');
+      return;
+  }
+
+  try {
+      const formattedData = {
+          ...formData,
+          date: formatDateToBackend(formData.date), // Convertir la fecha
+      };
+
+      console.log('Datos enviados al backend:', formattedData); // Verificar formato
+
+      const response = await axios.post(
+          `${api_URL}/trips/${carId}`,
+          formattedData, // Usar los datos formateados
+          {
+              headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${token}`,
+              },
+          }
+      );
+
+      console.log('Viaje creado exitosamente:', response.data);
+      alert('Viaje creado exitosamente');
+
+      // Limpieza del formulario
+      setFormData({
+          startTrip: '',
+          endTrip: '',
+          date: '',
+          timeTrip: '',
+          availablePlaces: '',
+          priceTrip: '',
+          route: '',
+      });
+      setStartPoint(null);
+      setEndPoint(null);
+  } catch (error) {
+      console.error('Error creando el viaje:');
+      alert('Error creando el viaje');
+  }
+};
+
+
 
   // Obtener la fecha actual para establecer el mínimo en el calendario
   const today = getTodayDate();
@@ -244,18 +329,18 @@ const AñadirViaje: React.FC = () => {
           <form onSubmit={handleSubmit} className="añadir_viaje_trip-form">
             <input
               type="text"
-              name="puntoInicio"
-              value={formData.puntoInicio}
-              onChange={handlePuntoInicioChange}
+              name="startTrip"
+              value={formData.startTrip}
+              onChange={handlestartTripChange}
               placeholder="Punto de inicio"
               className="inputs-añadir letrainpitstitulo_añadir"
               required
             />
             <input
               type="text"
-              name="puntoFinal"
-              value={formData.puntoFinal}
-              onChange={handlePuntoFinalChange}
+              name="endTrip"
+              value={formData.endTrip}
+              onChange={handleendTripChange}
               placeholder="Punto final"
               className="inputs-añadir letrainpitstitulo_añadir"
               required
@@ -263,9 +348,9 @@ const AñadirViaje: React.FC = () => {
             {/* Nuevo Input para Fecha de Salida con atributo min */}
             <input
               type="date"
-              name="fechaSalida"
-              value={formData.fechaSalida}
-              onChange={handleFechaSalidaChange}
+              name="date"
+              value={formData.date}
+              onChange={handledateChange}
               placeholder="Fecha de salida"
               className="inputs-añadir letrainpitstitulo_añadir"
               required
@@ -273,18 +358,18 @@ const AñadirViaje: React.FC = () => {
             />
             <input
               type="time"
-              name="horaSalida"
-              value={formData.horaSalida}
-              onChange={(e) => setFormData({ ...formData, horaSalida: e.target.value })}
+              name="timeTrip"
+              value={formData.timeTrip}
+              onChange={(e) => setFormData({ ...formData, timeTrip: e.target.value })}
               placeholder="Hora de salida"
               className="inputs-añadir letrainpitstitulo_añadir"
               required
             />
             <input
               type="number"
-              name="cuposDisponibles"
-              value={formData.cuposDisponibles}
-              onChange={(e) => setFormData({ ...formData, cuposDisponibles: e.target.value })}
+              name="availablePlaces"
+              value={formData.availablePlaces}
+              onChange={(e) => setFormData({ ...formData, availablePlaces: e.target.value })}
               placeholder="Cupos disponibles"
               className="inputs-añadir letrainpitstitulo_añadir"
               min="1"
@@ -292,9 +377,9 @@ const AñadirViaje: React.FC = () => {
             />
             <input
               type="number"
-              name="tarifaPorPasajero"
-              value={formData.tarifaPorPasajero}
-              onChange={(e) => setFormData({ ...formData, tarifaPorPasajero: e.target.value })}
+              name="priceTrip"
+              value={formData.priceTrip}
+              onChange={(e) => setFormData({ ...formData, priceTrip: e.target.value })}
               placeholder="Tarifa por pasajero"
               className="inputs-añadir letrainpitstitulo_añadir"
               min="0"
@@ -302,19 +387,10 @@ const AñadirViaje: React.FC = () => {
               required
             />
             <textarea
-              name="ruta"
-              value={formData.ruta}
-              onChange={(e) => setFormData({ ...formData, ruta: e.target.value })}
-              placeholder="Ruta"
-              className="inputs-añadir letrainpitstitulo_añadir"
-              required
-            />
-            <input
-              type="text"
-              name="placa"
-              value={formData.placa}
-              onChange={(e) => setFormData({ ...formData, placa: e.target.value })}
-              placeholder="Placa"
+              name="route"
+              value={formData.route}
+              onChange={(e) => setFormData({ ...formData, route: e.target.value })}
+              placeholder="route"
               className="inputs-añadir letrainpitstitulo_añadir"
               required
             />

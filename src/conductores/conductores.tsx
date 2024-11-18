@@ -500,8 +500,7 @@ const Conductores = () => {
                       className="button-status-select_conductores"
                     >
                       <option value="Disponible">Disponible</option>
-                      <option value="En curso">En curso</option>
-                      <option value="Finalizado">Finalizado</option>
+                      <option value="No disponible">No disponible</option>
                     </select>
                     <button className="button-secondary_conductores" onClick={handleCancelarViaje}>
                       Cancelar Viaje
