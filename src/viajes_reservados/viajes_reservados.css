@@ -129,6 +129,9 @@ html {
 .viaje-item-viajes p {
   margin: 0.313rem 0;
   color: var(--color-contraste);
+  white-space: nowrap; /* Evita que el texto ocupe varias líneas */
+  overflow: hidden;    /* Oculta el texto que se salga del contenedor */
+  text-overflow: ellipsis; /* Añade "..." al final del texto truncado */
 }
 
 /* Botón que muestra el estado del viaje */
@@ -200,6 +203,7 @@ html {
   margin-bottom: 1rem;
 }
 
+/* Estilos para los inputs */
 .input-highlight-viajes {
   width: 100%;
   padding: 0.625rem;
@@ -210,6 +214,24 @@ html {
   color: var(--color-primario);
   background-color: rgba(208, 162, 242, 0.5);
   transition: background-color 0.3s ease, border-color 0.3s ease;
+  overflow-x: scroll; /* Habilitar scroll horizontal */
+  white-space: nowrap; /* Evitar saltos de línea */
+  cursor: default; /* Indicar que no es editable */
+  display: block; /* Asegurar que el contenido se muestra completo */
+}
+
+/* Scroll personalizado */
+.input-highlight-viajes::-webkit-scrollbar {
+  height: 0.5rem; /* Altura del scrollbar horizontal */
+}
+
+.input-highlight-viajes::-webkit-scrollbar-thumb {
+  background-color: var(--color-primario); /* Color del scrollbar */
+  border-radius: 0.25rem;
+}
+
+.input-highlight-viajes::-webkit-scrollbar-track {
+  background-color: rgba(208, 162, 242, 0.2); /* Fondo del scrollbar */
 }
 
 .input-highlight-viajes:focus {

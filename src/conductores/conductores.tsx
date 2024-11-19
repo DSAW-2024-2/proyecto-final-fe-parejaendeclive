@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { MapContainer, TileLayer, Marker, Popup as LeafletPopup } from 'react-leaflet';
@@ -321,39 +321,6 @@ const Conductores = () => {
     }
   };
 
-  // Función para manejar el cambio del estado del viaje
-  const handleChangeEstadoViaje = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-    if (viajeSeleccionado_conductores) {
-      const nuevoEstado = e.target.value;
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          alert('No se encontró el token. Por favor, inicia sesión nuevamente.');
-          navigate('/login');
-          return;
-        }
-
-        await axios.patch(
-          `https://proyecto-final-be-parejaendeclive.vercel.app/trips/${viajeSeleccionado_conductores.id}`,
-          { status: nuevoEstado },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        alert(`Estado del viaje ha sido actualizado a ${nuevoEstado}.`);
-        // Refrescar la lista de viajes
-        obtenerViajes();
-        handleCerrarDetalles();
-      } catch (error) {
-        console.error('Error al actualizar el estado del viaje:', error);
-        alert('Ocurrió un error al actualizar el estado del viaje. Por favor, intenta nuevamente.');
-      }
-    }
-  };
-
   // Función de filtrado
   const filterViajes = () => {
     const viajesFiltrados = viajes_conductores.filter((viaje) => {
@@ -571,15 +538,6 @@ const Conductores = () => {
                   </div>
 
                   <div className="button-container_conductores">
-                    {/* Modificar Estado del Viaje */}
-                    <select
-                      value={viajeSeleccionado_conductores.status}
-                      onChange={handleChangeEstadoViaje}
-                      className="button-status-select_conductores"
-                    >
-                      <option value="Disponible">Disponible</option>
-                      <option value="No disponible">No disponible</option>
-                    </select>
                     <button className="button-secondary_conductores" onClick={handleCancelarViaje}>
                       Cancelar Viaje
                     </button>
