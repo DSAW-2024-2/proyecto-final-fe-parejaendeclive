@@ -19,7 +19,7 @@ interface Viaje {
   date: string;
   priceTrip: number;
   status: string;
-  stops: { direccion: string; coords: [number, number]; celular: string }[];
+  stops: { direccion: string; celular: string }[]; 
   route: string;
   number?: string;
   reservedBy?: string[];
@@ -225,16 +225,35 @@ const Conductores = () => {
     navigate('/perfil');
   };
 
-  // Seleccionar un viaje de la lista
   const handleSeleccionarViaje_conductores = async (viaje: Viaje) => {
-    setViajeSeleccionado_conductores(viaje);
-    setParadasCoords(viaje.stops);
-    // Geocodificar las direcciones de startTrip y endTrip del viaje seleccionado
-    const startTrip = await geocodeAddress(viaje.startTrip);
-    const endTrip = await geocodeAddress(viaje.endTrip);
-    setstartTripCoords(startTrip);
-    setendTripCoords(endTrip);
-  };
+  setViajeSeleccionado_conductores(viaje);
+
+  // Geocodificar las direcciones de las paradas
+  const stopsWithCoords = await Promise.all(
+    viaje.stops.map(async (parada) => {
+      const coords = await geocodeAddress(parada.direccion);
+      return coords
+        ? { ...parada, coords }
+        : null; // Ignorar paradas que no puedan ser geocodificadas
+    })
+  );
+
+  // Filtrar paradas sin coordenadas y actualizar el estado
+  const validStops = stopsWithCoords.filter((parada) => parada !== null) as {
+    direccion: string;
+    coords: [number, number];
+    celular: string;
+  }[];
+
+  setParadasCoords(validStops);
+
+  // Geocodificar inicio y fin del viaje
+  const startTrip = await geocodeAddress(viaje.startTrip);
+  const endTrip = await geocodeAddress(viaje.endTrip);
+  setstartTripCoords(startTrip);
+  setendTripCoords(endTrip);
+};
+
 
   // Cerrar la ventana emergente de detalles del viaje
   const handleCerrarDetalles = () => {

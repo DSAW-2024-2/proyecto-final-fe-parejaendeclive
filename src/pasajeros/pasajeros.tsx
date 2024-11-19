@@ -10,7 +10,7 @@ import menuIcon from '../assets/menu.png';
 import personaIcon from '../assets/persona.png';
 
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-
+const api_URL = import.meta.env.VITE_API_URL;
 // Definir la interfaz Viaje
 interface Viaje {
   id: string;
@@ -24,7 +24,7 @@ interface Viaje {
   number: string; // Nuevo campo para el teléfono
   route: string; // Nuevo campo para la ruta
   stops?: string[] | null;
-  reservedBy?: string[] | null;
+  reservedBy?: ReservedTrips[] | null;
   status?: string;
   startCoords?: [number, number] | null;
   endCoords?: [number, number] | null;
@@ -35,6 +35,11 @@ interface Viaje {
 interface TripsResponse {
   message: string;
   trips: Viaje[];
+}
+interface ReservedTrips{
+  userId: string; // ID del usuario que realizó la reserva
+  stops: string[]; // Arreglo con las paradas seleccionadas
+  reservedPlaces: number; // Número de lugares reservados
 }
 
 const Pasajeros: React.FC = () => {
@@ -358,41 +363,54 @@ const Pasajeros: React.FC = () => {
     navigate('/perfil');
   };
 
-  // Función de filtrado
   const filterViajes = () => {
     if (!Array.isArray(todosViajes)) {
-      console.error('todosViajes no es un array:', todosViajes);
+      console.error('Error: todosViajes no es un array válido:', todosViajes);
       setError('Error interno de la aplicación.');
       setViajes_pasajeros([]);
       return;
     }
-
-    // Obtener la fecha actual en formato 'YYYY-MM-DD'
+  
+    // Obtener la fecha actual en formato comparable 'YYYY-MM-DD'
     const todayStr = new Date().toISOString().split('T')[0];
-
+  
     const viajesFiltrados = todosViajes.filter((viaje) => {
+      // Convertir la fecha del viaje al formato 'YYYY-MM-DD' para comparaciones
+      const formattedDate = viaje.date
+        ? viaje.date.split('-').reverse().join('-') // Convierte 'DD-MM-YYYY' a 'YYYY-MM-DD'
+        : '';
+  
+      // Verificar condiciones de cada filtro
       const coincideStart = puntoStart
-        ? viaje.startTrip.toLowerCase().includes(puntoStart.toLowerCase()) ||
-          puntoStart.toLowerCase().includes(viaje.startTrip.toLowerCase())
+        ? viaje.startTrip.toLowerCase().includes(puntoStart.toLowerCase())
         : true;
       const coincideEnd = puntoEnd
-        ? viaje.endTrip.toLowerCase().includes(puntoEnd.toLowerCase()) ||
-          puntoEnd.toLowerCase().includes(viaje.endTrip.toLowerCase())
+        ? viaje.endTrip.toLowerCase().includes(puntoEnd.toLowerCase())
         : true;
       const coincidePlaces = availablePlaces_pasajeros
         ? viaje.availablePlaces >= availablePlaces_pasajeros
         : true;
-      const coincideTime = timeTrip_pasajeros ? viaje.timeTrip === timeTrip_pasajeros : true;
-      const coincideDate = date_pasajeros ? viaje.date === date_pasajeros : true;
-
-      // Nueva condición para excluir viajes pasados
-      const notInPast = viaje.date >= todayStr;
-
+      const coincideTime = timeTrip_pasajeros
+        ? viaje.timeTrip === timeTrip_pasajeros
+        : true;
+      const coincideDate = date_pasajeros
+        ? new Date(formattedDate).toISOString().split('T')[0] ===
+          new Date(date_pasajeros).toISOString().split('T')[0]
+        : true;
+  
+      // Verificar que el viaje no esté en el pasado
+      const notInPast = formattedDate >= todayStr;
+  
+      // Combinar todas las condiciones
       return coincideStart && coincideEnd && coincidePlaces && coincideTime && coincideDate && notInPast;
     });
-
+  
+    // Actualizar el estado con los viajes filtrados
     setViajes_pasajeros(viajesFiltrados);
+  
+    console.log('Viajes filtrados:', viajesFiltrados); // Log para depuración
   };
+   
 
   // useEffect para filtrar automáticamente cuando cambien los filtros
   useEffect(() => {
@@ -468,6 +486,86 @@ const Pasajeros: React.FC = () => {
     setStartCoords(start);
     setEndCoords(end);
   };
+  
+  const decodeToken = (token: string): { userId: string } | null => {
+    try {
+      const payloadBase64 = token.split('.')[1];
+      const decodedPayload = JSON.parse(atob(payloadBase64));
+      return decodedPayload;
+    } catch (error) {
+      console.error('Error al decodificar el token:', error);
+      return null;
+    }
+  };
+  
+  const handleReservarViaje = async () => {
+    if (!viajeSeleccionado_pasajeros) {
+      alert('No se ha seleccionado ningún viaje para reservar.');
+      return;
+    }
+  
+    // Decodificar el token para obtener el userId
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('No estás autenticado. Por favor, inicia sesión.');
+      return;
+    }
+  
+    const decodedToken = decodeToken(token);
+    const userId = decodedToken?.userId;
+    if (!userId) {
+      alert('No se pudo obtener el ID del usuario. Por favor, inicia sesión nuevamente.');
+      return;
+    }
+  
+    // Validar entradas necesarias
+    const inputsCompletos = pickupInputs.every((input) => input.trim() !== '');
+    if (!inputsCompletos) {
+      alert('Por favor, ingresa todos los puntos de recogida antes de reservar.');
+      return;
+    }
+  
+    // Crear la data para enviar al servidor
+    const reservaData: ReservedTrips = {
+      userId: userId,
+      reservedPlaces: placesToReserve,
+      stops: pickupInputs,
+    };
+  
+    try {
+      // Realizar la solicitud al endpoint
+      const response = await axiosInstance.put(
+        `${api_URL}/trips/reserve/${viajeSeleccionado_pasajeros.id}`,
+        reservaData
+      );
+  
+      // Mostrar mensaje de éxito
+      console.log('Viaje reservado:', response.data);
+      alert('Reserva realizada con éxito.');
+
+  
+      // Actualizar el arreglo reservedTrips del viaje seleccionado localmente
+      setViajeSeleccionado_pasajeros((prevViaje) =>
+        prevViaje
+          ? {
+              ...prevViaje,
+              reservedBy: prevViaje.reservedBy
+                ? [...prevViaje.reservedBy, reservaData]
+                : [reservaData],
+            }
+          : null
+      );
+  
+      // Limpiar el modal después de reservar
+      setPickupInputs([]);
+      setPickupCoordsArray([]);
+      setViajeSeleccionado_pasajeros(null);
+    } catch (error) {
+      console.error('Error al realizar la reserva:', error);
+      alert('Ocurrió un error al intentar reservar. Por favor, intenta de nuevo.');
+    }
+  };
+  
 
   // Cerrar el modal de detalles del viaje
   const handleCloseModal = () => {
@@ -477,20 +575,9 @@ const Pasajeros: React.FC = () => {
     setPlacesToReserve(1);
   };
 
-  // Función para manejar la reserva
-  const handleReservar = () => {
-    // Validar que todos los puntos de recogida estén completos
-    const inputsCompletos = pickupInputs.every((input) => input.trim() !== '');
-    if (!inputsCompletos) {
-      alert('Por favor, ingresa todos los puntos de recogida para reservar.');
-      return;
-    }
-    alert(`Reserva realizada exitosamente.
-Número de Teléfono del Viaje: ${viajeSeleccionado_pasajeros?.number}`);
-    setPickupInputs([]);
-    setPickupCoordsArray([]);
-    setViajeSeleccionado_pasajeros(null);
-  };
+  
+
+  
 
   // useEffect para actualizar los arrays de puntos de recogida cuando cambia placesToReserve
   useEffect(() => {
@@ -871,7 +958,7 @@ Número de Teléfono del Viaje: ${viajeSeleccionado_pasajeros?.number}`);
 
                 {/* Botones de Reservar y Cerrar */}
                 <div className="button-container_pasajeros">
-                  <button className="button-primary_pasajeros" onClick={handleReservar}>
+                  <button className="button-primary_pasajeros" onClick={handleReservarViaje}>
                     Reservar
                   </button>
                   <button className="button-secondary_pasajeros" onClick={handleCloseModal}>
