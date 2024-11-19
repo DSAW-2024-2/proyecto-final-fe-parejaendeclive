@@ -367,6 +367,9 @@ const Pasajeros: React.FC = () => {
       return;
     }
 
+    // Obtener la fecha actual en formato 'YYYY-MM-DD'
+    const todayStr = new Date().toISOString().split('T')[0];
+
     const viajesFiltrados = todosViajes.filter((viaje) => {
       const coincideStart = puntoStart
         ? viaje.startTrip.toLowerCase().includes(puntoStart.toLowerCase()) ||
@@ -382,7 +385,10 @@ const Pasajeros: React.FC = () => {
       const coincideTime = timeTrip_pasajeros ? viaje.timeTrip === timeTrip_pasajeros : true;
       const coincideDate = date_pasajeros ? viaje.date === date_pasajeros : true;
 
-      return coincideStart && coincideEnd && coincidePlaces && coincideTime && coincideDate;
+      // Nueva condición para excluir viajes pasados
+      const notInPast = viaje.date >= todayStr;
+
+      return coincideStart && coincideEnd && coincidePlaces && coincideTime && coincideDate && notInPast;
     });
 
     setViajes_pasajeros(viajesFiltrados);
@@ -489,10 +495,46 @@ Número de Teléfono del Viaje: ${viajeSeleccionado_pasajeros?.number}`);
   // useEffect para actualizar los arrays de puntos de recogida cuando cambia placesToReserve
   useEffect(() => {
     if (viajeSeleccionado_pasajeros) {
-      setPickupInputs(Array(placesToReserve).fill(''));
-      setPickupCoordsArray(Array(placesToReserve).fill(null));
+      setPickupInputs((prevInputs) => {
+        const newInputs = [...prevInputs];
+        if (placesToReserve > newInputs.length) {
+          // Agregar nuevos inputs
+          return [...newInputs, ...Array(placesToReserve - newInputs.length).fill('')];
+        } else if (placesToReserve < newInputs.length) {
+          // Eliminar los inputs excedentes
+          return newInputs.slice(0, placesToReserve);
+        }
+        return newInputs;
+      });
+
+      setPickupCoordsArray((prevCoords) => {
+        const newCoords = [...prevCoords];
+        if (placesToReserve > newCoords.length) {
+          // Agregar nuevos coords
+          return [...newCoords, ...Array(placesToReserve - newCoords.length).fill(null)];
+        } else if (placesToReserve < newCoords.length) {
+          // Eliminar los coords excedentes
+          return newCoords.slice(0, placesToReserve);
+        }
+        return newCoords;
+      });
     }
   }, [placesToReserve, viajeSeleccionado_pasajeros]);
+
+  // **Nuevo useEffect para resetear startCoords y endCoords al cerrar el modal**
+  useEffect(() => {
+    const resetCoords = async () => {
+      if (!viajeSeleccionado_pasajeros) {
+        // Geocodificar puntoStart y puntoEnd para los filtros
+        const start = puntoStart ? await geocodeAddress(puntoStart) : null;
+        const end = puntoEnd ? await geocodeAddress(puntoEnd) : null;
+        setStartCoords(start);
+        setEndCoords(end);
+      }
+    };
+
+    resetCoords();
+  }, [viajeSeleccionado_pasajeros, puntoStart, puntoEnd]);
 
   return (
     <div className="pasajeros-container">
@@ -559,7 +601,7 @@ Número de Teléfono del Viaje: ${viajeSeleccionado_pasajeros?.number}`);
               </div>
               <div className="form-row_pasajeros">
                 <div className="form-group_pasajeros">
-                  <label>availablePlaces disponibles</label>
+                  <label>Cupos disponibles</label>
                   <select
                     value={availablePlaces_pasajeros}
                     onChange={(e) => setAvailablePlaces_pasajeros(parseInt(e.target.value))}
@@ -632,7 +674,7 @@ Número de Teléfono del Viaje: ${viajeSeleccionado_pasajeros?.number}`);
                             <strong>Tarifa:</strong> ${viaje.priceTrip}
                           </p>
                           <p>
-                            <strong>availablePlaces disponibles:</strong> {viaje.availablePlaces}
+                            <strong>Cupos disponibles:</strong> {viaje.availablePlaces}
                           </p>
                           <p>
                             <strong>Teléfono:</strong> {viaje.number}
@@ -659,11 +701,12 @@ Número de Teléfono del Viaje: ${viajeSeleccionado_pasajeros?.number}`);
             <div className="modal-overlay_pasajeros" onClick={handleCloseModal}>
               <div className="modal-content_pasajeros" onClick={(e) => e.stopPropagation()}>
                 <h3>Detalles del viaje seleccionado</h3>
+                
+                {/* Inicio viaje */}
                 <div className="form-row_pasajeros">
                   <div className="form-group_pasajeros">
                     <label>Inicio viaje:</label>
-                    <div className="input-container_pasajeros">
-                      <span className={`input-icon_pasajeros start`}></span>
+                    <div className="input-container_pasajeros no-icon">
                       <input
                         type="text"
                         value={viajeSeleccionado_pasajeros.startTrip}
@@ -672,10 +715,11 @@ Número de Teléfono del Viaje: ${viajeSeleccionado_pasajeros?.number}`);
                       />
                     </div>
                   </div>
+
+                  {/* Final viaje */}
                   <div className="form-group_pasajeros">
                     <label>Final viaje:</label>
-                    <div className="input-container_pasajeros">
-                      <span className={`input-icon_pasajeros end`}></span>
+                    <div className="input-container_pasajeros no-icon">
                       <input
                         type="text"
                         value={viajeSeleccionado_pasajeros.endTrip}
@@ -685,6 +729,8 @@ Número de Teléfono del Viaje: ${viajeSeleccionado_pasajeros?.number}`);
                     </div>
                   </div>
                 </div>
+
+                {/* Resto del contenido del modal */}
                 <div className="form-row_pasajeros">
                   <div className="form-group_pasajeros">
                     <label>Hora inicio:</label>
@@ -716,10 +762,10 @@ Número de Teléfono del Viaje: ${viajeSeleccionado_pasajeros?.number}`);
                     />
                   </div>
                   <div className="form-group_pasajeros">
-                    <label>availablePlaces disponibles:</label>
+                    <label>Cupos disponibles:</label>
                     <input
                       type="text"
-                      value={`${viajeSeleccionado_pasajeros.availablePlaces} availablePlaces`}
+                      value={`${viajeSeleccionado_pasajeros.availablePlaces} Cupos`}
                       readOnly
                       className="input-highlight_pasajeros"
                     />
@@ -727,9 +773,8 @@ Número de Teléfono del Viaje: ${viajeSeleccionado_pasajeros?.number}`);
                 </div>
                 <div className="form-row_pasajeros">
                   <div className="form-group_pasajeros">
-                    <label>Car ID:</label>
-                    <div className="input-container_pasajeros">
-                      {/* Eliminado el span de ícono de placa */}
+                    <label>Placa:</label>
+                    <div className="input-container_pasajeros no-icon">
                       <input
                         type="text"
                         value={viajeSeleccionado_pasajeros.carID}
@@ -738,11 +783,9 @@ Número de Teléfono del Viaje: ${viajeSeleccionado_pasajeros?.number}`);
                       />
                     </div>
                   </div>
-                  {/* Nuevo Campo para el Número de Teléfono (Solo Lectura) */}
                   <div className="form-group_pasajeros">
                     <label>Número de Teléfono:</label>
-                    <div className="input-container_pasajeros">
-                      {/* Eliminado el span de ícono de teléfono */}
+                    <div className="input-container_pasajeros no-icon">
                       <input
                         type="tel"
                         value={viajeSeleccionado_pasajeros.number}
@@ -753,10 +796,10 @@ Número de Teléfono del Viaje: ${viajeSeleccionado_pasajeros?.number}`);
                   </div>
                 </div>
 
-                {/* Nuevo Campo para availablePlaces a Reservar y Ruta */}
+                {/* Cupos a Reservar y Ruta */}
                 <div className="form-row_pasajeros">
                   <div className="form-group_pasajeros">
-                    <label>availablePlaces a reservar:</label>
+                    <label>Cupos a reservar:</label>
                     <input
                       type="number"
                       min="1"
@@ -764,8 +807,16 @@ Número de Teléfono del Viaje: ${viajeSeleccionado_pasajeros?.number}`);
                       value={placesToReserve}
                       onChange={(e) => {
                         const value = parseInt(e.target.value);
+                        if (isNaN(value)) {
+                          setPlacesToReserve(1);
+                          return;
+                        }
                         if (value > viajeSeleccionado_pasajeros.availablePlaces) {
-                          alert('No puedes reservar más availablePlaces de los disponibles.');
+                          alert('Añade o disminuye cupos a través de los botones');
+                          return;
+                        }
+                        if (value < 1) {
+                          alert('Debes reservar al menos un cupo.');
                           return;
                         }
                         setPlacesToReserve(value);
@@ -818,6 +869,7 @@ Número de Teléfono del Viaje: ${viajeSeleccionado_pasajeros?.number}`);
                   </div>
                 ))}
 
+                {/* Botones de Reservar y Cerrar */}
                 <div className="button-container_pasajeros">
                   <button className="button-primary_pasajeros" onClick={handleReservar}>
                     Reservar

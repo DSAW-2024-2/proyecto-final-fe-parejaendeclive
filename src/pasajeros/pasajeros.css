@@ -176,15 +176,15 @@ html {
     transition: background-color 0.3s ease;
 }
 
-.input-icon_pasajeros.inicio {
+.input-icon_pasajeros.start {
     background-color: #2E8B57; /* Verde */
 }
 
-.input-icon_pasajeros.final {
+.input-icon_pasajeros.end {
     background-color: #DC143C; /* Rojo */
 }
 
-.input-icon_pasajeros.recogida {
+.input-icon_pasajeros.pickup {
     background-color: #1E90FF; /* Azul */
 }
 
@@ -194,7 +194,8 @@ html {
 
 /* Estilos para inputs y selects en filtros y modal */
 input.input-field_pasajeros,
-select.input-field_pasajeros {
+select.input-field_pasajeros,
+input.input-highlight_pasajeros {
     width: 100%;
     padding: 0.625rem;
     padding-left: 2.5rem; /* Espacio suficiente para el icono */
@@ -208,10 +209,17 @@ select.input-field_pasajeros {
 }
 
 input.input-field_pasajeros:focus,
-select.input-field_pasajeros:focus {
+select.input-field_pasajeros:focus,
+input.input-highlight_pasajeros:focus {
     background-color: rgba(208, 162, 242, 0.75);
     border-color: #2e0e7c;
     outline: none;
+}
+
+/* Estilos para inputs sin íconos */
+.input-container_pasajeros.no-icon input.input-field_pasajeros,
+.input-container_pasajeros.no-icon input.input-highlight_pasajeros {
+    padding-left: 0.625rem; /* Ajusta el padding según sea necesario */
 }
 
 /* Estilos específicos para textarea "Ruta" en el modal */
@@ -392,3 +400,11 @@ select.input-field_pasajeros:focus {
     /* Puedes eliminar o dejar vacías estas media queries si ya no son necesarias */
     /* Si decides mantenerlas para otras funcionalidades, ajusta según sea necesario */
 }
+
+/* Estilos para inputs con íconos */
+.input-container_pasajeros input.input-field_pasajeros,
+.input-container_pasajeros input.input-highlight_pasajeros {
+    padding-left: 2.5rem; /* Espacio reservado para los íconos */
+}
+
+/* Estilos para inputs sin íconos ya definidos arriba */
