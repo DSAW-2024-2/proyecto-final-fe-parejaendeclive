@@ -7,24 +7,26 @@ import 'leaflet/dist/leaflet.css';
 import './conductores.css';
 import menuIcon from '../assets/menu.png';
 import personaIcon from '../assets/persona.png';
-
-// Importar las imágenes de los iconos de Leaflet
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
 // Definir la interfaz Viaje
 interface Viaje {
-  id: number;
+  id: string;
   startTrip: string;
   endTrip: string;
   availablePlaces: number;
   timeTrip: string;
   date: string;
   priceTrip: number;
-  placa: string;
-  estado: string;
-  paradas: { direccion: string; coords: [number, number]; celular: string }[]; // Añadido 'celular'
-  ruta: string; // Nuevo campo para la ruta
+  status: string;
+  stops: { direccion: string; coords: [number, number]; celular: string }[];
+  route: string;
+  number?: string;
+  reservedBy?: string[];
+  carId?: string;
+  carID?: string;
 }
+
 
 const Conductores = () => {
   const navigate = useNavigate();
@@ -38,83 +40,7 @@ const Conductores = () => {
   // Estados para las coordenadas del viaje seleccionado
   const [startTripCoords, setstartTripCoords] = useState<[number, number] | null>(null);
   const [endTripCoords, setendTripCoords] = useState<[number, number] | null>(null);
-  const [paradasCoords, setParadasCoords] = useState<{ direccion: string; coords: [number, number]; celular: string }[]>([]);
-
-  // Viajes disponibles (simulación) con coordenadas, dates, estados y paradas predefinidas
-  const todosViajes: Viaje[] = [
-    {
-      id: 1,
-      startTrip: 'Titan Plaza',
-      endTrip: 'Universidad de La Sabana',
-      availablePlaces: 2,
-      timeTrip: '09:00',
-      date: '2024-11-15',
-      priceTrip: 6000,
-      placa: 'ABC123',
-      estado: 'Disponible',
-      ruta: 'Ruta principal desde Titan Plaza hacia la Universidad de La Sabana pasando por la Calle 50 y la Avenida Central.',
-      paradas: [
-        {
-          direccion: 'Parada 1 - Calle 50',
-          coords: [4.711, -74.0721],
-          celular: '3101112222',
-        },
-        {
-          direccion: 'Parada 2 - Calle 60',
-          coords: [4.712, -74.073],
-          celular: '3103334444',
-        },
-      ],
-    },
-    {
-      id: 2,
-      startTrip: 'Estación Calle 100',
-      endTrip: 'Universidad de La Sabana',
-      availablePlaces: 3,
-      timeTrip: '10:00',
-      date: '2024-11-16',
-      priceTrip: 5500,
-      placa: 'XYZ789',
-      estado: 'Disponible',
-      ruta: 'Ruta alterna desde Estación Calle 100 hacia la Universidad de La Sabana pasando por la Calle 110.',
-      paradas: [
-        {
-          direccion: 'Parada 1 - Calle 110',
-          coords: [4.713, -74.074],
-          celular: '3105556666',
-        },
-      ],
-    },
-    {
-      id: 3,
-      startTrip: 'Estación Calle 85',
-      endTrip: 'Universidad de Los Andes',
-      availablePlaces: 2,
-      timeTrip: '09:30',
-      date: '2024-11-15',
-      priceTrip: 6500,
-      placa: 'JKL456',
-      estado: 'Disponible',
-      ruta: 'Ruta directa desde Estación Calle 85 hacia la Universidad de Los Andes, pasando por la Calle 90 y la Calle 95.',
-      paradas: [
-        {
-          direccion: 'Parada 1 - Calle 90',
-          coords: [4.714, -74.075],
-          celular: '3107778888',
-        },
-        {
-          direccion: 'Parada 2 - Calle 95',
-          coords: [4.715, -74.076],
-          celular: '3109990000',
-        },
-        {
-          direccion: 'Parada 3 - Calle 100',
-          coords: [4.716, -74.077],
-          celular: '3101213141',
-        },
-      ],
-    },
-  ];
+  const [stopsCoords, setParadasCoords] = useState<{ direccion: string; coords: [number, number]; celular: string }[]>([]);
 
   // Caché para geocodificación
   const geocodeCache = useMemo(() => new Map<string, [number, number]>(), []);
@@ -197,41 +123,112 @@ const Conductores = () => {
     });
   }, []);
 
-  // Manejo de cambios en los filtros
-  const handletimeTripSalidaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    settimeTripSalida_conductores(e.target.value);
+  // Función para decodificar el token JWT manualmente
+  const decodeToken = (token: string) => {
+    try {
+      const payload = token.split('.')[1];
+      // Reemplazar caracteres para base64 estándar
+      const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+      const decodedPayload = atob(base64);
+      return JSON.parse(decodedPayload);
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      return null;
+    }
   };
 
-  const handledateSalidaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setdateSalida_conductores(e.target.value);
+  // Función para formatear la fecha a DD-MM-YYYY
+  const formatDate = (date: string): string => {
+    const [year, month, day] = date.split('-'); // Divide la fecha en partes
+    return `${day}-${month}-${year}`; // Reorganiza al formato DD-MM-YYYY
   };
 
-  // Función de filtrado
-  const filterViajes = () => {
-    const viajesFiltrados = todosViajes.filter((viaje) => {
-      const coincidetimeTrip = timeTripSalida_conductores ? viaje.timeTrip === timeTripSalida_conductores : true;
-      const coincidedate = dateSalida_conductores ? viaje.date === dateSalida_conductores : true;
-
-      return coincidetimeTrip && coincidedate;
-    });
-
-    setViajes_conductores(viajesFiltrados);
+  // Función para obtener los viajes del conductor
+  const obtenerViajes = async () => {
+    try {
+      // Obtener el token almacenado en localStorage
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('No se encontró el token. Por favor, inicia sesión nuevamente.');
+        navigate('/login');
+        return;
+      }
+  
+      // Decodificar el token para validar al usuario
+      const decoded = decodeToken(token);
+      if (!decoded || !decoded.userId) {
+        alert('Token inválido. Por favor, inicia sesión nuevamente.');
+        navigate('/login');
+        return;
+      }
+  
+      const userId = decoded.userId;
+  
+      // Realizar la solicitud GET a /user/:id para obtener el carIDs
+      const userResponse = await axios.get(`https://proyecto-final-be-parejaendeclive.vercel.app/user/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      const userData = userResponse.data.data;
+      console.log("Información completa del usuario:", JSON.stringify(userData, null, 2));
+  
+      const carIDs = userData.carIDs;
+      if (!carIDs || carIDs.length === 0) {
+        alert('No tienes carros asociados.');
+        return;
+      }
+  
+      // Supongamos que queremos usar el primer carID
+      const carID = carIDs[0]; // O manejarlo dinámicamente según tu lógica
+  
+      // Realizar la solicitud GET a /trips/:carId
+      const tripsResponse = await axios.get(`https://proyecto-final-be-parejaendeclive.vercel.app/trips/${carID}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      const viajesData: Viaje[] = tripsResponse.data.trips;
+      console.log("Respuesta completa de la API:", JSON.stringify(viajesData, null, 2));
+      
+      // Formatear las fechas de los viajes
+      const viajesFormateados = viajesData.map((viaje) => ({
+        ...viaje,
+        date: formatDate(viaje.date), 
+        // Asegúrate de que formatDate esté implementado
+      }));
+  
+      setViajes_conductores(viajesFormateados);
+      console.log("Viajes obtenidos:", viajesFormateados);
+    } catch (error) {
+      console.error('Error al obtener viajes:', error);
+      alert('Ocurrió un error al obtener los viajes. Por favor, intenta nuevamente.');
+    }
   };
-
-  // useEffect para filtrar automáticamente cuando cambien los filtros
+  
   useEffect(() => {
-    filterViajes();
-  }, [timeTripSalida_conductores, dateSalida_conductores]);
-
-  // Inicializar viajes_conductores con todos los viajes al montar el componente
-  useEffect(() => {
-    setViajes_conductores(todosViajes);
+    obtenerViajes();
   }, []);
+  
+
+  // Caché para geocodificación
+  // ... (la parte de geocodificación se mantiene igual)
+
+  // Definir funciones de navegación dentro del componente
+  const navigateToMenu = () => {
+    navigate('/menu');
+  };
+
+  const navigateToPerfil = () => {
+    navigate('/perfil');
+  };
 
   // Seleccionar un viaje de la lista
   const handleSeleccionarViaje_conductores = async (viaje: Viaje) => {
     setViajeSeleccionado_conductores(viaje);
-    setParadasCoords(viaje.paradas);
+    setParadasCoords(viaje.stops);
     // Geocodificar las direcciones de startTrip y endTrip del viaje seleccionado
     const startTrip = await geocodeAddress(viaje.startTrip);
     const endTrip = await geocodeAddress(viaje.endTrip);
@@ -248,39 +245,112 @@ const Conductores = () => {
   };
 
   // Función para manejar la cancelación del viaje
-  const handleCancelarViaje = () => {
+  const handleCancelarViaje = async () => {
     if (viajeSeleccionado_conductores) {
-      // Aquí puedes agregar la lógica para cancelar el viaje, como una llamada a la API
-      alert(`Viaje con ID ${viajeSeleccionado_conductores.id} ha sido cancelado.`);
-      setViajeSeleccionado_conductores(null);
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          alert('No se encontró el token. Por favor, inicia sesión nuevamente.');
+          navigate('/login');
+          return;
+        }
+
+        await axios.delete(`https://proyecto-final-be-parejaendeclive.vercel.app/trips/${viajeSeleccionado_conductores.id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        alert(`Viaje con ID ${viajeSeleccionado_conductores.id} ha sido cancelado.`);
+        // Refrescar la lista de viajes
+        obtenerViajes();
+        handleCerrarDetalles();
+      } catch (error) {
+        console.error('Error al cancelar el viaje:', error);
+        alert('Ocurrió un error al cancelar el viaje. Por favor, intenta nuevamente.');
+      }
     }
   };
 
   // Función para manejar la cancelación de una parada específica
-  const handleCancelarParada = (index: number) => {
+  const handleCancelarParada = async (index: number) => {
     if (viajeSeleccionado_conductores) {
-      const updatedParadas = [...viajeSeleccionado_conductores.paradas];
-      updatedParadas.splice(index, 1); // Elimina la parada en el índice especificado
-      setViajeSeleccionado_conductores({ ...viajeSeleccionado_conductores, paradas: updatedParadas });
-      setParadasCoords(updatedParadas);
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          alert('No se encontró el token. Por favor, inicia sesión nuevamente.');
+          navigate('/login');
+          return;
+        }
+
+        const parada = viajeSeleccionado_conductores.stops[index];
+        // Supongamos que hay un endpoint para cancelar una parada específica
+        await axios.delete(`https://proyecto-final-be-parejaendeclive.vercel.app/trips/${viajeSeleccionado_conductores.id}/stops/${parada.direccion}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        alert(`Parada en ${parada.direccion} ha sido cancelada.`);
+        // Refrescar la lista de viajes
+        obtenerViajes();
+        handleCerrarDetalles();
+      } catch (error) {
+        console.error('Error al cancelar la parada:', error);
+        alert('Ocurrió un error al cancelar la parada. Por favor, intenta nuevamente.');
+      }
     }
   };
 
   // Función para manejar el cambio del estado del viaje
-  const handleChangeEstadoViaje = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleChangeEstadoViaje = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     if (viajeSeleccionado_conductores) {
-      setViajeSeleccionado_conductores({ ...viajeSeleccionado_conductores, estado: e.target.value });
+      const nuevoEstado = e.target.value;
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          alert('No se encontró el token. Por favor, inicia sesión nuevamente.');
+          navigate('/login');
+          return;
+        }
+
+        await axios.patch(
+          `https://proyecto-final-be-parejaendeclive.vercel.app/trips/${viajeSeleccionado_conductores.id}`,
+          { status: nuevoEstado },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        alert(`Estado del viaje ha sido actualizado a ${nuevoEstado}.`);
+        // Refrescar la lista de viajes
+        obtenerViajes();
+        handleCerrarDetalles();
+      } catch (error) {
+        console.error('Error al actualizar el estado del viaje:', error);
+        alert('Ocurrió un error al actualizar el estado del viaje. Por favor, intenta nuevamente.');
+      }
     }
   };
 
-  // Definir funciones de navegación dentro del componente
-  const navigateToMenu = () => {
-    navigate('/menu');
+  // Función de filtrado
+  const filterViajes = () => {
+    const viajesFiltrados = viajes_conductores.filter((viaje) => {
+      const coincidetimeTrip = timeTripSalida_conductores ? viaje.timeTrip === timeTripSalida_conductores : true;
+      const coincidedate = dateSalida_conductores ? viaje.date === formatDate(dateSalida_conductores) : true;
+
+      return coincidetimeTrip && coincidedate;
+    });
+
+    setViajes_conductores(viajesFiltrados);
   };
 
-  const navigateToPerfil = () => {
-    navigate('/perfil');
-  };
+  // useEffect para filtrar automáticamente cuando cambien los filtros
+  useEffect(() => {
+    filterViajes();
+  }, [timeTripSalida_conductores, dateSalida_conductores]);
 
   return (
     <div className="conductores-container">
@@ -305,21 +375,21 @@ const Conductores = () => {
               <h3>Filtrar viajes del conductor</h3>
               <div className="form-row_conductores">
                 <div className="form-group_conductores">
-                  <label>timeTrip salida</label>
+                  <label>Hora de Salida</label>
                   <input
                     type="time"
                     value={timeTripSalida_conductores}
-                    onChange={handletimeTripSalidaChange}
-                    className="input-field_conductores" // Usar la misma clase que los demás inputs
+                    onChange={(e) => settimeTripSalida_conductores(e.target.value)}
+                    className="input-field_conductores"
                   />
                 </div>
                 <div className="form-group_conductores">
-                  <label>date salida</label>
+                  <label>Fecha de Salida</label>
                   <input
                     type="date"
                     value={dateSalida_conductores}
-                    onChange={handledateSalidaChange}
-                    className="input-field_conductores" // Usar la misma clase que los demás inputs
+                    onChange={(e) => setdateSalida_conductores(e.target.value)}
+                    className="input-field_conductores"
                   />
                 </div>
               </div>
@@ -337,31 +407,31 @@ const Conductores = () => {
                       <li key={viaje.id} className="viaje-item_conductores">
                         <div>
                           <p>
-                            <strong>startTrip:</strong> {viaje.startTrip}
+                            <strong>Inicio:</strong> {viaje.startTrip}
                           </p>
                           <p>
-                            <strong>endTrip:</strong> {viaje.endTrip}
+                            <strong>Destino:</strong> {viaje.endTrip}
                           </p>
                           <p>
-                            <strong>timeTrip:</strong> {viaje.timeTrip}
+                            <strong>Hora:</strong> {viaje.timeTrip}
                           </p>
                           <p>
-                            <strong>date:</strong> {viaje.date}
+                            <strong>Fecha:</strong> {viaje.date}
                           </p>
                           <p>
-                            <strong>priceTrip:</strong> ${viaje.priceTrip}
+                            <strong>Precio:</strong> ${viaje.priceTrip}
                           </p>
                           <p>
-                            <strong>availablePlaces disponibles:</strong> {viaje.availablePlaces}
+                            <strong>Lugares Disponibles:</strong> {viaje.availablePlaces}
                           </p>
                           <p>
-                            <strong>Estado:</strong> {viaje.estado}
+                            <strong>Estado:</strong> {viaje.status}
                           </p>
                           <button
                             className="button-status_conductores"
                             onClick={() => handleSeleccionarViaje_conductores(viaje)}
                           >
-                            {viaje.estado}
+                            {viaje.status}
                           </button>
                         </div>
                       </li>
@@ -384,27 +454,27 @@ const Conductores = () => {
                   <div className="detalles-section_conductores">
                     <div className="form-row_conductores">
                       <div className="form-group_conductores">
-                        <label>startTrip viaje:</label>
+                        <label>Inicio del Viaje:</label>
                         <input
                           type="text"
                           value={viajeSeleccionado_conductores.startTrip}
                           readOnly
-                          className="input-highlight_conductores" // Usar la misma clase que los demás inputs
+                          className="input-highlight_conductores"
                         />
                       </div>
                       <div className="form-group_conductores">
-                        <label>endTrip viaje:</label>
+                        <label>Destino del Viaje:</label>
                         <input
                           type="text"
                           value={viajeSeleccionado_conductores.endTrip}
                           readOnly
-                          className="input-highlight_conductores" // Usar la misma clase que los demás inputs
+                          className="input-highlight_conductores"
                         />
                       </div>
                     </div>
                     <div className="form-row_conductores">
                       <div className="form-group_conductores">
-                        <label>timeTrip startTrip:</label>
+                        <label>Hora de Inicio:</label>
                         <input
                           type="text"
                           value={viajeSeleccionado_conductores.timeTrip}
@@ -413,7 +483,7 @@ const Conductores = () => {
                         />
                       </div>
                       <div className="form-group_conductores">
-                        <label>date salida:</label>
+                        <label>Fecha de Salida:</label>
                         <input
                           type="text"
                           value={viajeSeleccionado_conductores.date}
@@ -424,7 +494,7 @@ const Conductores = () => {
                     </div>
                     <div className="form-row_conductores">
                       <div className="form-group_conductores">
-                        <label>priceTrip:</label>
+                        <label>Precio del Viaje:</label>
                         <input
                           type="text"
                           value={`$${viajeSeleccionado_conductores.priceTrip}`}
@@ -433,41 +503,40 @@ const Conductores = () => {
                         />
                       </div>
                       <div className="form-group_conductores">
-                        <label>availablePlaces disponibles:</label>
+                        <label>Lugares Disponibles:</label>
                         <input
                           type="text"
-                          value={`${viajeSeleccionado_conductores.availablePlaces} availablePlaces`}
+                          value={`${viajeSeleccionado_conductores.availablePlaces} lugares`}
                           readOnly
                           className="input-highlight_conductores"
                         />
                       </div>
                     </div>
-                    
 
-                    {/* Nuevo Campo para Ruta */}
+                    {/* Campo para Ruta */}
                     <div className="form-row_conductores">
                       <div className="form-group_conductores">
                         <label>Ruta:</label>
                         <textarea
-                          value={viajeSeleccionado_conductores.ruta}
+                          value={viajeSeleccionado_conductores.route}
                           readOnly
                           className="input-field_conductores"
                         />
                       </div>
                     </div>
 
-                    {/* Sección de Paradas Predefinidas con Celular */}
+                    {/* Sección de Paradas con Celular */}
                     <div className="form-group_conductores">
                       <label>Paradas:</label>
-                      <ul className="paradas-list_conductores">
-                        {viajeSeleccionado_conductores.paradas.map((parada, index) => (
+                      <ul className="stops-list_conductores">
+                        {viajeSeleccionado_conductores.stops.map((parada, index) => (
                           <li key={index} className="parada-item_conductores">
                             <div className="parada-info_conductores">
                               <p>
-                                <strong>Celular:</strong> {parada.celular}
+                                <strong>Dirección:</strong> {parada.direccion}
                               </p>
                               <p>
-                                <strong>Dirección:</strong> {parada.direccion}
+                                <strong>Celular:</strong> {parada.celular}
                               </p>
                             </div>
                             <button
@@ -485,7 +554,7 @@ const Conductores = () => {
                   <div className="button-container_conductores">
                     {/* Modificar Estado del Viaje */}
                     <select
-                      value={viajeSeleccionado_conductores.estado}
+                      value={viajeSeleccionado_conductores.status}
                       onChange={handleChangeEstadoViaje}
                       className="button-status-select_conductores"
                     >
@@ -518,20 +587,20 @@ const Conductores = () => {
               attribution="&copy; OpenStreetMap contributors"
             />
 
-            {/* Marcadores según el estado */}
+            {/* Marcadores según el status */}
             {viajeSeleccionado_conductores && (
               <>
                 {startTripCoords && (
                   <Marker position={startTripCoords} icon={startTripIcon}>
-                    <LeafletPopup>startTrip del viaje: {viajeSeleccionado_conductores.startTrip}</LeafletPopup>
+                    <LeafletPopup>Inicio del viaje: {viajeSeleccionado_conductores.startTrip}</LeafletPopup>
                   </Marker>
                 )}
                 {endTripCoords && (
                   <Marker position={endTripCoords} icon={endTripIcon}>
-                    <LeafletPopup>endTrip del viaje: {viajeSeleccionado_conductores.endTrip}</LeafletPopup>
+                    <LeafletPopup>Destino del viaje: {viajeSeleccionado_conductores.endTrip}</LeafletPopup>
                   </Marker>
                 )}
-                {paradasCoords.map((parada, index) => (
+                {stopsCoords.map((parada, index) => (
                   <Marker key={index} position={parada.coords} icon={paradaIcon}>
                     <LeafletPopup>Parada: {parada.direccion}</LeafletPopup>
                   </Marker>

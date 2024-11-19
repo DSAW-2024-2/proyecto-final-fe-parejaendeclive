@@ -421,7 +421,7 @@ const Pasajeros: React.FC = () => {
               setError('No autorizado. Por favor, inicia sesión nuevamente.');
               navigate('/login');
             } else {
-              setError('Error al obtener los viajes disponibles. Por favor, inténtalo de nuevo más tarde.');
+              setError('no hay viajes disponibles por el momento');
             }
           } else if (axiosError.request) {
             setError('No se recibió respuesta del servidor. Por favor, intenta de nuevo más tarde.');
