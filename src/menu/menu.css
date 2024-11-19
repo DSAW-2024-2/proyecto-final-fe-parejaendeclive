@@ -264,7 +264,7 @@ html {
 @media (max-width: 480px) {
     .perfil-content {
         max-width: 300px;
-    }
+    }   
 
     .option {
         flex-direction: column;
