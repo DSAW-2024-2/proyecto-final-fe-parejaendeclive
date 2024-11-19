@@ -1,3 +1,4 @@
+// src/components/Conductores.tsx
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -8,6 +9,8 @@ import './conductores.css';
 import menuIcon from '../assets/menu.png';
 import personaIcon from '../assets/persona.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+const api_URL = import.meta.env.VITE_API_URL;
+const geocode_API_URL = import.meta.env.VITE_GEOCODE_API_URL;
 
 // Definir la interfaz Viaje
 interface Viaje {
@@ -27,14 +30,14 @@ interface Viaje {
   carID?: string;
 }
 
-
 const Conductores = () => {
   const navigate = useNavigate();
 
   // Estados para los filtros y datos
   const [timeTripSalida_conductores, settimeTripSalida_conductores] = useState('');
   const [dateSalida_conductores, setdateSalida_conductores] = useState('');
-  const [viajes_conductores, setViajes_conductores] = useState<Viaje[]>([]);
+  const [todosLosViajes, setTodosLosViajes] = useState<Viaje[]>([]);
+  const [viajesFiltrados, setViajesFiltrados] = useState<Viaje[]>([]);
   const [viajeSeleccionado_conductores, setViajeSeleccionado_conductores] = useState<Viaje | null>(null);
 
   // Estados para las coordenadas del viaje seleccionado
@@ -45,27 +48,22 @@ const Conductores = () => {
   // Caché para geocodificación
   const geocodeCache = useMemo(() => new Map<string, [number, number]>(), []);
 
-  // Función para geocodificar una dirección con caché
+  // Función para geocodificar una dirección usando el backend
   const geocodeAddress = async (address: string): Promise<[number, number] | null> => {
     if (geocodeCache.has(address)) {
       return geocodeCache.get(address)!;
     }
     try {
-      const response = await axios.get('https://nominatim.openstreetmap.org/search', {
-        params: {
-          q: address,
-          format: 'json',
-          addressdetails: 1,
-          limit: 1,
-        },
+      const response = await axios.get(`${geocode_API_URL}`, {
+        params: { address },
       });
 
-      if (response.data && response.data.length > 0) {
-        const { lat, lon } = response.data[0];
-        const coords: [number, number] = [parseFloat(lat), parseFloat(lon)];
+      if (response.data && response.data.coords) {
+        const coords: [number, number] = response.data.coords;
         geocodeCache.set(address, coords);
         return coords;
       } else {
+        console.warn(`No se encontraron coordenadas para la dirección: ${address}`);
         return null;
       }
     } catch (error) {
@@ -165,7 +163,7 @@ const Conductores = () => {
       const userId = decoded.userId;
   
       // Realizar la solicitud GET a /user/:id para obtener el carIDs
-      const userResponse = await axios.get(`https://proyecto-final-be-parejaendeclive.vercel.app/user/${userId}`, {
+      const userResponse = await axios.get(`${api_URL}/user/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -184,7 +182,7 @@ const Conductores = () => {
       const carID = carIDs[0]; // O manejarlo dinámicamente según tu lógica
   
       // Realizar la solicitud GET a /trips/:carId
-      const tripsResponse = await axios.get(`https://proyecto-final-be-parejaendeclive.vercel.app/trips/${carID}`, {
+      const tripsResponse = await axios.get(`${api_URL}/trips/${carID}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -200,7 +198,8 @@ const Conductores = () => {
         // Asegúrate de que formatDate esté implementado
       }));
   
-      setViajes_conductores(viajesFormateados);
+      setTodosLosViajes(viajesFormateados);
+      setViajesFiltrados(viajesFormateados);
       console.log("Viajes obtenidos:", viajesFormateados);
     } catch (error) {
       console.error('Error al obtener viajes:', error);
@@ -212,10 +211,6 @@ const Conductores = () => {
     obtenerViajes();
   }, []);
   
-
-  // Caché para geocodificación
-  // ... (la parte de geocodificación se mantiene igual)
-
   // Definir funciones de navegación dentro del componente
   const navigateToMenu = () => {
     navigate('/menu');
@@ -226,33 +221,33 @@ const Conductores = () => {
   };
 
   const handleSeleccionarViaje_conductores = async (viaje: Viaje) => {
-  setViajeSeleccionado_conductores(viaje);
+    setViajeSeleccionado_conductores(viaje);
 
-  // Geocodificar las direcciones de las paradas
-  const stopsWithCoords = await Promise.all(
-    viaje.stops.map(async (parada) => {
-      const coords = await geocodeAddress(parada.direccion);
-      return coords
-        ? { ...parada, coords }
-        : null; // Ignorar paradas que no puedan ser geocodificadas
-    })
-  );
+    // Geocodificar las direcciones de las paradas
+    const stopsWithCoords = await Promise.all(
+      viaje.stops.map(async (parada) => {
+        const coords = await geocodeAddress(parada.direccion);
+        return coords
+          ? { ...parada, coords }
+          : null; // Ignorar paradas que no puedan ser geocodificadas
+      })
+    );
 
-  // Filtrar paradas sin coordenadas y actualizar el estado
-  const validStops = stopsWithCoords.filter((parada) => parada !== null) as {
-    direccion: string;
-    coords: [number, number];
-    celular: string;
-  }[];
+    // Filtrar paradas sin coordenadas y actualizar el estado
+    const validStops = stopsWithCoords.filter((parada) => parada !== null) as {
+      direccion: string;
+      coords: [number, number];
+      celular: string;
+    }[];
 
-  setParadasCoords(validStops);
+    setParadasCoords(validStops);
 
-  // Geocodificar inicio y fin del viaje
-  const startTrip = await geocodeAddress(viaje.startTrip);
-  const endTrip = await geocodeAddress(viaje.endTrip);
-  setstartTripCoords(startTrip);
-  setendTripCoords(endTrip);
-};
+    // Geocodificar inicio y fin del viaje
+    const startTrip = await geocodeAddress(viaje.startTrip);
+    const endTrip = await geocodeAddress(viaje.endTrip);
+    setstartTripCoords(startTrip);
+    setendTripCoords(endTrip);
+  };
 
 
   // Cerrar la ventana emergente de detalles del viaje
@@ -274,13 +269,13 @@ const Conductores = () => {
           return;
         }
 
-        await axios.delete(`https://proyecto-final-be-parejaendeclive.vercel.app/trips/${viajeSeleccionado_conductores.id}`, {
+        await axios.delete(`${api_URL}/trips/cancel/${viajeSeleccionado_conductores.id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
-        alert(`Viaje con ID ${viajeSeleccionado_conductores.id} ha sido cancelado.`);
+        alert(`Viaje ha sido cancelado exitosamente.`);
         // Refrescar la lista de viajes
         obtenerViajes();
         handleCerrarDetalles();
@@ -291,52 +286,74 @@ const Conductores = () => {
     }
   };
 
-  // Función para manejar la cancelación de una parada específica
   const handleCancelarParada = async (index: number) => {
-    if (viajeSeleccionado_conductores) {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          alert('No se encontró el token. Por favor, inicia sesión nuevamente.');
-          navigate('/login');
-          return;
-        }
-
-        const parada = viajeSeleccionado_conductores.stops[index];
-        // Supongamos que hay un endpoint para cancelar una parada específica
-        await axios.delete(`https://proyecto-final-be-parejaendeclive.vercel.app/trips/${viajeSeleccionado_conductores.id}/stops/${parada.direccion}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        alert(`Parada en ${parada.direccion} ha sido cancelada.`);
+    if (!viajeSeleccionado_conductores) {
+      alert('No se encontró el viaje seleccionado.');
+      return;
+    }
+  
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('No se encontró el token. Por favor, inicia sesión nuevamente.');
+        navigate('/login');
+        return;
+      }
+  
+      const parada = viajeSeleccionado_conductores.stops[index];
+      if (!parada) {
+        alert('No se pudo encontrar la parada seleccionada.');
+        return;
+      }
+  
+      console.log('Cancelando parada:', parada, 'para el viaje:', viajeSeleccionado_conductores.id);
+      console.log('Cuerpo enviado:', { stop: parada });
+      console.log('URL generada:', `${api_URL}/trips/cancel-stop/${viajeSeleccionado_conductores.id}`);
+  
+      // Realizar la solicitud DELETE con el cuerpo incluido
+      const response = await axios({
+        method: 'DELETE',
+        url: `${api_URL}/trips/cancel-stop/${viajeSeleccionado_conductores.id}`,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        data: {
+          stop: parada, // El backend espera esto
+        },
+      });
+  
+      if (response.status === 200) {
+        alert(`Parada "${parada.direccion}" ha sido cancelada.`);
         // Refrescar la lista de viajes
         obtenerViajes();
         handleCerrarDetalles();
-      } catch (error) {
-        console.error('Error al cancelar la parada:', error);
-        alert('Ocurrió un error al cancelar la parada. Por favor, intenta nuevamente.');
+      } else {
+        alert('La parada no pudo ser cancelada. Verifica con el administrador.');
       }
+    } catch (error) {
+      console.error('Error al cancelar la parada:', error);
+      alert('Ocurrió un error al cancelar la parada. Por favor, intenta nuevamente.');
     }
   };
+  
 
   // Función de filtrado
   const filterViajes = () => {
-    const viajesFiltrados = viajes_conductores.filter((viaje) => {
+    const viajesFiltrados = todosLosViajes.filter((viaje) => {
       const coincidetimeTrip = timeTripSalida_conductores ? viaje.timeTrip === timeTripSalida_conductores : true;
       const coincidedate = dateSalida_conductores ? viaje.date === formatDate(dateSalida_conductores) : true;
 
       return coincidetimeTrip && coincidedate;
     });
 
-    setViajes_conductores(viajesFiltrados);
+    setViajesFiltrados(viajesFiltrados);
   };
 
   // useEffect para filtrar automáticamente cuando cambien los filtros
   useEffect(() => {
     filterViajes();
-  }, [timeTripSalida_conductores, dateSalida_conductores]);
+  }, [timeTripSalida_conductores, dateSalida_conductores, todosLosViajes]);
 
   return (
     <div className="conductores-container">
@@ -385,11 +402,11 @@ const Conductores = () => {
           {/* Viajes del Conductor */}
           {!viajeSeleccionado_conductores && (
             <>
-              {viajes_conductores.length > 0 ? (
+              {viajesFiltrados.length > 0 ? (
                 <div className="viajes-section_conductores">
                   <h3>Viajes Disponibles</h3>
                   <ul className="viajes-list_conductores">
-                    {viajes_conductores.map((viaje) => (
+                    {viajesFiltrados.map((viaje) => (
                       <li key={viaje.id} className="viaje-item_conductores">
                         <div>
                           <p>
@@ -579,7 +596,11 @@ const Conductores = () => {
                 )}
                 {stopsCoords.map((parada, index) => (
                   <Marker key={index} position={parada.coords} icon={paradaIcon}>
-                    <LeafletPopup>Parada: {parada.direccion}</LeafletPopup>
+                    <LeafletPopup>
+                      <strong>Parada:</strong> {parada.direccion}
+                      <br />
+                      <strong>Celular:</strong> {parada.celular}
+                    </LeafletPopup>
                   </Marker>
                 ))}
               </>
