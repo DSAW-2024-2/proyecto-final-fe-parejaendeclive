@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './viajes_reservados.css';
 const api_URL = import.meta.env.VITE_API_URL;
+
 interface Viaje {
   id: number;
   startTrip: string;
@@ -33,7 +34,7 @@ const ViajesReservados = () => {
       try {
         const token = localStorage.getItem('token');
         if (!token) throw new Error('Token no encontrado');
-        
+
         const userId = decodeToken(token).userId;
 
         const response = await fetch(`${api_URL}/trips/user/${userId}`, {
@@ -71,6 +72,31 @@ const ViajesReservados = () => {
   const handleBack = () => navigate('/menu');
   const handleOpenModal = (viaje: Viaje) => setViajeSeleccionado(viaje);
   const handleCloseModal = () => setViajeSeleccionado(null);
+
+  const cancelarViaje = async () => {
+    if (!viajeSeleccionado) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('Token no encontrado');
+
+      const response = await fetch(`${api_URL}/trips/reservation/${viajeSeleccionado.id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) throw new Error('Error al cancelar el viaje');
+
+      alert('Viaje cancelado exitosamente');
+      setViajes(viajes.filter((viaje) => viaje.id !== viajeSeleccionado.id));
+      setViajeSeleccionado(null);
+    } catch (error) {
+      console.error('Error al cancelar el viaje:', error);
+      alert('No se pudo cancelar el viaje. Intenta de nuevo.');
+    }
+  };
 
   return (
     <div className="viajes-reservados-container">
@@ -172,7 +198,9 @@ const ViajesReservados = () => {
             </div>
 
             <div className="button-container-viajes">
-              <button className="button-primary-viajes">Cancelar viaje</button>
+              <button className="button-primary-viajes" onClick={cancelarViaje}>
+                Cancelar viaje
+              </button>
               <button className="button-secondary-viajes" onClick={handleCloseModal}>
                 Cerrar
               </button>
