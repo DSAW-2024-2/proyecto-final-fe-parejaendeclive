@@ -1,3 +1,5 @@
+// Registro.tsx
+
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './registro.css';
@@ -6,13 +8,12 @@ import axios from 'axios';
 
 const api_URL = import.meta.env.VITE_API_URL;
 
-
 interface MyUglyFormData {
-  name: string;           // Nombre del estudiante
-  LastName: string;       // Apellido del estudiante
-  idUser: string;             // ID de la universidad
-  email: string;          // Correo del usuario
-  number: string;         // Número de contacto
+  name: string;       // Nombre del estudiante
+  LastName: string;   // Apellido del estudiante
+  idUser: string;     // ID de la universidad
+  email: string;      // Correo del usuario
+  number: string;     // Número de contacto
   password: string;
   photoUser?: string;
 }
@@ -20,13 +21,13 @@ interface MyUglyFormData {
 const Registro: React.FC = () => {
   const [imagenPerfil, setImagenPerfil] = useState<string | null>(null);
   const [formData, setFormData] = useState<MyUglyFormData>({
-    name: '',       // Inicializado como cadena vacía
-    LastName: '',   // Inicializado como cadena vacía
-    idUser: '',         // Inicializado como cadena vacía
-    email: '',      // Inicializado como cadena vacía
-    number: '',     // Inicializado como cadena vacía
-    password: '',   // Inicializado como cadena vacía
-    photoUser: ''   // Inicialización opcional
+    name: '',
+    LastName: '',
+    idUser: '',
+    email: '',
+    number: '',
+    password: '',
+    photoUser: '',
   });
   const [errores, setErrores] = useState({
     name: '',
@@ -34,7 +35,7 @@ const Registro: React.FC = () => {
     idUser: '',
     email: '',
     number: '',
-    password: ''
+    password: '',
   });
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -111,22 +112,38 @@ const Registro: React.FC = () => {
     event.preventDefault();
     if (validarFormulario()) {
       try {
-        let newFormData = { ...formData };
-
+        let response;        
         if (fileInputRef.current && fileInputRef.current.files && fileInputRef.current.files[0]) {
-          newFormData = {
-            ...formData,
-            photoUser: fileInputRef.current.files[0].name || ''
-          }
-        }
-        console.log("API URL:", api_URL);
+          // Si hay una foto, usamos FormData
+          const formDataToSend = new FormData();
 
-        await axios.post(`${api_URL}/register`, newFormData, {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          withCredentials: true
-        });
+          // Agrega los campos de texto al FormData
+          formDataToSend.append('name', formData.name);
+          formDataToSend.append('LastName', formData.LastName);
+          formDataToSend.append('idUser', formData.idUser);
+          formDataToSend.append('email', formData.email);
+          formDataToSend.append('number', formData.number);
+          formDataToSend.append('password', formData.password);
+
+          // Agrega la foto
+          formDataToSend.append('photoUser', fileInputRef.current.files[0]);
+
+          response = await axios.post(`${api_URL}/register`, formDataToSend, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+            withCredentials: true,
+          });
+        } else {
+          // Si no hay foto, enviamos los datos como JSON
+          response = await axios.post(`${api_URL}/register`, formData, {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            withCredentials: true,
+          });
+        }
+
         navigate('/login');
       } catch (error) {
         if (axios.isAxiosError(error)) {
@@ -149,7 +166,7 @@ const Registro: React.FC = () => {
     const { name, value } = event.target;
     setFormData({
       ...formData,
-      [name]: value
+      [name]: value,
     });
   };
 

@@ -1,6 +1,7 @@
+// src/pasajeros/Pasajeros.tsx
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
 import L, { Icon, LeafletMouseEvent } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -8,89 +9,92 @@ import './pasajeros.css';
 import menuIcon from '../assets/menu.png';
 import personaIcon from '../assets/persona.png';
 
-// Importar las imágenes de los iconos de Leaflet
-//import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-//import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-
+const api_URL = import.meta.env.VITE_API_URL;
 // Definir la interfaz Viaje
 interface Viaje {
-  id: number;
-  inicio: string;
-  final: string;
-  cupos: number;
-  hora: string;
-  fecha: string; // Nuevo campo para la fecha
-  tarifa: number;
-  placa: string;
-  inicioCoords?: [number, number] | null;
-  finalCoords?: [number, number] | null;
-  recogidaCoords?: [number, number] | null;
+  id: string;
+  startTrip: string;
+  endTrip: string;
+  availablePlaces: number;
+  timeTrip: string;
+  date: string; // Nuevo campo para la fecha
+  priceTrip: number;
+  carID: string;
+  number: string; // Nuevo campo para el teléfono
+  route: string; // Nuevo campo para la ruta
+  stops?: string[] | null;
+  reservedBy?: ReservedTrips[] | null;
+  status?: string;
+  startCoords?: [number, number] | null;
+  endCoords?: [number, number] | null;
+  pickupCoords?: [number, number] | null;
 }
 
-const Pasajeros = () => {
+// Definir la interfaz de la respuesta de la API
+interface TripsResponse {
+  message: string;
+  trips: Viaje[];
+}
+interface ReservedTrips{
+  userId: string; // ID del usuario que realizó la reserva
+  stops: string[]; // Arreglo con las paradas seleccionadas
+  reservedPlaces: number; // Número de lugares reservados
+}
+
+const Pasajeros: React.FC = () => {
   const navigate = useNavigate();
 
   // Estados para los filtros y datos
-  const [puntoInicio_pasajeros, setPuntoInicio_pasajeros] = useState('');
-  const [puntoFinal_pasajeros, setPuntoFinal_pasajeros] = useState('');
-  const [cuposDisponibles_pasajeros, setCuposDisponibles_pasajeros] = useState(2);
-  const [horaSalida_pasajeros, setHoraSalida_pasajeros] = useState('');
-  const [fechaSalida_pasajeros, setFechaSalida_pasajeros] = useState(''); // Nuevo estado para la fecha
+  const [puntoStart, setPuntoStart] = useState('');
+  const [puntoEnd, setPuntoEnd] = useState('');
+  const [availablePlaces_pasajeros, setAvailablePlaces_pasajeros] = useState(2);
+  const [timeTrip_pasajeros, setTimeTrip_pasajeros] = useState('');
+  const [date_pasajeros, setDate_pasajeros] = useState(''); // Nuevo estado para la fecha
+  const [todosViajes, setTodosViajes] = useState<Viaje[]>([]); // Nuevo estado para todos los viajes
   const [viajes_pasajeros, setViajes_pasajeros] = useState<Viaje[]>([]);
   const [viajeSeleccionado_pasajeros, setViajeSeleccionado_pasajeros] = useState<Viaje | null>(null);
 
   // Estados para las coordenadas
-  const [inicioCoords, setInicioCoords] = useState<[number, number] | null>(null);
-  const [finalCoords, setFinalCoords] = useState<[number, number] | null>(null);
+  const [startCoords, setStartCoords] = useState<[number, number] | null>(null);
+  const [endCoords, setEndCoords] = useState<[number, number] | null>(null);
 
   // Nuevo estado para los puntos de recogida y sus coordenadas
-  const [puntoRecogidaInputs, setPuntoRecogidaInputs] = useState<string[]>([]);
-  const [recogidaCoordsArray, setRecogidaCoordsArray] = useState<Array<[number, number] | null>>([]);
+  const [pickupInputs, setPickupInputs] = useState<string[]>([]);
+  const [pickupCoordsArray, setPickupCoordsArray] = useState<Array<[number, number] | null>>([]);
 
   // Estado para determinar qué input está activo
-  const [activeInput, setActiveInput] = useState<{ type: 'inicio' | 'final' | 'recogida'; index?: number } | null>(
+  const [activeInput, setActiveInput] = useState<{ type: 'start' | 'end' | 'pickup'; index?: number } | null>(
     null
   );
 
-  // Nuevo estado para la cantidad de cupos a reservar
-  const [cuposAReservar, setCuposAReservar] = useState(1);
+  // Nuevo estado para la cantidad de availablePlaces a reservar
+  const [placesToReserve, setPlacesToReserve] = useState(1);
 
-  const opcionesCupos_pasajeros = Array.from({ length: 11 }, (_, index) => index);
+  // Estados para carga y error
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Viajes disponibles (simulación) con coordenadas y fechas
-  const todosViajes: Viaje[] = [
-    {
-      id: 1,
-      inicio: 'Titan Plaza',
-      final: 'Universidad de La Sabana',
-      cupos: 2,
-      hora: '09:00',
-      fecha: '2024-11-15',
-      tarifa: 6000,
-      placa: 'ABC123',
-    },
-    {
-      id: 2,
-      inicio: 'Estación Calle 100',
-      final: 'Universidad de La Sabana',
-      cupos: 3,
-      hora: '10:00',
-      fecha: '2024-11-16',
-      tarifa: 5500,
-      placa: 'XYZ789',
-    },
-    {
-      id: 3,
-      inicio: 'Estación Calle 85',
-      final: 'Universidad de Los Andes',
-      cupos: 2,
-      hora: '09:30',
-      fecha: '2024-11-15',
-      tarifa: 6500,
-      placa: 'JKL456',
-    },
-  ];
+  const opcionesPlaces_pasajeros = Array.from({ length: 11 }, (_, index) => index);
+
+  // Obtener la URL de la API desde el .env
+  const apiUrl = import.meta.env.VITE_API_URL;
+
+  // Obtener el token de localStorage
+  const token = localStorage.getItem('token');
+
+  // Configurar Axios con el token de autenticación
+  const axiosInstance = useMemo(() => {
+    const instance = axios.create({
+      baseURL: apiUrl,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: token ? `Bearer ${token}` : '',
+      },
+      withCredentials: true,
+    });
+    return instance;
+  }, [apiUrl, token]);
 
   // Caché para geocodificación
   const geocodeCache = useMemo(() => new Map<string, [number, number]>(), []);
@@ -110,7 +114,7 @@ const Pasajeros = () => {
         },
       });
 
-      if (response.data && response.data.length > 0) {
+      if (response.data && Array.isArray(response.data) && response.data.length > 0) {
         const { lat, lon } = response.data[0];
         const coords: [number, number] = [parseFloat(lat), parseFloat(lon)];
         geocodeCache.set(address, coords);
@@ -141,11 +145,8 @@ const Pasajeros = () => {
     }
   };
 
-  // Definir un icono predeterminado usando useMemo para optimizar el rendimiento
-  
-
-  // Definir íconos personalizados para inicio, final y parada utilizando SVG data URLs
-  const inicioIcon: Icon = useMemo(() => {
+  // Definir íconos personalizados para start, end y pickup utilizando SVG data URLs
+  const startIcon: Icon = useMemo(() => {
     const svg = encodeURIComponent(`
       <svg xmlns='http://www.w3.org/2000/svg' width='25' height='41' viewBox='0 0 25 41'>
         <path fill='#2E8B57' d='M12.5 0C5.6 0 0 5.6 0 12.5c0 11.3 12.5 29.5 12.5 29.5S25 23.8 25 12.5C25 5.6 19.4 0 12.5 0zm0 18.8a6.3 6.3 0 1 1 0-12.6 6.3 6.3 0 0 1 0 12.6z'/>
@@ -161,7 +162,7 @@ const Pasajeros = () => {
     });
   }, []);
 
-  const finalIcon: Icon = useMemo(() => {
+  const endIcon: Icon = useMemo(() => {
     const svg = encodeURIComponent(`
       <svg xmlns='http://www.w3.org/2000/svg' width='25' height='41' viewBox='0 0 25 41'>
         <path fill='#DC143C' d='M12.5 0C5.6 0 0 5.6 0 12.5c0 11.3 12.5 29.5 12.5 29.5S25 23.8 25 12.5C25 5.6 19.4 0 12.5 0zm0 18.8a6.3 6.3 0 1 1 0-12.6 6.3 6.3 0 0 1 0 12.6z'/>
@@ -177,7 +178,7 @@ const Pasajeros = () => {
     });
   }, []);
 
-  const paradaIcon: Icon = useMemo(() => {
+  const pickupIcon: Icon = useMemo(() => {
     const svg = encodeURIComponent(`
       <svg xmlns='http://www.w3.org/2000/svg' width='25' height='41' viewBox='0 0 25 41'>
         <path fill='#1E90FF' d='M12.5 0C5.6 0 0 5.6 0 12.5c0 11.3 12.5 29.5 12.5 29.5S25 23.8 25 12.5C25 5.6 19.4 0 12.5 0zm0 18.8a6.3 6.3 0 1 1 0-12.6 6.3 6.3 0 0 1 0 12.6z'/>
@@ -210,8 +211,8 @@ const Pasajeros = () => {
     });
   }, []);
 
-  // Componente para manejar eventos en el mapa y seleccionar puntos de inicio, final o recogida
-  const LocationSelector = () => {
+  // Componente para manejar eventos en el mapa y seleccionar puntos de start, end o pickup
+  const LocationSelector: React.FC = () => {
     useMapEvents({
       click: async (e: LeafletMouseEvent) => {
         if (!activeInput) return;
@@ -221,20 +222,20 @@ const Pasajeros = () => {
         try {
           const address = await reverseGeocodeCoords(coords);
           if (address) {
-            if (activeInput.type === 'inicio') {
-              setInicioCoords(coords);
-              setPuntoInicio_pasajeros(address);
-            } else if (activeInput.type === 'final') {
-              setFinalCoords(coords);
-              setPuntoFinal_pasajeros(address);
-            } else if (activeInput.type === 'recogida' && activeInput.index !== undefined) {
-              const updatedCoordsArray = [...recogidaCoordsArray];
+            if (activeInput.type === 'start') {
+              setStartCoords(coords);
+              setPuntoStart(address);
+            } else if (activeInput.type === 'end') {
+              setEndCoords(coords);
+              setPuntoEnd(address);
+            } else if (activeInput.type === 'pickup' && activeInput.index !== undefined) {
+              const updatedCoordsArray = [...pickupCoordsArray];
               updatedCoordsArray[activeInput.index] = coords;
-              setRecogidaCoordsArray(updatedCoordsArray);
+              setPickupCoordsArray(updatedCoordsArray);
 
-              const updatedInputs = [...puntoRecogidaInputs];
+              const updatedInputs = [...pickupInputs];
               updatedInputs[activeInput.index] = address;
-              setPuntoRecogidaInputs(updatedInputs);
+              setPickupInputs(updatedInputs);
             }
           }
         } catch (error) {
@@ -246,66 +247,60 @@ const Pasajeros = () => {
   };
 
   // Manejo de cambios en los filtros y activación del input
-  const handlePuntoInicioChange_pasajeros = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePuntoStartChange_pasajeros = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const address = e.target.value;
-    setPuntoInicio_pasajeros(address);
+    setPuntoStart(address);
 
     if (address) {
       const coords = await geocodeAddress(address);
-      setInicioCoords(coords);
+      setStartCoords(coords);
     } else {
-      setInicioCoords(null);
+      setStartCoords(null);
     }
   };
 
-  const handlePuntoFinalChange_pasajeros = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePuntoEndChange_pasajeros = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const address = e.target.value;
-    setPuntoFinal_pasajeros(address);
+    setPuntoEnd(address);
 
     if (address) {
       const coords = await geocodeAddress(address);
-      setFinalCoords(coords);
+      setEndCoords(coords);
     } else {
-      setFinalCoords(null);
+      setEndCoords(null);
     }
   };
 
   // Función para manejar cambios en los inputs de puntos de recogida
-  const handlePuntoRecogidaChange = async (
+  const handlePickupChange = async (
     index: number,
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const address = e.target.value;
-    const updatedInputs = [...puntoRecogidaInputs];
+    const updatedInputs = [...pickupInputs];
     updatedInputs[index] = address;
-    setPuntoRecogidaInputs(updatedInputs);
+    setPickupInputs(updatedInputs);
 
     if (address) {
       const coords = await geocodeAddress(address);
-      const updatedCoordsArray = [...recogidaCoordsArray];
+      const updatedCoordsArray = [...pickupCoordsArray];
       updatedCoordsArray[index] = coords;
-      setRecogidaCoordsArray(updatedCoordsArray);
+      setPickupCoordsArray(updatedCoordsArray);
     } else {
-      const updatedCoordsArray = [...recogidaCoordsArray];
+      const updatedCoordsArray = [...pickupCoordsArray];
       updatedCoordsArray[index] = null;
-      setRecogidaCoordsArray(updatedCoordsArray);
+      setPickupCoordsArray(updatedCoordsArray);
     }
   };
 
   // Función para mover los marcadores
-  const DraggableMarker = ({
-    coords,
-    setCoords,
-    setAddress,
-    type,
-    index,
-  }: {
+  const DraggableMarker: React.FC<{
     coords: [number, number] | null;
     setCoords: (coords: [number, number] | null) => void;
     setAddress: (address: string) => void;
-    type: 'inicio' | 'final' | 'recogida';
+    type: 'start' | 'end' | 'pickup';
     index?: number;
-  }) => {
+  }> = ({ coords, setCoords, setAddress, type, index }) => {
     const markerRef = React.useRef<L.Marker>(null);
 
     const eventHandlers = {
@@ -324,16 +319,16 @@ const Pasajeros = () => {
 
     // Determinar el icono según el tipo
     const icon = useMemo(() => {
-      if (type === 'inicio') {
-        return activeInput?.type === 'inicio' ? activeIcon : inicioIcon;
-      } else if (type === 'final') {
-        return activeInput?.type === 'final' ? activeIcon : finalIcon;
+      if (type === 'start') {
+        return activeInput?.type === 'start' ? activeIcon : startIcon;
+      } else if (type === 'end') {
+        return activeInput?.type === 'end' ? activeIcon : endIcon;
       } else {
-        return activeInput?.type === 'recogida' && activeInput.index === index
+        return activeInput?.type === 'pickup' && activeInput.index === index
           ? activeIcon
-          : paradaIcon;
+          : pickupIcon;
       }
-    }, [activeInput, type, index, activeIcon, inicioIcon, finalIcon, paradaIcon]);
+    }, [activeInput, type, index, activeIcon, startIcon, endIcon, pickupIcon]);
 
     return coords ? (
       <Marker
@@ -349,15 +344,11 @@ const Pasajeros = () => {
   };
 
   // Función para mostrar marcadores no movibles
-  const StaticMarker = ({
-    coords,
-    label,
-    icon,
-  }: {
+  const StaticMarker: React.FC<{
     coords: [number, number];
     label: string;
     icon: Icon;
-  }) => (
+  }> = ({ coords, label, icon }) => (
     <Marker position={coords} icon={icon}>
       <Popup>{label}</Popup>
     </Marker>
@@ -372,84 +363,265 @@ const Pasajeros = () => {
     navigate('/perfil');
   };
 
-  // Función de filtrado
   const filterViajes = () => {
+    if (!Array.isArray(todosViajes)) {
+      console.error('Error: todosViajes no es un array válido:', todosViajes);
+      setError('Error interno de la aplicación.');
+      setViajes_pasajeros([]);
+      return;
+    }
+  
+    // Obtener la fecha actual en formato comparable 'YYYY-MM-DD'
+    const todayStr = new Date().toISOString().split('T')[0];
+  
     const viajesFiltrados = todosViajes.filter((viaje) => {
-      const coincideInicio = puntoInicio_pasajeros
-        ? viaje.inicio.toLowerCase().includes(puntoInicio_pasajeros.toLowerCase()) ||
-          puntoInicio_pasajeros.toLowerCase().includes(viaje.inicio.toLowerCase())
+      // Convertir la fecha del viaje al formato 'YYYY-MM-DD' para comparaciones
+      const formattedDate = viaje.date
+        ? viaje.date.split('-').reverse().join('-') // Convierte 'DD-MM-YYYY' a 'YYYY-MM-DD'
+        : '';
+  
+      // Verificar condiciones de cada filtro
+      const coincideStart = puntoStart
+        ? viaje.startTrip.toLowerCase().includes(puntoStart.toLowerCase())
         : true;
-      const coincideFinal = puntoFinal_pasajeros
-        ? viaje.final.toLowerCase().includes(puntoFinal_pasajeros.toLowerCase()) ||
-          puntoFinal_pasajeros.toLowerCase().includes(viaje.final.toLowerCase())
+      const coincideEnd = puntoEnd
+        ? viaje.endTrip.toLowerCase().includes(puntoEnd.toLowerCase())
         : true;
-      const coincideCupos = cuposDisponibles_pasajeros ? viaje.cupos >= cuposDisponibles_pasajeros : true;
-      const coincideHora = horaSalida_pasajeros ? viaje.hora === horaSalida_pasajeros : true;
-      const coincideFecha = fechaSalida_pasajeros ? viaje.fecha === fechaSalida_pasajeros : true;
-
-      return coincideInicio && coincideFinal && coincideCupos && coincideHora && coincideFecha;
+      const coincidePlaces = availablePlaces_pasajeros
+        ? viaje.availablePlaces >= availablePlaces_pasajeros
+        : true;
+      const coincideTime = timeTrip_pasajeros
+        ? viaje.timeTrip === timeTrip_pasajeros
+        : true;
+      const coincideDate = date_pasajeros
+        ? new Date(formattedDate).toISOString().split('T')[0] ===
+          new Date(date_pasajeros).toISOString().split('T')[0]
+        : true;
+  
+      // Verificar que el viaje no esté en el pasado
+      const notInPast = formattedDate >= todayStr;
+  
+      // Combinar todas las condiciones
+      return coincideStart && coincideEnd && coincidePlaces && coincideTime && coincideDate && notInPast;
     });
-
+  
+    // Actualizar el estado con los viajes filtrados
     setViajes_pasajeros(viajesFiltrados);
+  
+    console.log('Viajes filtrados:', viajesFiltrados); // Log para depuración
   };
+   
 
   // useEffect para filtrar automáticamente cuando cambien los filtros
   useEffect(() => {
     filterViajes();
-  }, [puntoInicio_pasajeros, puntoFinal_pasajeros, cuposDisponibles_pasajeros, horaSalida_pasajeros, fechaSalida_pasajeros]);
+  }, [puntoStart, puntoEnd, availablePlaces_pasajeros, timeTrip_pasajeros, date_pasajeros, todosViajes]);
 
-  // Inicializar viajes_pasajeros con todos los viajes al montar el componente
+  // useEffect para obtener los viajes desde la API al montar el componente
   useEffect(() => {
-    setViajes_pasajeros(todosViajes);
-  }, []);
+    const fetchViajes = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await axiosInstance.get<TripsResponse>('/trips'); // Endpoint correcto
+
+        console.log('Respuesta de la API:', response.data); // Verificar la respuesta
+
+        if (Array.isArray(response.data.trips)) {
+          setTodosViajes(response.data.trips);
+          setViajes_pasajeros(response.data.trips);
+        } else {
+          console.error('Respuesta inesperada de la API:', response.data);
+          setError('Formato de datos inesperado recibido desde el servidor.');
+          setTodosViajes([]);
+          setViajes_pasajeros([]);
+        }
+      } catch (err) {
+        console.error('Error fetching viajes:', err);
+        if (axios.isAxiosError(err)) {
+          const axiosError = err as AxiosError;
+          if (axiosError.response) {
+            if (axiosError.response.status === 401) {
+              setError('No autorizado. Por favor, inicia sesión nuevamente.');
+              navigate('/login');
+            } else {
+              setError('no hay viajes disponibles por el momento');
+            }
+          } else if (axiosError.request) {
+            setError('No se recibió respuesta del servidor. Por favor, intenta de nuevo más tarde.');
+          } else {
+            setError('Error al configurar la solicitud. Por favor, intenta de nuevo.');
+          }
+        } else {
+          setError('Ocurrió un error desconocido. Por favor, intenta de nuevo.');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Verificar si el token está presente antes de intentar la solicitud
+    if (token) {
+      fetchViajes();
+    } else {
+      setError('No estás autenticado. Por favor, inicia sesión.');
+      navigate('/login');
+    }
+  }, [axiosInstance, navigate, token]);
 
   // Seleccionar un viaje de la lista
   const handleSeleccionarViaje_pasajeros = async (viaje: Viaje) => {
     setViajeSeleccionado_pasajeros(viaje);
     // Limpiar las coordenadas de los filtros para que no se muestren en el mapa
-    setInicioCoords(null);
-    setFinalCoords(null);
+    setStartCoords(null);
+    setEndCoords(null);
 
     // Limpiar puntos de recogida
-    setPuntoRecogidaInputs(Array(cuposAReservar).fill(''));
-    setRecogidaCoordsArray(Array(cuposAReservar).fill(null));
+    setPickupInputs(Array(placesToReserve).fill(''));
+    setPickupCoordsArray(Array(placesToReserve).fill(null));
 
-    // Geocodificar las direcciones de inicio y final del viaje seleccionado
-    const inicio = await geocodeAddress(viaje.inicio);
-    const final = await geocodeAddress(viaje.final);
-    setInicioCoords(inicio);
-    setFinalCoords(final);
+    // Geocodificar las direcciones de start y end del viaje seleccionado
+    const start = await geocodeAddress(viaje.startTrip);
+    const end = await geocodeAddress(viaje.endTrip);
+    setStartCoords(start);
+    setEndCoords(end);
   };
+  
+  const decodeToken = (token: string): { userId: string } | null => {
+    try {
+      const payloadBase64 = token.split('.')[1];
+      const decodedPayload = JSON.parse(atob(payloadBase64));
+      return decodedPayload;
+    } catch (error) {
+      console.error('Error al decodificar el token:', error);
+      return null;
+    }
+  };
+  
+  const handleReservarViaje = async () => {
+    if (!viajeSeleccionado_pasajeros) {
+      alert('No se ha seleccionado ningún viaje para reservar.');
+      return;
+    }
+  
+    // Decodificar el token para obtener el userId
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('No estás autenticado. Por favor, inicia sesión.');
+      return;
+    }
+  
+    const decodedToken = decodeToken(token);
+    const userId = decodedToken?.userId;
+    if (!userId) {
+      alert('No se pudo obtener el ID del usuario. Por favor, inicia sesión nuevamente.');
+      return;
+    }
+  
+    // Validar entradas necesarias
+    const inputsCompletos = pickupInputs.every((input) => input.trim() !== '');
+    if (!inputsCompletos) {
+      alert('Por favor, ingresa todos los puntos de recogida antes de reservar.');
+      return;
+    }
+  
+    // Crear la data para enviar al servidor
+    const reservaData: ReservedTrips = {
+      userId: userId,
+      reservedPlaces: placesToReserve,
+      stops: pickupInputs,
+    };
+  
+    try {
+      // Realizar la solicitud al endpoint
+      const response = await axiosInstance.put(
+        `${api_URL}/trips/reserve/${viajeSeleccionado_pasajeros.id}`,
+        reservaData
+      );
+  
+      // Mostrar mensaje de éxito
+      console.log('Viaje reservado:', response.data);
+      alert('Reserva realizada con éxito.');
+
+  
+      // Actualizar el arreglo reservedTrips del viaje seleccionado localmente
+      setViajeSeleccionado_pasajeros((prevViaje) =>
+        prevViaje
+          ? {
+              ...prevViaje,
+              reservedBy: prevViaje.reservedBy
+                ? [...prevViaje.reservedBy, reservaData]
+                : [reservaData],
+            }
+          : null
+      );
+  
+      // Limpiar el modal después de reservar
+      setPickupInputs([]);
+      setPickupCoordsArray([]);
+      setViajeSeleccionado_pasajeros(null);
+    } catch (error) {
+      console.error('Error al realizar la reserva:', error);
+      alert('Ocurrió un error al intentar reservar. Por favor, intenta de nuevo.');
+    }
+  };
+  
 
   // Cerrar el modal de detalles del viaje
   const handleCloseModal = () => {
     setViajeSeleccionado_pasajeros(null);
-    setPuntoRecogidaInputs([]);
-    setRecogidaCoordsArray([]);
-    setCuposAReservar(1);
+    setPickupInputs([]);
+    setPickupCoordsArray([]);
+    setPlacesToReserve(1);
   };
 
-  // Función para manejar la reserva
-  const handleReservar = () => {
-    // Validar que todos los puntos de recogida estén completos
-    const inputsCompletos = puntoRecogidaInputs.every((input) => input.trim() !== '');
-    if (!inputsCompletos) {
-      alert('Por favor, ingresa todos los puntos de recogida para reservar.');
-      return;
-    }
-    alert('Reserva realizada exitosamente.');
-    setPuntoRecogidaInputs([]);
-    setRecogidaCoordsArray([]);
-    setViajeSeleccionado_pasajeros(null);
-  };
+  
 
-  // useEffect para actualizar los arrays de puntos de recogida cuando cambia cuposAReservar
+  
+
+  // useEffect para actualizar los arrays de puntos de recogida cuando cambia placesToReserve
   useEffect(() => {
     if (viajeSeleccionado_pasajeros) {
-      setPuntoRecogidaInputs(Array(cuposAReservar).fill(''));
-      setRecogidaCoordsArray(Array(cuposAReservar).fill(null));
+      setPickupInputs((prevInputs) => {
+        const newInputs = [...prevInputs];
+        if (placesToReserve > newInputs.length) {
+          // Agregar nuevos inputs
+          return [...newInputs, ...Array(placesToReserve - newInputs.length).fill('')];
+        } else if (placesToReserve < newInputs.length) {
+          // Eliminar los inputs excedentes
+          return newInputs.slice(0, placesToReserve);
+        }
+        return newInputs;
+      });
+
+      setPickupCoordsArray((prevCoords) => {
+        const newCoords = [...prevCoords];
+        if (placesToReserve > newCoords.length) {
+          // Agregar nuevos coords
+          return [...newCoords, ...Array(placesToReserve - newCoords.length).fill(null)];
+        } else if (placesToReserve < newCoords.length) {
+          // Eliminar los coords excedentes
+          return newCoords.slice(0, placesToReserve);
+        }
+        return newCoords;
+      });
     }
-  }, [cuposAReservar, viajeSeleccionado_pasajeros]);
+  }, [placesToReserve, viajeSeleccionado_pasajeros]);
+
+  // **Nuevo useEffect para resetear startCoords y endCoords al cerrar el modal**
+  useEffect(() => {
+    const resetCoords = async () => {
+      if (!viajeSeleccionado_pasajeros) {
+        // Geocodificar puntoStart y puntoEnd para los filtros
+        const start = puntoStart ? await geocodeAddress(puntoStart) : null;
+        const end = puntoEnd ? await geocodeAddress(puntoEnd) : null;
+        setStartCoords(start);
+        setEndCoords(end);
+      }
+    };
+
+    resetCoords();
+  }, [viajeSeleccionado_pasajeros, puntoStart, puntoEnd]);
 
   return (
     <div className="pasajeros-container">
@@ -476,20 +648,20 @@ const Pasajeros = () => {
                 <label>Punto de inicio</label>
                 <div className="input-container_pasajeros">
                   <span
-                    className={`input-icon_pasajeros ${activeInput?.type === 'inicio' ? 'active' : ''}`}
+                    className={`input-icon_pasajeros ${activeInput?.type === 'start' ? 'active start' : 'start'}`}
                     onClick={() =>
                       setActiveInput(
-                        activeInput?.type === 'inicio' ? null : { type: 'inicio' }
+                        activeInput?.type === 'start' ? null : { type: 'start' }
                       )
                     }
                   ></span>
                   <input
                     type="text"
-                    value={puntoInicio_pasajeros}
-                    onChange={handlePuntoInicioChange_pasajeros}
+                    value={puntoStart}
+                    onChange={handlePuntoStartChange_pasajeros}
                     placeholder="Punto salida"
                     className="input-field_pasajeros"
-                    onFocus={() => setActiveInput({ type: 'inicio' })}
+                    onFocus={() => setActiveInput({ type: 'start' })}
                   />
                 </div>
               </div>
@@ -497,20 +669,20 @@ const Pasajeros = () => {
                 <label>Punto final</label>
                 <div className="input-container_pasajeros">
                   <span
-                    className={`input-icon_pasajeros ${activeInput?.type === 'final' ? 'active' : ''}`}
+                    className={`input-icon_pasajeros ${activeInput?.type === 'end' ? 'active end' : 'end'}`}
                     onClick={() =>
                       setActiveInput(
-                        activeInput?.type === 'final' ? null : { type: 'final' }
+                        activeInput?.type === 'end' ? null : { type: 'end' }
                       )
                     }
                   ></span>
                   <input
                     type="text"
-                    value={puntoFinal_pasajeros}
-                    onChange={handlePuntoFinalChange_pasajeros}
+                    value={puntoEnd}
+                    onChange={handlePuntoEndChange_pasajeros}
                     placeholder="Punto llegada"
                     className="input-field_pasajeros"
-                    onFocus={() => setActiveInput({ type: 'final' })}
+                    onFocus={() => setActiveInput({ type: 'end' })}
                   />
                 </div>
               </div>
@@ -518,11 +690,11 @@ const Pasajeros = () => {
                 <div className="form-group_pasajeros">
                   <label>Cupos disponibles</label>
                   <select
-                    value={cuposDisponibles_pasajeros}
-                    onChange={(e) => setCuposDisponibles_pasajeros(parseInt(e.target.value))}
+                    value={availablePlaces_pasajeros}
+                    onChange={(e) => setAvailablePlaces_pasajeros(parseInt(e.target.value))}
                     className="input-field_pasajeros"
                   >
-                    {opcionesCupos_pasajeros.map((opcion) => (
+                    {opcionesPlaces_pasajeros.map((opcion) => (
                       <option key={opcion} value={opcion}>
                         {opcion}
                       </option>
@@ -533,8 +705,8 @@ const Pasajeros = () => {
                   <label>Hora salida</label>
                   <input
                     type="time"
-                    value={horaSalida_pasajeros}
-                    onChange={(e) => setHoraSalida_pasajeros(e.target.value)}
+                    value={timeTrip_pasajeros}
+                    onChange={(e) => setTimeTrip_pasajeros(e.target.value)}
                     className="input-field_pasajeros"
                   />
                 </div>
@@ -542,8 +714,8 @@ const Pasajeros = () => {
                   <label>Fecha salida</label>
                   <input
                     type="date"
-                    value={fechaSalida_pasajeros}
-                    onChange={(e) => setFechaSalida_pasajeros(e.target.value)}
+                    value={date_pasajeros}
+                    onChange={(e) => setDate_pasajeros(e.target.value)}
                     className="input-field_pasajeros"
                   />
                 </div>
@@ -552,8 +724,20 @@ const Pasajeros = () => {
             </div>
           )}
 
+          {/* Manejo de estados de carga y error */}
+          {loading && !error && (
+            <div className="loading-overlay">
+              <p>Cargando viajes disponibles...</p>
+            </div>
+          )}
+          {error && (
+            <div className="error-overlay">
+              <p className="error-message_pasajeros">{error}</p>
+            </div>
+          )}
+
           {/* Viajes Disponibles */}
-          {!viajeSeleccionado_pasajeros && (
+          {!viajeSeleccionado_pasajeros && !loading && !error && (
             <>
               {viajes_pasajeros.length > 0 ? (
                 <div className="viajes-section_pasajeros">
@@ -562,22 +746,25 @@ const Pasajeros = () => {
                       <li key={viaje.id} className="viaje-item_pasajeros">
                         <div>
                           <p>
-                            <strong>Inicio:</strong> {viaje.inicio}
+                            <strong>Inicio:</strong> {viaje.startTrip}
                           </p>
                           <p>
-                            <strong>Final:</strong> {viaje.final}
+                            <strong>Final:</strong> {viaje.endTrip}
                           </p>
                           <p>
-                            <strong>Hora:</strong> {viaje.hora}
+                            <strong>Hora:</strong> {viaje.timeTrip}
                           </p>
                           <p>
-                            <strong>Fecha:</strong> {viaje.fecha}
+                            <strong>Fecha:</strong> {viaje.date}
                           </p>
                           <p>
-                            <strong>Tarifa:</strong> ${viaje.tarifa}
+                            <strong>Tarifa:</strong> ${viaje.priceTrip}
                           </p>
                           <p>
-                            <strong>Cupos disponibles:</strong> {viaje.cupos}
+                            <strong>Cupos disponibles:</strong> {viaje.availablePlaces}
+                          </p>
+                          <p>
+                            <strong>Teléfono:</strong> {viaje.number}
                           </p>
                           <button
                             className="button-primary_pasajeros"
@@ -601,38 +788,42 @@ const Pasajeros = () => {
             <div className="modal-overlay_pasajeros" onClick={handleCloseModal}>
               <div className="modal-content_pasajeros" onClick={(e) => e.stopPropagation()}>
                 <h3>Detalles del viaje seleccionado</h3>
+                
+                {/* Inicio viaje */}
                 <div className="form-row_pasajeros">
                   <div className="form-group_pasajeros">
                     <label>Inicio viaje:</label>
-                    <div className="input-container_pasajeros">
-                      <span className={`input-icon_pasajeros ${'inicio'}`}></span>
+                    <div className="input-container_pasajeros no-icon">
                       <input
                         type="text"
-                        value={viajeSeleccionado_pasajeros.inicio}
+                        value={viajeSeleccionado_pasajeros.startTrip}
                         readOnly
                         className="input-highlight_pasajeros"
                       />
                     </div>
                   </div>
+
+                  {/* Final viaje */}
                   <div className="form-group_pasajeros">
                     <label>Final viaje:</label>
-                    <div className="input-container_pasajeros">
-                      <span className={`input-icon_pasajeros ${'final'}`}></span>
+                    <div className="input-container_pasajeros no-icon">
                       <input
                         type="text"
-                        value={viajeSeleccionado_pasajeros.final}
+                        value={viajeSeleccionado_pasajeros.endTrip}
                         readOnly
                         className="input-highlight_pasajeros"
                       />
                     </div>
                   </div>
                 </div>
+
+                {/* Resto del contenido del modal */}
                 <div className="form-row_pasajeros">
                   <div className="form-group_pasajeros">
                     <label>Hora inicio:</label>
                     <input
                       type="text"
-                      value={viajeSeleccionado_pasajeros.hora}
+                      value={viajeSeleccionado_pasajeros.timeTrip}
                       readOnly
                       className="input-highlight_pasajeros"
                     />
@@ -641,7 +832,7 @@ const Pasajeros = () => {
                     <label>Fecha salida:</label>
                     <input
                       type="text"
-                      value={viajeSeleccionado_pasajeros.fecha}
+                      value={viajeSeleccionado_pasajeros.date}
                       readOnly
                       className="input-highlight_pasajeros"
                     />
@@ -652,7 +843,7 @@ const Pasajeros = () => {
                     <label>Tarifa:</label>
                     <input
                       type="text"
-                      value={`$${viajeSeleccionado_pasajeros.tarifa}`}
+                      value={`$${viajeSeleccionado_pasajeros.priceTrip}`}
                       readOnly
                       className="input-highlight_pasajeros"
                     />
@@ -661,7 +852,7 @@ const Pasajeros = () => {
                     <label>Cupos disponibles:</label>
                     <input
                       type="text"
-                      value={`${viajeSeleccionado_pasajeros.cupos} cupos`}
+                      value={`${viajeSeleccionado_pasajeros.availablePlaces} Cupos`}
                       readOnly
                       className="input-highlight_pasajeros"
                     />
@@ -670,65 +861,104 @@ const Pasajeros = () => {
                 <div className="form-row_pasajeros">
                   <div className="form-group_pasajeros">
                     <label>Placa:</label>
-                    <input
-                      type="text"
-                      value={viajeSeleccionado_pasajeros.placa}
-                      readOnly
-                      className="input-highlight_pasajeros"
-                    />
+                    <div className="input-container_pasajeros no-icon">
+                      <input
+                        type="text"
+                        value={viajeSeleccionado_pasajeros.carID}
+                        readOnly
+                        className="input-highlight_pasajeros"
+                      />
+                    </div>
                   </div>
-                  {/* Campo para seleccionar la cantidad de cupos a reservar */}
+                  <div className="form-group_pasajeros">
+                    <label>Número de Teléfono:</label>
+                    <div className="input-container_pasajeros no-icon">
+                      <input
+                        type="tel"
+                        value={viajeSeleccionado_pasajeros.number}
+                        readOnly
+                        className="input-highlight_pasajeros"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Cupos a Reservar y Ruta */}
+                <div className="form-row_pasajeros">
                   <div className="form-group_pasajeros">
                     <label>Cupos a reservar:</label>
                     <input
                       type="number"
                       min="1"
-                      max={viajeSeleccionado_pasajeros.cupos}
-                      value={cuposAReservar}
+                      max={viajeSeleccionado_pasajeros.availablePlaces}
+                      value={placesToReserve}
                       onChange={(e) => {
                         const value = parseInt(e.target.value);
-                        if (value > viajeSeleccionado_pasajeros.cupos) {
-                          alert('No puedes reservar más cupos de los disponibles.');
+                        if (isNaN(value)) {
+                          setPlacesToReserve(1);
                           return;
                         }
-                        setCuposAReservar(value);
+                        if (value > viajeSeleccionado_pasajeros.availablePlaces) {
+                          alert('Añade o disminuye cupos a través de los botones');
+                          return;
+                        }
+                        if (value < 1) {
+                          alert('Debes reservar al menos un cupo.');
+                          return;
+                        }
+                        setPlacesToReserve(value);
                       }}
                       className="input-field_pasajeros"
+                    />
+                  </div>
+                  <div className="form-group_pasajeros">
+                    <label>Ruta:</label>
+                    <textarea
+                      value={viajeSeleccionado_pasajeros.route}
+                      readOnly
+                      className="input-field_pasajeros"
+                      style={{
+                        resize: 'vertical',
+                        minHeight: '3rem',
+                        maxHeight: '10rem',
+                        overflowY: 'auto',
+                      }}
                     />
                   </div>
                 </div>
 
                 {/* Inputs para los puntos de recogida */}
-                {Array.from({ length: cuposAReservar }, (_, index) => (
+                {Array.from({ length: placesToReserve }, (_, index) => (
                   <div className="form-group_pasajeros" key={index}>
                     <label>Punto de recogida {index + 1}:</label>
                     <div className="input-container_pasajeros">
                       <span
                         className={`input-icon_pasajeros ${
-                          activeInput?.type === 'recogida' && activeInput.index === index ? 'active' : ''
+                          activeInput?.type === 'pickup' && activeInput.index === index ? 'active pickup' : 'pickup'
                         }`}
                         onClick={() =>
                           setActiveInput(
-                            activeInput?.type === 'recogida' && activeInput.index === index
+                            activeInput?.type === 'pickup' && activeInput.index === index
                               ? null
-                              : { type: 'recogida', index }
+                              : { type: 'pickup', index }
                           )
                         }
                       ></span>
                       <input
                         type="text"
-                        value={puntoRecogidaInputs[index] || ''}
-                        onChange={(e) => handlePuntoRecogidaChange(index, e)}
+                        value={pickupInputs[index] || ''}
+                        onChange={(e) => handlePickupChange(index, e)}
                         placeholder={`Ingresa el punto de recogida ${index + 1}`}
                         className="input-field_pasajeros"
-                        onFocus={() => setActiveInput({ type: 'recogida', index })}
+                        onFocus={() => setActiveInput({ type: 'pickup', index })}
                       />
                     </div>
                   </div>
                 ))}
 
+                {/* Botones de Reservar y Cerrar */}
                 <div className="button-container_pasajeros">
-                  <button className="button-primary_pasajeros" onClick={handleReservar}>
+                  <button className="button-primary_pasajeros" onClick={handleReservarViaje}>
                     Reservar
                   </button>
                   <button className="button-secondary_pasajeros" onClick={handleCloseModal}>
@@ -738,6 +968,7 @@ const Pasajeros = () => {
               </div>
             </div>
           )}
+
         </div>
 
         {/* Sección Derecha (Mapa) */}
@@ -759,30 +990,30 @@ const Pasajeros = () => {
             {/* Marcadores según el estado */}
             {viajeSeleccionado_pasajeros ? (
               <>
-                {inicioCoords && (
+                {startCoords && (
                   <StaticMarker
-                    coords={inicioCoords}
+                    coords={startCoords}
                     label="Inicio del viaje"
-                    icon={activeInput?.type === 'inicio' ? activeIcon : inicioIcon}
+                    icon={activeInput?.type === 'start' ? activeIcon : startIcon}
                   />
                 )}
-                {finalCoords && (
+                {endCoords && (
                   <StaticMarker
-                    coords={finalCoords}
+                    coords={endCoords}
                     label="Final del viaje"
-                    icon={activeInput?.type === 'final' ? activeIcon : finalIcon}
+                    icon={activeInput?.type === 'end' ? activeIcon : endIcon}
                   />
                 )}
-                {recogidaCoordsArray.map((coords, index) =>
+                {pickupCoordsArray.map((coords, index) =>
                   coords ? (
                     <StaticMarker
                       key={index}
                       coords={coords}
                       label={`Parada de recogida ${index + 1}`}
                       icon={
-                        activeInput?.type === 'recogida' && activeInput.index === index
+                        activeInput?.type === 'pickup' && activeInput.index === index
                           ? activeIcon
-                          : paradaIcon
+                          : pickupIcon
                       }
                     />
                   ) : null
@@ -791,16 +1022,16 @@ const Pasajeros = () => {
             ) : (
               <>
                 <DraggableMarker
-                  coords={inicioCoords}
-                  setCoords={setInicioCoords}
-                  setAddress={setPuntoInicio_pasajeros}
-                  type="inicio"
+                  coords={startCoords}
+                  setCoords={setStartCoords}
+                  setAddress={setPuntoStart}
+                  type="start"
                 />
                 <DraggableMarker
-                  coords={finalCoords}
-                  setCoords={setFinalCoords}
-                  setAddress={setPuntoFinal_pasajeros}
-                  type="final"
+                  coords={endCoords}
+                  setCoords={setEndCoords}
+                  setAddress={setPuntoEnd}
+                  type="end"
                 />
               </>
             )}

@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import './principal.css';
-import Registro from './registro/registro'; 
+import Registro from './registro/registro';
 import Login from './inicio_sesion/inicio_sesion';
 import Pasajero from './pasajeros/pasajeros';
 import Menu from './menu/menu';
@@ -9,8 +9,9 @@ import Perfil from './perfil/perfil';
 import EditPerfil from './editar_perfil/editar_perfil';
 import Añadir_viaje from './añadir_viaje/añadir_viaje';
 import RegistroCarro from './registro_carro/registro_carro';
-import Conductor from './conductores/conductores'
+import Conductor from './conductores/conductores';
 import Viajes_Reservados from './viajes_reservados/viajes_reservados';
+import EditarVehiculo from './editar_carro/editar_carro'; // Importar EditarVehiculo
 import { AuthProvider } from './Authentication';
 //import ProtectedRoute from './routeProtected';
 //import LoginRedirect from './login-redirect';
@@ -41,115 +42,85 @@ const App: React.FC = () => {
           <Route path="/" element={<Principal />} />
           <Route path="/principal" element={<Principal />} />
           <Route path="/registro" element={<Registro />} />
-          
           <Route 
             path="/login" 
             element={
-              /* 
               <LoginRedirect>
                 <Login />
               </LoginRedirect> 
-              */
-              <Login />
             } 
           />
-          
           <Route 
             path="/pasajeros" 
             element={
-              /* 
               <ProtectedRoute>
                 <Pasajero />
               </ProtectedRoute> 
-              */
-              <Pasajero />
             } 
           />
-          
           <Route 
             path="/menu" 
             element={
-              /* 
               <ProtectedRoute>
                 <Menu />
               </ProtectedRoute> 
-              */
-              <Menu />
             } 
           />
-          
           <Route 
             path="/perfil" 
             element={
-              /* 
               <ProtectedRoute>
                 <Perfil />
               </ProtectedRoute> 
-              */
-              <Perfil />
             } 
           />
-
           <Route 
             path="/editar-perfil" 
             element={
-              /* 
               <ProtectedRoute>
                 <EditPerfil />
               </ProtectedRoute> 
-              */
-              <EditPerfil />
             } 
           />
-          
-          {/* Añadir la ruta para /registro-carro */}
           <Route 
             path="/registro-carro" 
             element={
-              /*
               <ProtectedRoute>
                 <RegistroCarro />
               </ProtectedRoute>
-              */
-              <RegistroCarro />
             } 
           />
           <Route 
             path="/añadir_viaje" 
             element={
-              /* 
               <ProtectedRoute>
-                <EditPerfil />
+                <Añadir_viaje />
               </ProtectedRoute> 
-              */
-              <Añadir_viaje />
             } 
           />
-          {/* Fin de la ruta para /registro-carro */}
           <Route 
             path="/conductores" 
             element={
-              /* 
               <ProtectedRoute>
-                <EditPerfil />
+                <Conductor />
               </ProtectedRoute> 
-              */
-              <Conductor />
             } 
           />
-          {/* Fin de la ruta para /registro-carro */}
           <Route 
             path="/reservas" 
             element={
-              /* 
               <ProtectedRoute>
-                <EditPerfil />
+                <Viajes_Reservados />
               </ProtectedRoute> 
-              */
-              <Viajes_Reservados />
             } 
           />
-          {/* Fin de la ruta para /registro-carro */}
+          {/* Añadiendo la ruta para EditarVehiculo */}
+          <Route 
+            path="/editar_carro" 
+            element={
+              <EditarVehiculo />
+            } 
+          />
         </Routes>
       </Router>
     </AuthProvider>

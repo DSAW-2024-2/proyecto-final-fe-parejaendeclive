@@ -207,6 +207,17 @@ html {
     color: var(--color-primario);
 }
 
+/* Estilo para botones deshabilitados */
+.option-label.disabled {
+    cursor: not-allowed; /* Cambia el cursor a prohibido */
+    opacity: 0.5; /* Reduce la opacidad */
+    pointer-events: none; /* Desactiva eventos de clic */
+}
+
+.option-label.disabled:hover {
+    background-color: transparent; /* Sin efecto hover */
+}
+
 /* Responsividad */
 @media (max-width: 1024px) {
     .perfil-content {
@@ -264,7 +275,7 @@ html {
 @media (max-width: 480px) {
     .perfil-content {
         max-width: 300px;
-    }
+    }   
 
     .option {
         flex-direction: column;
