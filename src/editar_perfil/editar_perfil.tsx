@@ -139,9 +139,7 @@ const EditarPerfil: React.FC = () => {
         const payloadBase64 = token?.split('.')[1] || '';
         const decodedPayload = JSON.parse(atob(payloadBase64));
         const userId = decodedPayload.userId;
-
-        let response;
-
+  
         if (fileInputRef.current && fileInputRef.current.files && fileInputRef.current.files[0]) {
           const formDataToSend = new FormData();
           formDataToSend.append('name', formData.name);
@@ -150,34 +148,43 @@ const EditarPerfil: React.FC = () => {
           formDataToSend.append('email', formData.email);
           formDataToSend.append('number', formData.number);
           formDataToSend.append('photoUser', fileInputRef.current.files[0]);
-
+  
           // Logs para verificar FormData
           for (let [key, value] of formDataToSend.entries()) {
-                console.log(`${key}:`, value);
+            console.log(`${key}:`, value);
           }
-          response = await axios.put(`${api_URL}/user/${userId}`, formDataToSend, {
+  
+          const response = await axios.put(`${api_URL}/user/${userId}`, formDataToSend, {
             headers: {
               'Content-Type': 'multipart/form-data',
               Authorization: `Bearer ${token}`,
             },
           });
+  
+          if (response.status === 200) {
+            alert('Perfil actualizado exitosamente.');
+            navigate('/perfil');
+          }
         } else {
-          response = await axios.put(`${api_URL}/user/${userId}`, formData, {
+          const response = await axios.put(`${api_URL}/user/${userId}`, formData, {
             headers: {
               'Content-Type': 'application/json',
               Authorization: `Bearer ${token}`,
             },
           });
+  
+          if (response.status === 200) {
+            alert('Perfil actualizado exitosamente.');
+            navigate('/perfil');
+          }
         }
-
-        alert('Perfil actualizado exitosamente.');
-        navigate('/perfil');
       } catch (error) {
         console.error('Error al actualizar el perfil:', error);
         alert('Ocurrió un error al actualizar el perfil.');
       }
     }
   };
+  
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
