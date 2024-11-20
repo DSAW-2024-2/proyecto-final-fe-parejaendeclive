@@ -1,0 +1,410 @@
+:root {
+    --color-fondo: #ffffff;
+    --color-primario: #401163;
+    --color-secundario: #D0A2F2;
+    --color-contraste: #684483;
+    --color-error: #ff0000;
+    --sombra: rgba(0, 0, 0, 0.1);
+    --fuente-principal: 'Instrument Sans', sans-serif;
+    --fuente-secundaria: 'Roboto', sans-serif;
+    --tam-fuente-base: 0.875rem;
+    --tam-fuente-titulo: 1.75rem;
+    --altura-header: 5rem;
+    --ancho-izquierda: 40vw;
+    --ancho-mapa: 60vw;
+    --border-thin: 0.0625rem;
+    --border-radius-small: 0.3125rem;
+}
+
+/* Reset y box-sizing */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 100%;
+}
+
+/* Contenedor principal */
+.pasajeros-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    background-color: #f3bdff;
+    font-family: var(--fuente-secundaria);
+}
+
+/* Encabezado */
+.header_pasajeros {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1.25rem;
+    background-color: var(--color-fondo);
+    box-shadow: 0 0.25rem 0.75rem var(--sombra);
+    border: var(--border-thin) solid var(--color-primario);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: var(--altura-header);
+    z-index: 10;
+}
+
+.menu-button_pasajeros,
+.persona-button_pasajeros {
+    width: 3.5625rem;
+    height: 3.5625rem;
+    border-radius: 50%;
+    background-color: var(--color-secundario);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.menu-button_pasajeros:hover,
+.persona-button_pasajeros:hover {
+    background-color: #b58eea;
+}
+
+.menu-button_pasajeros img,
+.persona-button_pasajeros img {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.title_pasajeros {
+    font-size: var(--tam-fuente-titulo);
+    font-weight: bold;
+    color: var(--color-primario);
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    z-index: 5;
+}
+
+/* Contenedor Principal */
+.main-content_pasajeros {
+    display: flex;
+    flex-direction: row;
+    margin-top: var(--altura-header);
+    height: calc(100vh - var(--altura-header));
+    width: 100%;
+    overflow: hidden;
+}
+
+/* Sección Izquierda */
+.left-section_pasajeros {
+    width: var(--ancho-izquierda);
+    background-color: var(--color-fondo);
+    border-right: var(--border-thin) solid var(--color-primario);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 1rem;
+    gap: 1rem;
+    position: relative; /* Posicionamiento relativo para el modal */
+    z-index: 5;
+}
+
+/* Sección Derecha (Mapa) */
+.right-section_pasajeros {
+    width: var(--ancho-mapa);
+    flex-shrink: 0;
+    background-color: var(--color-fondo);
+    position: relative;
+    height: 100%;
+    z-index: 1;
+}
+
+/* Map Container */
+.map_pasajeros {
+    width: 100%;
+    height: 100%;
+}
+
+/* Secciones dentro de la Sección Izquierda */
+.filters-section_pasajeros,
+.viajes-section_pasajeros {
+    background-color: var(--color-fondo);
+    padding: 1rem;
+    border-radius: var(--border-radius-small);
+    box-shadow: 0 0.25rem 0.75rem var(--sombra);
+}
+
+.filters-section_pasajeros h3,
+.viajes-section_pasajeros h3 {
+    margin-bottom: 0.625rem;
+    color: var(--color-primario);
+}
+
+.form-group_pasajeros {
+    margin-bottom: 0.938rem;
+}
+
+.form-group_pasajeros label {
+    display: block;
+    color: var(--color-contraste);
+    font-weight: bold;
+    font-size: 1rem;
+    margin-bottom: 0.313rem;
+}
+
+/* Contenedor de Input con Icono */
+.input-container_pasajeros {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon_pasajeros {
+    position: absolute;
+    left: 0.75rem;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background-color: #ccc; /* Color por defecto */
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.input-icon_pasajeros.start {
+    background-color: #2E8B57; /* Verde */
+}
+
+.input-icon_pasajeros.end {
+    background-color: #DC143C; /* Rojo */
+}
+
+.input-icon_pasajeros.pickup {
+    background-color: #1E90FF; /* Azul */
+}
+
+.input-icon_pasajeros.active {
+    background-color: #800080; /* Morado */
+}
+
+/* Estilos para inputs y selects en filtros y modal */
+input.input-field_pasajeros,
+select.input-field_pasajeros,
+input.input-highlight_pasajeros {
+    width: 100%;
+    padding: 0.625rem;
+    padding-left: 2.5rem; /* Espacio suficiente para el icono */
+    border: var(--border-thin) solid var(--color-primario);
+    border-radius: 1rem;
+    font-family: var(--fuente-secundaria);
+    font-size: 0.875rem;
+    color: var(--color-primario);
+    background-color: rgba(208, 162, 242, 0.5);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+input.input-field_pasajeros:focus,
+select.input-field_pasajeros:focus,
+input.input-highlight_pasajeros:focus {
+    background-color: rgba(208, 162, 242, 0.75);
+    border-color: #2e0e7c;
+    outline: none;
+}
+
+/* Estilos para inputs sin íconos */
+.input-container_pasajeros.no-icon input.input-field_pasajeros,
+.input-container_pasajeros.no-icon input.input-highlight_pasajeros {
+    padding-left: 0.625rem; /* Ajusta el padding según sea necesario */
+}
+
+/* Estilos específicos para textarea "Ruta" en el modal */
+.modal-content_pasajeros textarea.input-field_pasajeros {
+    min-height: 3rem;
+    max-height: 10rem;
+    resize: vertical;
+    overflow-y: auto;
+    background-color: rgba(208, 162, 242, 0.5); /* Mismo fondo que los otros inputs */
+    color: var(--color-primario); /* Mismo color de texto */
+    padding-left: 2.5rem; /* Espacio para el icono si es necesario */
+}
+
+/* Botones */
+.button-primary_pasajeros,
+.button-secondary_pasajeros {
+    padding: 0.625rem 1rem;
+    background-color: var(--color-contraste);
+    color: var(--color-fondo);
+    font-family: var(--fuente-principal);
+    font-weight: 600;
+    font-size: 0.938rem;
+    border: none;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.button-primary_pasajeros:hover {
+    background-color: #563b6c;
+}
+
+.button-secondary_pasajeros {
+    background-color: var(--color-error);
+}
+
+.button-secondary_pasajeros:hover {
+    background-color: #cc0000;
+}
+
+.button-container_pasajeros {
+    display: flex;
+    gap: 0.625rem;
+    margin-top: 1rem;
+    justify-content: center; /* Alinear botones al centro */
+}
+
+/* Botón "Añadir parada" */
+.button-add_pasajeros {
+    width: 100%;
+    padding: 0.625rem 1rem;
+    background-color: var(--color-primario);
+    color: var(--color-fondo);
+    border: none;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-family: var(--fuente-principal);
+    font-weight: 600;
+    font-size: 0.938rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.5rem; /* Añadir margen superior para separación */
+}
+
+.button-add_pasajeros:hover {
+    background-color: #563b6c;
+}
+
+/* Lista de Viajes */
+.viajes-list_pasajeros {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.viaje-item_pasajeros {
+    background-color: var(--color-fondo);
+    padding: 1rem;
+    border: var(--border-thin) solid var(--color-primario);
+    border-radius: var(--border-radius-small);
+    box-shadow: 0 0.25rem 0.75rem var(--sombra);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.viaje-item_pasajeros:hover {
+    transform: translateY(-0.3125rem);
+    box-shadow: 0 0.5rem 1rem var(--sombra);
+}
+
+.viaje-item_pasajeros p {
+    margin: 0.313rem 0;
+    color: var(--color-contraste);
+}
+
+/* Overlay para el modal dentro de left-section_pasajeros */
+.modal-overlay_pasajeros {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Fondo semitransparente */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10; /* Asegurarse de que esté encima del contenido de left-section */
+}
+
+/* Contenido del modal */
+.modal-content_pasajeros {
+    background-color: var(--color-fondo);
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 0.25rem 0.75rem var(--sombra);
+    width: 90%;
+    max-width: 500px;
+    z-index: 20; /* Para que esté encima del overlay */
+}
+
+.modal-content_pasajeros h3 {
+    margin-bottom: 1rem;
+    color: var(--color-primario);
+}
+
+/* Alinear Cupos, Ruta y otros campos en el modal */
+.form-row_pasajeros {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+}
+
+.form-row_pasajeros .form-group_pasajeros {
+    flex: 1;
+}
+
+/* Responsividad para celulares (menos de 425px) */
+@media (max-width: 425px) {
+    :root {
+        --ancho-izquierda: 100%;
+        --ancho-mapa: 100%;
+        --altura-mapa: 50vh;
+    }
+
+    .main-content_pasajeros {
+        flex-direction: column;
+    }
+
+    /* Reordenar las secciones: mapa primero */
+    .right-section_pasajeros {
+        width: 100%;
+        height: var(--altura-mapa);
+        order: 1; /* Aparece primero */
+    }
+
+    .left-section_pasajeros {
+        width: 100%;
+        order: 2; /* Aparece después */
+    }
+
+    .map_pasajeros {
+        height: 100%;
+    }
+
+    /* Modal */
+    .modal-content_pasajeros {
+        width: 90%;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Puedes eliminar o dejar vacías estas media queries si ya no son necesarias */
+    /* Si decides mantenerlas para otras funcionalidades, ajusta según sea necesario */
+}
+
+/* Estilos para inputs con íconos */
+.input-container_pasajeros input.input-field_pasajeros,
+.input-container_pasajeros input.input-highlight_pasajeros {
+    padding-left: 2.5rem; /* Espacio reservado para los íconos */
+}
+
+/* Estilos para inputs sin íconos ya definidos arriba */

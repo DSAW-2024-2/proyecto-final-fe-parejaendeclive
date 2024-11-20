@@ -1,0 +1,478 @@
+:root {
+    --color-fondo: #ffffff;
+    --color-primario: #401163;
+    --color-secundario: #D0A2F2;
+    --color-contraste: #684483;
+    --color-error: #ff0000;
+    --color-cancelar-parada: #ff6347; /* Rojo tomate para cancelar paradas */
+    --sombra: rgba(0, 0, 0, 0.1);
+    --fuente-principal: 'Instrument Sans', sans-serif;
+    --fuente-secundaria: 'Roboto', sans-serif;
+    --tam-fuente-base: 0.875rem;
+    --tam-fuente-titulo: 1.75rem;
+    --altura-header: 5rem;
+    --ancho-izquierda: 40vw;
+    --ancho-mapa: 60vw;
+    --border-thin: 0.0625rem;
+    --border-radius-small: 0.3125rem;
+    --popup-width: 500px;
+    --popup-height: 650px;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 100%;
+}
+
+.conductores-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100vh;
+    background-color: #f3bdff;
+    font-family: var(--fuente-secundaria);
+}
+
+/* Encabezado */
+.header_conductores {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1.25rem;
+    background-color: var(--color-fondo);
+    box-shadow: 0 0.25rem 0.75rem var(--sombra);
+    border: var(--border-thin) solid var(--color-primario);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: var(--altura-header);
+    z-index: 10;
+}
+
+.menu-button_conductores,
+.persona-button_conductores {
+    width: 3.5625rem;
+    height: 3.5625rem;
+    border-radius: 50%;
+    background-color: var(--color-secundario);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.menu-button_conductores:hover,
+.persona-button_conductores:hover {
+    background-color: #b58eea;
+}
+
+.menu-button_conductores img,
+.persona-button_conductores img {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.title_conductores {
+    font-size: var(--tam-fuente-titulo);
+    font-weight: bold;
+    color: var(--color-primario);
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    z-index: 5;
+}
+
+/* Contenedor Principal */
+.main-content_conductores {
+    display: flex;
+    flex-direction: row;
+    margin-top: var(--altura-header);
+    height: calc(100vh - var(--altura-header));
+    width: 100%;
+    overflow: hidden;
+}
+
+/* Sección Izquierda */
+.left-section_conductores {
+    width: var(--ancho-izquierda);
+    background-color: var(--color-fondo);
+    border-right: var(--border-thin) solid var(--color-primario);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 1rem;
+    gap: 1.5rem; /* Aumentar el gap para más espacio entre secciones */
+    position: relative;
+    z-index: 5;
+}
+
+/* Sección Derecha (Mapa) */
+.right-section_conductores {
+    width: var(--ancho-mapa);
+    flex-shrink: 0;
+    background-color: var(--color-fondo);
+    position: relative;
+    height: 100%;
+    z-index: 1;
+}
+
+/* Map Container */
+.map_conductores {
+    width: 100%;
+    height: 100%;
+}
+
+/* Secciones dentro de la Sección Izquierda */
+.filters-section_conductores,
+.viajes-section_conductores {
+    background-color: var(--color-fondo);
+    padding: 1.5rem; /* Aumentar padding para más espacio interno */
+    border-radius: var(--border-radius-small);
+    box-shadow: 0 0.25rem 0.75rem var(--sombra);
+}
+
+.filters-section_conductores h3,
+.viajes-section_conductores h3 {
+    margin-bottom: 1rem; /* Aumentar margen inferior para más espacio */
+    color: var(--color-primario);
+}
+
+.form-row_conductores {
+    display: flex;
+    flex-direction: row;
+    gap: 1.5rem; /* Aumentar gap para más espacio entre inputs */
+}
+
+.form-group_conductores {
+    flex: 1;
+    margin-bottom: 1rem; /* Aumentar margen inferior para más espacio */
+}
+
+.form-group_conductores label {
+    display: block;
+    color: var(--color-contraste);
+    font-weight: bold;
+    font-size: 1rem;
+    margin-bottom: 0.5rem; /* Aumentar margen inferior */
+}
+
+/* Contenedor de Input sin Icono */
+.input-container_conductores {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* Eliminamos los spans de los iconos para mantener la consistencia */
+.input-field_conductores,
+.input-highlight_conductores {
+    width: 100%;
+    padding: 0.75rem; /* Aumentar padding para más espacio interno */
+    padding-left: 0.75rem;
+    border: var(--border-thin) solid var(--color-primario);
+    border-radius: 1rem;
+    font-family: var(--fuente-secundaria);
+    font-size: 0.875rem;
+    color: var(--color-primario);
+    background-color: rgba(208, 162, 242, 0.5);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.input-field_conductores:focus,
+.input-highlight_conductores:focus {
+    background-color: rgba(208, 162, 242, 0.75);
+    border-color: #2e0e7c;
+    outline: none;
+}
+
+/* Estilos específicos para textarea "Ruta" en el modal */
+.modal-content_conductores textarea.input-field_conductores {
+    min-height: 3rem;
+    max-height: 10rem;
+    resize: vertical;
+    overflow-y: auto;
+    background-color: rgba(208, 162, 242, 0.5); /* Mismo fondo que los otros inputs */
+    color: var(--color-primario); /* Mismo color de texto */
+    padding-left: 2.5rem; /* Espacio para el icono si es necesario */
+}
+
+/* Botones */
+.button-status_conductores,
+.button-secondary_conductores,
+.button-exit_conductores {
+    padding: 0.75rem 1.25rem; /* Aumentar padding para mayor tamaño */
+    background-color: var(--color-contraste);
+    color: var(--color-fondo);
+    font-family: var(--fuente-principal);
+    font-weight: 600;
+    font-size: 1rem; /* Aumentar tamaño de fuente */
+    border: none;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.5rem; /* Añadir margen superior */
+}
+
+.button-status_conductores:hover {
+    background-color: #563b6c;
+}
+
+.button-status_conductores:disabled {
+    background-color: var(--color-contraste);
+    cursor: not-allowed;
+}
+
+.button-secondary_conductores {
+    background-color: var(--color-error);
+}
+
+.button-secondary_conductores:hover {
+    background-color: #cc0000;
+}
+
+.button-exit_conductores {
+    background-color: var(--color-primario);
+}
+
+.button-exit_conductores:hover {
+    background-color: #2e0e7c;
+}
+
+/* Botón "Cancelar Parada" */
+.button-cancelar-parada_conductores {
+    padding: 0.75rem 1rem; /* Más alto y proporcional al ancho */
+    background-color: var(--color-cancelar-parada);
+    color: var(--color-fondo);
+    font-size: 0.875rem;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    height: 3rem; /* Aumentar para mayor altura */
+    width: 8rem; /* Ajustar el ancho para que no se vea demasiado pequeño */
+    margin-top: 0.5rem; /* Añadir margen superior */
+}
+
+.button-cancelar-parada_conductores:hover {
+    background-color: #e63946; /* Rojo más oscuro al pasar el ratón */
+}
+
+/* Lista de Viajes */
+.viajes-list_conductores {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem; /* Aumentar gap para más espacio entre viajes */
+}
+
+.viaje-item_conductores {
+    background-color: var(--color-fondo);
+    padding: 1.5rem; /* Aumentar padding para más espacio interno */
+    border: var(--border-thin) solid var(--color-primario);
+    border-radius: var(--border-radius-small);
+    box-shadow: 0 0.25rem 0.75rem var(--sombra);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.viaje-item_conductores:hover {
+    transform: translateY(-0.3125rem);
+    box-shadow: 0 0.5rem 1rem var(--sombra);
+}
+
+.viaje-item_conductores p {
+    margin: 0.5rem 0; /* Aumentar margen entre párrafos */
+    color: var(--color-contraste);
+}
+
+/* Lista de Paradas */
+.paradas-list_conductores {
+    list-style: none;
+    padding-left: 0;
+    margin-top: 0.5rem;
+    color: var(--color-primario);
+}
+
+.parada-item_conductores {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 1rem; /* Aumentar margen inferior */
+    background-color: rgba(208, 162, 242, 0.2);
+    padding: 1rem;
+    border-radius: var(--border-radius-small);
+    box-shadow: 0 0.125rem 0.375rem var(--sombra);
+}
+
+.parada-info_conductores p {
+    margin: 0.25rem 0;
+    font-size: 0.875rem;
+}
+
+/* Overlay Oscuro */
+.overlay-conductores {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.3);
+    z-index: 90;
+}
+
+/* Ventana Emergente de Detalles del Viaje */
+.popup-detalles_conductores {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: var(--popup-width);
+    height: var(--popup-height);
+    background-color: var(--color-fondo);
+    border-radius: var(--border-radius-small);
+    box-shadow: 0 0.5rem 1rem var(--sombra);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.popup-content_conductores {
+    padding: 2rem; /* Aumentar padding para más espacio interno */
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.popup-content_conductores h3 {
+    margin-bottom: 1.5rem; /* Aumentar margen inferior */
+    color: var(--color-primario);
+    text-align: center;
+}
+
+.detalles-section_conductores {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 1rem; /* Espacio para evitar que el contenido se oculte detrás del scrollbar */
+}
+
+.button-container_conductores {
+    display: flex;
+    gap: 1rem; /* Aumentar gap entre botones */
+    justify-content: center;
+    margin-top: 1.5rem; /* Aumentar margen superior */
+}
+
+/* Responsividad para celulares (menos de 700px) */
+@media (max-width: 700px) {
+    :root {
+        --ancho-izquierda: 100%;
+        --ancho-mapa: 100%;
+        --altura-mapa: 50vh;
+        --popup-width: 90%;
+        --popup-height: 90%;
+    }
+
+    .main-content_conductores {
+        flex-direction: column;
+    }
+
+    /* Reordenar las secciones: mapa primero */
+    .right-section_conductores {
+        width: 100%;
+        height: var(--altura-mapa);
+        order: 1; /* Aparece primero */
+    }
+
+    .left-section_conductores {
+        width: 100%;
+        order: 2; /* Aparece después */
+    }
+
+    .map_conductores {
+        height: 100%;
+    }
+
+    /* Modal */
+    .popup-detalles_conductores {
+        width: 90%;
+        height: 90%;
+        max-width: 90%; /* Asegurar que no exceda el ancho de pantalla */
+        max-height: 90%; /* Asegurar que no exceda la altura de pantalla */
+        border-radius: 0.5rem; /* Reducir el radio para pantallas pequeñas */
+    }
+
+    .popup-content_conductores {
+        padding: 1rem; /* Reducir padding para pantallas pequeñas */
+    }
+
+    .popup-content_conductores h3 {
+        font-size: 1.25rem; /* Reducir tamaño de fuente */
+        margin-bottom: 1rem; /* Reducir margen inferior */
+    }
+
+    .detalles-section_conductores {
+        padding-right: 0.5rem; /* Reducir padding */
+    }
+
+    .button-container_conductores {
+        flex-direction: column;
+        gap: 0.5rem; /* Reducir gap entre botones */
+    }
+
+    .button-status_conductores,
+    .button-secondary_conductores,
+    .button-exit_conductores {
+        width: 100%; /* Botones ocupan todo el ancho disponible */
+        padding: 0.5rem 1rem; /* Reducir padding */
+        font-size: 0.875rem; /* Reducir tamaño de fuente */
+    }
+
+    /* Botón "Cancelar Parada" en el Modal */
+    .button-cancelar-parada_conductores {
+        width: 100%; /* Ocupa todo el ancho */
+        height: auto; /* Ajusta la altura automáticamente */
+        padding: 0.5rem 1rem; /* Reducir padding */
+        font-size: 0.75rem; /* Reducir tamaño de fuente */
+    }
+
+    /* Ajustes adicionales para asegurar que el contenido no se desborde */
+    .popup-content_conductores {
+        overflow-y: auto; /* Permitir scroll si el contenido excede */
+    }
+}
+
+/* Estilos para el Botón "Añadir parada" */
+.button-add_conductores {
+    width: 100%;
+    padding: 0.625rem 1rem;
+    background-color: var(--color-primario);
+    color: var(--color-fondo);
+    border: none;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-family: var(--fuente-principal);
+    font-weight: 600;
+    font-size: 0.938rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.5rem; /* Añadir margen superior para separación */
+}
+
+.button-add_conductores:hover {
+    background-color: #563b6c;
+}

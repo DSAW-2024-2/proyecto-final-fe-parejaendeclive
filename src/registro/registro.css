@@ -1,0 +1,310 @@
+/* Variables de colores y tamaños */
+:root {
+  --color-primario: #401163;
+  --color-secundario: #D0A2F2;
+  --color-contraste: #684483;
+  --color-fondo: #ffffff;
+  --border-radius-small: 10px;
+  --sombra: rgba(0, 0, 0, 0.1);
+  --tam-fuente-base: 16px;
+  --tam-fuente-titulo: 28px;
+}
+
+/* Fondo de la página */
+.page-background {
+  font-family: 'Instrument Sans', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-secundario);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Contenedor principal del menú */
+.menu-container {
+  width: 100%;
+  max-width: 1200px; /* Añadido para limitar el ancho máximo */
+  margin: 0 auto; /* Centrar el contenedor */
+  background-color: var(--color-fondo);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Encabezado */
+.menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background-color: var(--color-fondo);
+  border-bottom: 1px solid var(--color-secundario);
+  position: relative;
+}
+
+.menu-button,
+.persona-button {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: var(--color-secundario);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.menu-button img,
+.persona-button img {
+  width: 24px;
+  height: 24px;
+}
+
+.menu-title {
+  font-size: var(--tam-fuente-titulo);
+  font-weight: bold;
+  color: var(--color-primario);
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+}
+
+/* Div morado de fondo */
+.header-background {
+  background-color: var(--color-secundario);
+  width: 100%;
+  height: 120px;
+  position: relative;
+}
+
+/* Foto de perfil */
+.user-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: var(--color-fondo);
+  border: 4px solid var(--color-secundario);
+  position: absolute;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+}
+
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Contenido del menú */
+.menu-content {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  box-sizing: border-box;
+  background-color: var(--color-fondo);
+  border: 2px solid var(--color-primario);
+  border-radius: var(--border-radius-small);
+  margin: 0 1rem;
+  margin-top: 120px; /* Ajustado para acomodar la foto */
+  position: relative;
+  z-index: 1;
+}
+
+/* Opciones del menú */
+.options-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+/* Ajuste de las opciones */
+.option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  font-size: var(--tam-fuente-base);
+  color: var(--color-contraste);
+  border-radius: var(--border-radius-small);
+  transition: background-color 0.3s;
+  width: 100%;
+}
+
+.option:hover .option-label.clickable {
+  background-color: rgba(208, 162, 242, 0.3);
+}
+
+/* Alineación de imagen y texto */
+.option-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.option-label.clickable {
+  cursor: pointer;
+  flex: 1;
+}
+
+.icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--color-secundario);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.icon img {
+  width: 20px;
+  height: 20px;
+}
+
+.option-label span {
+  font-size: var(--tam-fuente-base);
+  color: var(--color-primario);
+}
+
+/* Estilos del switch */
+.switch-container {
+  /* Alineación correcta del switch */
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--color-contraste);
+  transition: 0.4s;
+  border-radius: 24px;
+}
+
+.switch .slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+.switch input:checked + .slider {
+  background-color: var(--color-secundario);
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+/* Responsividad */
+@media (max-width: 1024px) {
+  .menu-container {
+      padding: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .menu-container {
+      max-width: 100%;
+  }
+
+  .menu-header {
+      padding: 0.5rem;
+  }
+
+  .menu-button,
+  .persona-button {
+      width: 40px;
+      height: 40px;
+  }
+
+  .menu-button img,
+  .persona-button img {
+      width: 20px;
+      height: 20px;
+  }
+
+  .menu-title {
+      font-size: 1.5rem;
+  }
+
+  .header-background {
+      height: 100px;
+  }
+
+  .user-avatar {
+      width: 80px;
+      height: 80px;
+      top: 60px;
+  }
+
+  .menu-content {
+      margin: 0 0.5rem;
+      margin-top: 100px;
+  }
+
+  .options-section {
+      padding: 0;
+  }
+
+  .option {
+      padding: 0.5rem;
+      font-size: 0.9rem;
+  }
+
+  .icon {
+      width: 32px;
+      height: 32px;
+  }
+
+  .icon img {
+      width: 16px;
+      height: 16px;
+  }
+
+  .option-label span {
+      font-size: 0.9rem;
+  }
+
+  .switch {
+      width: 40px;
+      height: 20px;
+  }
+
+  .switch .slider:before {
+      width: 16px;
+      height: 16px;
+  }
+
+  .switch input:checked + .slider:before {
+      transform: translateX(20px);
+  }
+}

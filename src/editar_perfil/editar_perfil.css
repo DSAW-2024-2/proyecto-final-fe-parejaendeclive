@@ -1,0 +1,134 @@
+body {
+    font-family: 'Instrument Sans', sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+  
+  .formulario {
+    background-color: white;
+    border-radius: 0px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    width: 100%;
+    max-width: 400px;
+    position: relative;
+  }
+  
+  .header_registro {
+    background-color: #d0a2f2;
+    height: 100px;
+    width: 100%;
+    position: relative;
+    border-radius: 0;
+    z-index: 0;
+  }
+  
+  .imagen-perfil-container {
+    position: absolute;
+    top: 100px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    border: 4px solid white;
+    z-index: 1;
+  }
+  
+  .imagen-perfil {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .hidden-input {
+    display: none;
+  }
+  
+  h2 {
+    text-align: center;
+    color: #401163;
+    margin-top: 80px;
+    margin-bottom: 20px;
+  }
+  
+  form {
+    padding: 0 20px 20px;
+  }
+  
+  input {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: none;
+    border-radius: 20px;
+    background-color: #d0a2f2;
+    color: #401163;
+    font-size: 14px;
+  }
+  
+  input::placeholder {
+    color: #8e6baf;
+  }
+  
+  button {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 20px;
+    background-color: #684483;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  button:hover {
+    background-color: #563974;
+  }
+  
+  .input-error {
+    border: 2px solid red;
+  }
+  
+  .error {
+    color: red;
+    font-size: 12px;
+    margin-top: -10px;
+    margin-bottom: 10px;
+  }
+  
+  /* Flecha de retroceso actualizada */
+  .back-arrow {
+    position: absolute;
+    top: 0; /* Esquina superior izquierda */
+    left: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: transparent; /* Sin fondo inicialmente */
+    border: none;
+    border-radius: 50%;
+    font-size: 18px;
+    color: #684483; /* Color de los botones */
+    cursor: pointer;
+    z-index: 2;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  .back-arrow:hover {
+    background-color: #684483; /* Fondo del color de los botones al hacer hover */
+    color: white; /* Flecha blanca al hacer hover */
+  }  
