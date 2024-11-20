@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import './principal.css';
-import Registro from './registro/registro'; 
+import Registro from './registro/registro';
 import Login from './inicio_sesion/inicio_sesion';
 import Pasajero from './pasajeros/pasajeros';
 import Menu from './menu/menu';
@@ -13,8 +13,8 @@ import Conductor from './conductores/conductores';
 import Viajes_Reservados from './viajes_reservados/viajes_reservados';
 import EditarVehiculo from './editar_carro/editar_carro'; // Importar EditarVehiculo
 import { AuthProvider } from './Authentication';
-//import ProtectedRoute from './routeProtected';
-//import LoginRedirect from './login-redirect';
+import ProtectedRoute from './routeProtected';
+import LoginRedirect from './login-redirect';
 
 const Principal: React.FC = () => {
   return (
@@ -45,100 +45,73 @@ const App: React.FC = () => {
           <Route 
             path="/login" 
             element={
-              /* 
               <LoginRedirect>
                 <Login />
               </LoginRedirect> 
-              */
-              <Login />
             } 
           />
           <Route 
             path="/pasajeros" 
             element={
-              /* 
               <ProtectedRoute>
                 <Pasajero />
               </ProtectedRoute> 
-              */
-              <Pasajero />
             } 
           />
           <Route 
             path="/menu" 
             element={
-              /* 
               <ProtectedRoute>
                 <Menu />
               </ProtectedRoute> 
-              */
-              <Menu />
             } 
           />
           <Route 
             path="/perfil" 
             element={
-              /* 
               <ProtectedRoute>
                 <Perfil />
               </ProtectedRoute> 
-              */
-              <Perfil />
             } 
           />
           <Route 
             path="/editar-perfil" 
             element={
-              /* 
               <ProtectedRoute>
                 <EditPerfil />
               </ProtectedRoute> 
-              */
-              <EditPerfil />
             } 
           />
           <Route 
             path="/registro-carro" 
             element={
-              /*
               <ProtectedRoute>
                 <RegistroCarro />
               </ProtectedRoute>
-              */
-              <RegistroCarro />
             } 
           />
           <Route 
             path="/añadir_viaje" 
             element={
-              /* 
               <ProtectedRoute>
-                <EditPerfil />
+                <Añadir_viaje />
               </ProtectedRoute> 
-              */
-              <Añadir_viaje />
             } 
           />
           <Route 
             path="/conductores" 
             element={
-              /* 
               <ProtectedRoute>
-                <EditPerfil />
+                <Conductor />
               </ProtectedRoute> 
-              */
-              <Conductor />
             } 
           />
           <Route 
             path="/reservas" 
             element={
-              /* 
               <ProtectedRoute>
-                <EditPerfil />
+                <Viajes_Reservados />
               </ProtectedRoute> 
-              */
-              <Viajes_Reservados />
             } 
           />
           {/* Añadiendo la ruta para EditarVehiculo */}

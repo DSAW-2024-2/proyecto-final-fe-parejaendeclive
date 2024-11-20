@@ -24,6 +24,11 @@ interface Usuario {
   // Otros campos si es necesario
 }
 
+// Interfaz para la respuesta del rol
+interface RoleResponse {
+  role: 'pasajero' | 'conductor';
+}
+
 const Menu = () => {
   const navigate = useNavigate();
 
@@ -33,6 +38,10 @@ const Menu = () => {
 
   // Estado para verificar si el usuario tiene carros
   const [hasCars, setHasCars] = useState<boolean>(false); // Inicializa como false
+
+  // Estado para el rol y el ID del usuario
+  const [role, setRole] = useState<'pasajero' | 'conductor' | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
   // Función para decodificar el token JWT manualmente
   const decodeToken = (token: string) => {
@@ -48,7 +57,7 @@ const Menu = () => {
     }
   };
 
-  // Función para obtener la información del usuario
+  // Función para obtener la información del usuario y su rol
   const fetchUserData = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -66,10 +75,11 @@ const Menu = () => {
         return;
       }
 
-      const userId = decoded.userId;
+      const fetchedUserId = decoded.userId;
+      setUserId(fetchedUserId);
 
       // Realizar la solicitud GET a /user/:id
-      const userResponse = await axios.get(`${api_URL}/user/${userId}`, {
+      const userResponse = await axios.get(`${api_URL}/user/${fetchedUserId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -84,14 +94,33 @@ const Menu = () => {
       } else {
         setHasCars(false);
       }
+
+      // Realizar la solicitud GET a /roles/:idUser para obtener el rol
+      const roleResponse = await axios.get<RoleResponse>(`${api_URL}/roles/${fetchedUserId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const userRole = roleResponse.data.role;
+      setRole(userRole);
+
+      // Configurar los switches según el rol
+      if (userRole === 'pasajero') {
+        setIsPassenger(true);
+        setIsDriver(false);
+      } else if (userRole === 'conductor') {
+        setIsPassenger(false);
+        setIsDriver(true);
+      }
     } catch (error: any) {
-      console.error('Error al obtener datos del usuario:', error);
+      console.error('Error al obtener datos del usuario o rol:', error);
       if (error.response) {
-        alert(`Error al obtener datos del usuario: ${error.response.data.message || 'Error del servidor.'}`);
+        alert(`Error: ${error.response.data.message || 'Error del servidor.'}`);
       } else if (error.request) {
-        alert('Error de red al obtener datos del usuario. Por favor, verifica tu conexión a Internet.');
+        alert('Error de red. Por favor, verifica tu conexión a Internet.');
       } else {
-        alert('Ocurrió un error al obtener los datos del usuario. Por favor, intenta nuevamente.');
+        alert('Ocurrió un error. Por favor, intenta nuevamente.');
       }
       setHasCars(false); // Asumir que no tiene carros en caso de error
     }
@@ -103,37 +132,108 @@ const Menu = () => {
   }, []);
 
   // Función para manejar el switch de Pasajero
-  const handlePassengerSwitch = () => {
-    if (isPassenger) {
-      // Si se desactiva Pasajero, activar Conductor
-      setIsPassenger(false);
-      setIsDriver(true);
-    } else {
-      // Si se activa Pasajero, desactivar Conductor
+  const handlePassengerSwitch = async () => {
+    if (role === 'pasajero') return; // Ya es pasajero
+
+    if (!userId) {
+      alert('No se encontró el ID del usuario. Por favor, inicia sesión nuevamente.');
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('No se encontró el token. Por favor, inicia sesión nuevamente.');
+        navigate('/login');
+        return;
+      }
+
+      // Realizar la solicitud PUT para actualizar el rol a 'pasajero'
+      await axios.put(
+        `${api_URL}/roles/${userId}`,
+        { role: 'pasajero' },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Actualizar los estados según el nuevo rol
+      setRole('pasajero');
       setIsPassenger(true);
       setIsDriver(false);
+    } catch (error: any) {
+      console.error('Error al actualizar el rol a pasajero:', error);
+      if (error.response) {
+        alert(`Error: ${error.response.data.message || 'Error del servidor.'}`);
+      } else if (error.request) {
+        alert('Error de red al actualizar el rol. Por favor, verifica tu conexión a Internet.');
+      } else {
+        alert('Ocurrió un error al actualizar el rol. Por favor, intenta nuevamente.');
+      }
     }
   };
 
   // Función para manejar el switch de Conductor
-  const handleDriverSwitch = () => {
-    if (isDriver) {
-      // Si se desactiva Conductor, activar Pasajero
-      setIsDriver(false);
-      setIsPassenger(true);
-    } else {
-      // Si se activa Conductor, desactivar Pasajero
+  const handleDriverSwitch = async () => {
+    if (role === 'conductor') return; // Ya es conductor
+
+    if (!hasCars) {
+      alert('No tienes vehículos registrados. Por favor, añade un vehículo primero.');
+      return;
+    }
+
+    if (!userId) {
+      alert('No se encontró el ID del usuario. Por favor, inicia sesión nuevamente.');
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('No se encontró el token. Por favor, inicia sesión nuevamente.');
+        navigate('/login');
+        return;
+      }
+
+      // Realizar la solicitud PUT para actualizar el rol a 'conductor'
+      await axios.put(
+        `${api_URL}/roles/${userId}`,
+        { role: 'conductor' },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Actualizar los estados según el nuevo rol
+      setRole('conductor');
       setIsDriver(true);
       setIsPassenger(false);
+    } catch (error: any) {
+      console.error('Error al actualizar el rol a conductor:', error);
+      if (error.response) {
+        alert(`Error: ${error.response.data.message || 'Error del servidor.'}`);
+      } else if (error.request) {
+        alert('Error de red al actualizar el rol. Por favor, verifica tu conexión a Internet.');
+      } else {
+        alert('Ocurrió un error al actualizar el rol. Por favor, intenta nuevamente.');
+      }
     }
   };
 
-  // Función para manejar el clic en el menú
+  // Función para manejar el clic en el menú (opcionalmente, se puede modificar o eliminar)
   const handleMenuClick = () => {
-    if (isPassenger) {
+    if (role === 'pasajero') {
       navigate('/pasajeros');
-    } else if (isDriver) {
+    } else if (role === 'conductor') {
       navigate('/conductores');
+    } else {
+      alert('Rol desconocido. Por favor, intenta nuevamente.');
     }
   };
 
@@ -206,15 +306,14 @@ const Menu = () => {
           {/* Opción Conductor con botón y Switch */}
           <div className="option">
             <div
-              className={`option-label clickable ${!hasCars ? 'disabled' : ''}`}
-              onClick={hasCars ? () => navigate('/conductores') : undefined}
+              className="option-label clickable"
+              onClick={() => navigate('/conductores')}
               role="button"
               tabIndex={0}
               onKeyPress={(e) => {
-                if (e.key === 'Enter' && hasCars) navigate('/conductores');
+                if (e.key === 'Enter') navigate('/conductores');
               }}
               aria-label="Ir al modo Conductor"
-              aria-disabled={!hasCars}
             >
               <img src={carroIcon} alt="Conductor" className="icon" />
               <span>Conductor</span>
@@ -300,7 +399,7 @@ const Menu = () => {
               aria-disabled={!hasCars}
             >
               <img src={carroIcon} alt="Editar vehículo" className="icon" />
-              <span>Editar vehiculo</span>
+              <span>Editar vehículo</span>
             </div>
           </div>
         </div>

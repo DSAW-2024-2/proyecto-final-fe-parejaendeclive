@@ -1,3 +1,4 @@
+// InicioSesion.tsx
 import { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -6,7 +7,13 @@ import './inicio_sesion.css';
 import perfilPredefinido from '../assets/persona.png';
 import candadoIcon from '../assets/candado.png';
 
+// Variables de entorno
 const api_URL = import.meta.env.VITE_API_URL;
+
+// Interfaz para la respuesta del rol
+interface RoleResponse {
+  role: 'pasajero' | 'conductor';
+}
 
 const InicioSesion = () => {
   const navigate = useNavigate();
@@ -17,12 +24,25 @@ const InicioSesion = () => {
   });
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false); // Estado de carga
+  
+  // Estado adicional para almacenar el rol del usuario
+  const [role, setRole] = useState<'pasajero' | 'conductor' | null>(null);
 
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+  // Función para decodificar el token JWT manualmente
+  const decodeToken = (token: string) => {
+    try {
+      const payload = token.split('.')[1];
+      // Reemplazar caracteres para base64 estándar
+      const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+      const decodedPayload = atob(base64);
+      return JSON.parse(decodedPayload);
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      return null;
+    }
   };
 
+  // Función para verificar el token y obtener el rol del usuario
   const verifyToken = async () => {
     const token = localStorage.getItem('token');
     if (!token) return;
@@ -30,17 +50,41 @@ const InicioSesion = () => {
     setIsLoading(true); // Iniciar carga
 
     try {
+      // Verificar el token
       const response = await axios.get(`${api_URL}/login`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
       if (response.status === 200) {
+        // Decodificar el token para obtener el userId
+        const decoded = decodeToken(token);
+        if (!decoded || !decoded.userId) {
+          throw new Error('Token inválido');
+        }
+        const userId = decoded.userId;
+
+        // Obtener el rol del usuario
+        const roleResponse = await axios.get<RoleResponse>(`${api_URL}/roles/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        const userRole = roleResponse.data.role;
+        setRole(userRole);
+
+        // Navegar según el rol
+        if (userRole === 'pasajero') {
+          navigate('/pasajeros');
+        } else if (userRole === 'conductor') {
+          navigate('/conductores');
+        } else {
+          throw new Error('Rol desconocido');
+        }
+
         setIsAuthenticated(true);
-        navigate('/pasajeros');
       }
-    } catch (error) {
+    } catch (error: any) {
       localStorage.removeItem('token');
-      setErrorMessage('Sesión expirada, por favor inicia sesión nuevamente');
+      setErrorMessage('Sesión expirada o token inválido. Por favor, inicia sesión nuevamente.');
       setIsAuthenticated(false);
     } finally {
       setIsLoading(false); // Finalizar carga
@@ -49,7 +93,13 @@ const InicioSesion = () => {
 
   useEffect(() => {
     verifyToken();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
   const handleSubmit = async () => {
     const { email, password } = formData;
@@ -75,12 +125,34 @@ const InicioSesion = () => {
 
       localStorage.setItem('token', accessToken);
 
-      setIsAuthenticated(true);
+      // Decodificar el token para obtener el userId
+      const decoded = decodeToken(accessToken);
+      if (!decoded || !decoded.userId) {
+        throw new Error('Token inválido');
+      }
+      const userId = decoded.userId;
 
+      // Obtener el rol del usuario
+      const roleResponse = await axios.get<RoleResponse>(`${api_URL}/roles/${userId}`, {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+
+      const userRole = roleResponse.data.role;
+      setRole(userRole);
+
+      // Establecer la autenticación
+      setIsAuthenticated(true);
       setErrorMessage('');
 
-      navigate('/pasajeros');
-    } catch (error) {
+      // Navegar según el rol
+      if (userRole === 'pasajero') {
+        navigate('/pasajeros');
+      } else if (userRole === 'conductor') {
+        navigate('/conductores');
+      } else {
+        setErrorMessage('Rol desconocido');
+      }
+    } catch (error: any) {
       if (axios.isAxiosError(error) && error.response) {
         if (error.response.status === 404) {
           setErrorMessage('Correo no encontrado');
@@ -154,7 +226,9 @@ const InicioSesion = () => {
           </div>
         </div>
       </div>
-
+      <div className="welcome-message">
+      {role && <p>Bienvenido, {role === 'pasajero' ? 'Pasajero' : 'Conductor'}!</p>}
+      </div>
       {isLoading && (
         <div className="loading-overlay">
           <div className="loading-content">
