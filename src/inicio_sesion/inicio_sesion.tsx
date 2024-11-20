@@ -1,5 +1,6 @@
 // InicioSesion.tsx
-import { useState, useContext, useEffect } from 'react';
+
+import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../Authentication';
@@ -24,7 +25,7 @@ const InicioSesion = () => {
   });
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false); // Estado de carga
-  
+
   // Estado adicional para almacenar el rol del usuario
   const [role, setRole] = useState<'pasajero' | 'conductor' | null>(null);
 
@@ -42,66 +43,16 @@ const InicioSesion = () => {
     }
   };
 
-  // Función para verificar el token y obtener el rol del usuario
-  const verifyToken = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-
-    setIsLoading(true); // Iniciar carga
-
-    try {
-      // Verificar el token
-      const response = await axios.get(`${api_URL}/login`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      if (response.status === 200) {
-        // Decodificar el token para obtener el userId
-        const decoded = decodeToken(token);
-        if (!decoded || !decoded.userId) {
-          throw new Error('Token inválido');
-        }
-        const userId = decoded.userId;
-
-        // Obtener el rol del usuario
-        const roleResponse = await axios.get<RoleResponse>(`${api_URL}/roles/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-
-        const userRole = roleResponse.data.role;
-        setRole(userRole);
-
-        // Navegar según el rol
-        if (userRole === 'pasajero') {
-          navigate('/pasajeros');
-        } else if (userRole === 'conductor') {
-          navigate('/conductores');
-        } else {
-          throw new Error('Rol desconocido');
-        }
-
-        setIsAuthenticated(true);
-      }
-    } catch (error: any) {
-      localStorage.removeItem('token');
-      setErrorMessage('Sesión expirada o token inválido. Por favor, inicia sesión nuevamente.');
-      setIsAuthenticated(false);
-    } finally {
-      setIsLoading(false); // Finalizar carga
-    }
-  };
-
-  useEffect(() => {
-    verifyToken();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // Eliminamos la función verifyToken de este componente
+  // Esta lógica debería manejarse en un contexto de autenticación global o en un componente de alto nivel
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     const { email, password } = formData;
 
     setErrorMessage('');
@@ -182,41 +133,43 @@ const InicioSesion = () => {
       <div className="login-wrapper">
         <div className="login-container">
           <h2 className="login-title">Iniciar sesión</h2>
-          <div className="input-group">
-            <div className="input-wrapper">
-              <img src={perfilPredefinido} alt="icono usuario" className="input-icon-inside" />
-              <input
-                type="email"
-                name="email"
-                placeholder="Correo"
-                className="input-field"
-                value={formData.email}
-                onChange={handleChange}
-                disabled={isLoading} // Deshabilitar mientras carga
-              />
+          <form onSubmit={handleSubmit}>
+            <div className="input-group">
+              <div className="input-wrapper">
+                <img src={perfilPredefinido} alt="icono usuario" className="input-icon-inside" />
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Correo"
+                  className="input-field"
+                  value={formData.email}
+                  onChange={handleChange}
+                  disabled={isLoading} // Deshabilitar mientras carga
+                />
+              </div>
             </div>
-          </div>
 
-          <div className="input-group">
-            <div className="input-wrapper">
-              <img src={candadoIcon} alt="icono candado" className="input-icon-inside" />
-              <input
-                type="password"
-                name="password"
-                placeholder="Contraseña"
-                className="input-field"
-                value={formData.password}
-                onChange={handleChange}
-                disabled={isLoading} // Deshabilitar mientras carga
-              />
+            <div className="input-group">
+              <div className="input-wrapper">
+                <img src={candadoIcon} alt="icono candado" className="input-icon-inside" />
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Contraseña"
+                  className="input-field"
+                  value={formData.password}
+                  onChange={handleChange}
+                  disabled={isLoading} // Deshabilitar mientras carga
+                />
+              </div>
             </div>
-          </div>
 
-          {errorMessage && <p className="error-message">{errorMessage}</p>}
+            {errorMessage && <p className="error-message">{errorMessage}</p>}
 
-          <button className="login-button" onClick={handleSubmit} disabled={isLoading}>
-            Iniciar sesión
-          </button>
+            <button type="submit" className="login-button" disabled={isLoading}>
+              Iniciar sesión
+            </button>
+          </form>
 
           <div className="register-prompt">
             <span>¿No tienes cuenta?</span>
@@ -227,7 +180,7 @@ const InicioSesion = () => {
         </div>
       </div>
       <div className="welcome-message">
-      {role && <p>Bienvenido, {role === 'pasajero' ? 'Pasajero' : 'Conductor'}!</p>}
+        {role && <p>Bienvenido, {role === 'pasajero' ? 'Pasajero' : 'Conductor'}!</p>}
       </div>
       {isLoading && (
         <div className="loading-overlay">
