@@ -13,8 +13,8 @@ import Conductor from './conductores/conductores';
 import Viajes_Reservados from './viajes_reservados/viajes_reservados';
 import EditarVehiculo from './editar_carro/editar_carro'; // Importar EditarVehiculo
 import { AuthProvider } from './Authentication';
-//import ProtectedRoute from './routeProtected';
-//import LoginRedirect from './login-redirect';
+import ProtectedRoute from './routeProtected';
+import LoginRedirect from './login-redirect';
 
 const Principal: React.FC = () => {
   return (
