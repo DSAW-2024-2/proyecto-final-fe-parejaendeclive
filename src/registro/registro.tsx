@@ -149,7 +149,7 @@ const Registro: React.FC = () => {
           });
         }
 
-        navigate('/login');
+        navigate('/Principal');
       } catch (error) {
         if (axios.isAxiosError(error)) {
           console.error('Error de Axios en el registro:', error.toJSON());
