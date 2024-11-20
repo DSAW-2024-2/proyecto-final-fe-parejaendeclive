@@ -1,5 +1,5 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
 import './principal.css';
 import Registro from './registro/registro';
 import Login from './inicio_sesion/inicio_sesion';
@@ -17,6 +17,22 @@ import ProtectedRoute from './routeProtected';
 import LoginRedirect from './login-redirect';
 
 const Principal: React.FC = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Verificar si la recarga es para ir al login
+    const shouldRedirectToLogin = localStorage.getItem('redirectToLogin');
+    if (shouldRedirectToLogin) {
+      localStorage.removeItem('redirectToLogin');
+      navigate('/login');
+    }
+  }, [navigate]);
+
+  const handleLoginClick = () => {
+    localStorage.setItem('redirectToLogin', 'true'); // Marcar la intención de ir al login
+    window.location.reload(); // Recargar la página
+  };
+
   return (
     <div className="container">
       <div className="background"></div>
@@ -27,7 +43,7 @@ const Principal: React.FC = () => {
       </div>
       
       <div className="button-container_principal">
-        <Link to="/login" className="button">Iniciar sesión</Link>
+        <button onClick={handleLoginClick} className="button">Iniciar sesión</button>
         <Link to="/registro" className="button">Registrarme</Link>
       </div>
     </div>
