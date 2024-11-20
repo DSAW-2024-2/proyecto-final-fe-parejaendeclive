@@ -1,4 +1,4 @@
-// Registro.tsx
+// registro.tsx
 
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -112,7 +112,6 @@ const Registro: React.FC = () => {
     event.preventDefault();
     if (validarFormulario()) {
       try {
-        let response;        
         if (fileInputRef.current && fileInputRef.current.files && fileInputRef.current.files[0]) {
           // Si hay una foto, usamos FormData
           const formDataToSend = new FormData();
@@ -128,7 +127,13 @@ const Registro: React.FC = () => {
           // Agrega la foto
           formDataToSend.append('photoUser', fileInputRef.current.files[0]);
 
-          response = await axios.post(`${api_URL}/register`, formDataToSend, {
+          // Logs para verificar FormData
+          for (let [key, value] of formDataToSend.entries()) {
+            console.log(`${key}:`, value);
+          }
+
+          // Realiza la solicitud sin asignar a 'response' ya que no se utiliza
+          await axios.post(`${api_URL}/register`, formDataToSend, {
             headers: {
               'Content-Type': 'multipart/form-data',
             },
@@ -136,7 +141,7 @@ const Registro: React.FC = () => {
           });
         } else {
           // Si no hay foto, enviamos los datos como JSON
-          response = await axios.post(`${api_URL}/register`, formData, {
+          await axios.post(`${api_URL}/register`, formData, {
             headers: {
               'Content-Type': 'application/json',
             },
