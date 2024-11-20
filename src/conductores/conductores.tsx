@@ -417,7 +417,7 @@ const Conductores = () => {
 
       // Realizar la solicitud DELETE con el cuerpo incluido
       const response = await axios({
-        method: 'DELETE',
+        method: 'PUT',
         url: `${api_URL}/trips/cancel-stop/${viajeSeleccionado_conductores.id}`,
         headers: {
           Authorization: `Bearer ${token}`,
